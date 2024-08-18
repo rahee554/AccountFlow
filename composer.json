@@ -1,0 +1,28 @@
+{
+    "name": "artflow-studio/accountflow",
+    "description": "A reusable dynamic accounts module for Laravel.",
+    "autoload": {
+        "psr-4": {
+            "ArtflowStudio\\AccountFlow\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ArtflowStudio\\AccountFlow\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "laravel/framework": "*"
+    },
+    "suggest": {
+        "artflow-studio/laravel-dynamic-datatable": "Install this package for dynamic data tables support.",
+        "artflow-studio/web-snippets": "Install this package for additional web snippets."
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "ArtflowStudio\\AccountFlow\\AccountFlowServiceProvider"
+            ]
+        }
+    }
+}
