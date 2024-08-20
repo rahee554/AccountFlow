@@ -1,6 +1,6 @@
 <?php
 
 return [
-    'view_path' => resource_path('views/vendor/accountflow'),
-    'layout' => 'layouts.app',
+    'view_path' => 'vendor.accountflow.',
+    'layout' => 'layouts.institute.app',
 ];
