@@ -14,7 +14,7 @@
   "require": {
     "laravel/framework": "*",
     "artflow-studio/laravel-dynamic-datatable": "^3.1",
-    "artflow-studio/web-snippets": "^1.5"
+    "artflow-studio/snippets": "^1.5"
   },
   "extra": {
     "laravel": {
