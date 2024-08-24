@@ -13,8 +13,8 @@
   },
   "require": {
     "laravel/framework": "*",
-    "artflow-studio/laravel-dynamic-datatable": "*",
-    "artflow-studio/web-snippets": "*"
+    "artflow-studio/laravel-dynamic-datatable": "^3.5",
+    "artflow-studio/web-snippets": "^1.5"
   },
   "extra": {
     "laravel": {
