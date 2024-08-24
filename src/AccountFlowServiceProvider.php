@@ -43,6 +43,15 @@ class AccountFlowServiceProvider extends ServiceProvider
         // Load Routes
         $this->loadRoutesFrom(__DIR__ . '/routes/accountflow.php');
 
+
+         // Registering the command
+         if ($this->app->runningInConsole()) {
+            $this->commands([
+                \ArtflowStudio\AccountFlow\Console\InstallCommand::class,
+            ]);
+        }
+
+        
         // Merge Default Config
         $this->mergeConfigFrom(
             __DIR__ . '/config/accountflow.php', 'accountflow'

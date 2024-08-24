@@ -121,5 +121,5 @@
     </div>
     <!--end::Content container-->
 
-    @include('lab.modals.accounts.create_assets')
+    @include(config('accountflow.view_path') . 'modals.create_assets')
 @endsection

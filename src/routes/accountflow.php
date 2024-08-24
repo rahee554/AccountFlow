@@ -3,6 +3,7 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Config;
 
 
 
@@ -23,7 +24,7 @@ use App\Http\Controllers\AccountFlow\TransfersController;
 /** ::::::::::::::::::::::: Accounts & Finance ::::::::::::::::::::::: **/
 
 
-Route::group(['middleware' => ['auth', 'web', 'role:institute', 'verified']], function () {
+Route::group(['middleware' => Config::get('accountflow.middlewares')], function () {
 
     Route::prefix('accounts')->group(function () {
         /** ::::::::::::::::::::::: Accounts ::::::::::::::::::::::: **/
