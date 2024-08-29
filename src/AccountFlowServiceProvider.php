@@ -1,4 +1,5 @@
 <?php
+
 namespace ArtflowStudio\AccountFlow;
 
 use Illuminate\Support\ServiceProvider;
@@ -37,21 +38,24 @@ class AccountFlowServiceProvider extends ServiceProvider
             __DIR__ . '/routes/accountflow.php' => base_path('routes/accountflow.php'),
         ], 'accountflow-routes');
 
+        // Publish Assets
+        $this->publishes([
+            __DIR__ . '/public/vendor/accountflow/' => public_path('vendor/accountflow'),
+        ], 'accountflow-assets');
+
         // Load Views
-        $this->loadViewsFrom(__DIR__ . '/Views/vendor/accountflow', 'accountflow');
+        $this->loadViewsFrom(__DIR__ . '/views/vendor/accountflow', 'accountflow');
 
         // Load Routes
         $this->loadRoutesFrom(__DIR__ . '/routes/accountflow.php');
 
-
-         // Registering the command
-         if ($this->app->runningInConsole()) {
+        // Registering the command
+        if ($this->app->runningInConsole()) {
             $this->commands([
                 \ArtflowStudio\AccountFlow\Console\InstallCommand::class,
             ]);
         }
 
-        
         // Merge Default Config
         $this->mergeConfigFrom(
             __DIR__ . '/config/accountflow.php', 'accountflow'

@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->text('info')->comment('WYSIWYG Data of the Payment Method')->nullable();
             $table->string('logo_icon')->nullable();
+            $table->foreignId('account_id')->nullable()->constrained('accounts');
             $table->tinyInteger('status')->default(1)->comment('1 = active, 2=inactive');
             $table->timestamps();
         });

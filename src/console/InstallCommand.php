@@ -12,22 +12,25 @@ class InstallCommand extends Command
     public function handle()
     {
         $this->info('Publishing configuration...');
-        $this->call('vendor:publish', ['--tag' => 'accountflow-config']);
+        $this->call('vendor:publish', ['--tag' => 'accountflow-config', '--force' => true]);
 
         $this->info('Publishing migrations...');
-        $this->call('vendor:publish', ['--tag' => 'accountflow-migrations']);
+        $this->call('vendor:publish', ['--tag' => 'accountflow-migrations', '--force' => true]);
 
         $this->info('Publishing views...');
-        $this->call('vendor:publish', ['--tag' => 'accountflow-views']);
+        $this->call('vendor:publish', ['--tag' => 'accountflow-views', '--force' => true]);
 
         $this->info('Publishing models...');
-        $this->call('vendor:publish', ['--tag' => 'accountflow-models']);
+        $this->call('vendor:publish', ['--tag' => 'accountflow-models', '--force' => true]);
 
         $this->info('Publishing controllers...');
-        $this->call('vendor:publish', ['--tag' => 'accountflow-controllers']);
+        $this->call('vendor:publish', ['--tag' => 'accountflow-controllers', '--force' => true]);
 
         $this->info('Publishing routes...');
-        $this->call('vendor:publish', ['--tag' => 'accountflow-routes']);
+        $this->call('vendor:publish', ['--tag' => 'accountflow-routes', '--force' => true]);
+
+        $this->info('Publishing assets...');
+        $this->call('vendor:publish', ['--tag' => 'accountflow-assets', '--force' => true]);
 
         $this->info('Running migrations...');
         $this->call('migrate');

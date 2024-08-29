@@ -2,7 +2,7 @@
 
 return [
     'view_path' => 'vendor.accountflow.',
-    'layout' => 'layouts.institute.app',
+    'layout' => 'layouts.app',
     
     // Define middlewares to be used in the route file
     'middlewares' => [
