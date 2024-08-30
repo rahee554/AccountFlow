@@ -18,6 +18,11 @@ class AccountFlowServiceProvider extends ServiceProvider
             __DIR__ . '/database/migrations/' => database_path('migrations'),
         ], 'accountflow-migrations');
 
+        // Publish Seeders
+        $this->publishes([
+            __DIR__ . '/database/seeders/' => database_path('seeders'),
+        ], 'accountflow-seeders');
+
         // Publish Views
         $this->publishes([
             __DIR__ . '/views/vendor/accountflow' => resource_path('views/vendor/accountflow'),
@@ -53,6 +58,8 @@ class AccountFlowServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 \ArtflowStudio\AccountFlow\Console\InstallCommand::class,
+                \ArtflowStudio\AccountFlow\Console\AccountFlowMigrateCommand::class,
+
             ]);
         }
 
