@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders\AccountFlow;
+namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -13,78 +13,104 @@ class AccountsTableSeeder extends Seeder
      */
     public function run()
     {
-        
-        $categories = [
-            ['flow_type' => 1, 'name' => 'Income', 'parent_id' => NULL, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Regular Expense', 'parent_id' => NULL, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Purchases', 'parent_id' => NULL, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Bills & Utilities', 'parent_id' => NULL, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Rentals', 'parent_id' => NULL, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Promotion & Advertisement', 'parent_id' => NULL, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Other Expenses', 'parent_id' => NULL, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Financial Expenses', 'parent_id' => NULL, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 1, 'name' => 'Sales Income', 'parent_id' => 1, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Food', 'parent_id' => 2, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Refreshment', 'parent_id' => 2, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Guests', 'parent_id' => 2, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Furniture', 'parent_id' => 3, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Assets', 'parent_id' => 3, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Electronics', 'parent_id' => 3, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Accessories', 'parent_id' => 3, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Stationery, Tools', 'parent_id' => 3, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Electricity', 'parent_id' => 4, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Internet', 'parent_id' => 4, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Mobile, Phone', 'parent_id' => 4, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Office Rent', 'parent_id' => 5, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Social Media Promotion', 'parent_id' => 6, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Print Media Promotion', 'parent_id' => 6, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Charity & Donation', 'parent_id' => 7, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Grocery', 'parent_id' => 7, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Maintenance, Repairs', 'parent_id' => 7, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Transport', 'parent_id' => 7, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Others', 'parent_id' => 7, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Fees & Charges', 'parent_id' => 8, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Repayment', 'parent_id' => 8, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Staff Salaries', 'parent_id' => 8, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Renovation', 'parent_id' => 7, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Labour Cost', 'parent_id' => 7, 'privacy' => 1, 'status' => 1],
-            ['flow_type' => 2, 'name' => 'Cleaning', 'parent_id' => 2, 'privacy' => 1, 'status' => 1],
-        ];
+        $categories = config('accountflow.categories');
+
         DB::table('ac_categories')->delete();
-        foreach ($categories as $index => $category) {
-            $category['id'] = $index + 1;
-            DB::table('ac_categories')->insert($category);
+
+        $index = 1;
+        foreach ($categories as $type => $categoryGroup) {
+            $flowType = ($type == 'income') ? 1 : 2;
+
+            foreach ($categoryGroup as $parent => $children) {
+                // Generate icon path for the parent category
+                $parentIcon = strtolower(str_replace(' ', '_', $parent)) . '.svg';
+
+                // Insert parent category
+                DB::table('ac_categories')->insert([
+                    'id' => $index,
+                    'flow_type' => $flowType,
+                    'name' => $parent,
+                    'parent_id' => NULL,
+                    'privacy' => 1,
+                    'status' => 1,
+                    'icon' => $parentIcon,
+                ]);
+                $parentId = $index;
+                $index++;
+
+                // Insert child categories
+                foreach ($children as $child) {
+                    // Generate icon path for the child category
+                    $childIcon = strtolower(str_replace(' ', '_', $child)) . '.svg';
+
+                    DB::table('ac_categories')->insert([
+                        'id' => $index,
+                        'flow_type' => $flowType,
+                        'name' => $child,
+                        'parent_id' => $parentId,
+                        'privacy' => 1,
+                        'status' => 1,
+                        'icon' => $childIcon,
+                    ]);
+                    $index++;
+                }
+            }
         }
-        
+
 
         // Accounts Table Seed Data
+        $accounts = config('accountflow.accounts');
+
         DB::table('accounts')->delete();
-        DB::table('accounts')->insert([
-            [
-                'name' => 'Cash Account',
-            ],
-            [
-                'name' => 'Bank Account',
-            ],
-            [
-                'name' => 'Mobile Wallet',
-            ],
-        ]);
+
+        foreach ($accounts as $name) {
+            DB::table('accounts')->insert([
+                'name' => $name,
+                // You can add a default opening balance if needed, e.g. 0
+                'balance' => 0,
+            ]);
+        }
+
 
         // Payment Method Seeders
 
+        $paymentMethods = config('accountflow.payment_methods');
+
         DB::table('ac_payment_methods')->delete();
-        DB::table('ac_payment_methods')->insert([
-            [
-                'name' => 'Cash Payment',
-            ],
-            [
-                'name' => 'Bank Account Payment',
-            ],
-            [
-                'name' => 'EasyPaisa / Mobile Wallet',
-            ],
-        ]);
+
+        foreach ($paymentMethods as $method) {
+            DB::table('ac_payment_methods')->insert([
+                'name' => $method,
+            ]);
+        }
+
+        DB::table('ac_settings')->delete();
+        $settings = [
+            //modules
+            'multi_accounts_module' => 'enabled',
+            'custom_catetgory' => 'enabled',
+            'ledger_module' => 'enabled',
+            'cashbook_module' => 'enabled',
+            'trial_balance_module' => 'enabled',
+            'assets_module' => 'enabled',
+            'purchase_module' => 'enabled',
+            'multi_payment_methods' => 'enabled',
+            'loan_module' => 'enabled',
+            'user_wallet_module' => 'enabled',
+            'income_form' => 'enabled',
+            // Add more settings here
+        ];
+
+        foreach ($settings as $key => $value) {
+            DB::table('ac_settings')->insert([
+                'key' => $key,
+                'value' => $value,
+                'created_at' => \Carbon\Carbon::now(),
+                'updated_at' => \Carbon\Carbon::now(),
+            ]);
+        }
+
+
         DB::table('ac_transactions')->delete();
         DB::table('ac_transactions')->insert([
             [
@@ -126,34 +152,8 @@ class AccountsTableSeeder extends Seeder
                 'created_by' => '1',
             ],
         ]);
-        DB::table('ac_settings')->delete();
-        $settings = [
-            //modules
-            'multi_accounts_module' => 'enabled',
-            'custom_catetgory' => 'enabled',
-            'ledger_module' => 'enabled',
-            'cashbook_module' => 'enabled',
-            'trial_balance_module' => 'enabled',
-            'assets_module' => 'enabled',
-            'purchase_module' => 'enabled',
-            'multi_payment_methods' => 'enabled',
-            'loan_module' => 'enabled',
-            'user_wallet_module' => 'enabled',
-            'income_form' => 'enabled',
-            
-            
-            // Add more settings here
-        ];
+       
 
-        foreach ($settings as $key => $value) {
-            DB::table('ac_settings')->insert([
-                'key' => $key,
-                'value' => $value,
-                'created_at' => \Carbon\Carbon::now(),
-                'updated_at' => \Carbon\Carbon::now(),
-            ]);
-        }
-        
 
         DB::table('ac_user_wallets')->delete();
         DB::table('ac_user_wallets')->insert([

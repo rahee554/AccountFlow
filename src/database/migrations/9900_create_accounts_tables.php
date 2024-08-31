@@ -20,7 +20,7 @@ return new class extends Migration
             $table->tinyInteger('status')->default(1)->comment('0 = InActive , 1 = Active');
 
             $table->decimal('balance', 10, 2)->default(0.00);
-            $table->timestamps();
+            $table->timestamps(0);
         });
         Schema::create('ac_payment_methods', function (Blueprint $table) {
             $table->id();
@@ -29,7 +29,7 @@ return new class extends Migration
             $table->string('logo_icon')->nullable();
             $table->foreignId('account_id')->nullable()->constrained('accounts');
             $table->tinyInteger('status')->default(1)->comment('1 = active, 2=inactive');
-            $table->timestamps();
+            $table->timestamps(0);
         });
 
         Schema::create('ac_categories', function (Blueprint $table) {
@@ -41,7 +41,7 @@ return new class extends Migration
             $table->string('icon')->nullable();
             $table->tinyInteger('status')->default(1)->comment('0 = Inactive, 1 = Active');
             $table->integer('added_by')->nullable();
-            $table->timestamps();
+            $table->timestamps(0);
         });
         Schema::create('ac_transactions', function (Blueprint $table) {
             $table->id();
@@ -55,7 +55,7 @@ return new class extends Migration
             $table->foreignId('payment_method')->nullable()->constrained('ac_payment_methods');
             $table->tinyInteger('type')->default(1)->comment('1 = Income, 2 = Expense');
             $table->foreignId('added_by')->nullable()->constrained('users');
-            $table->timestamps();
+            $table->timestamps(0);
         });
 
         Schema::create('ac_assets', function (Blueprint $table) {
@@ -66,14 +66,14 @@ return new class extends Migration
             $table->foreignId('category_id')->nullable()->constrained('ac_categories');
             $table->tinyInteger('status')->default(1)->comment('1 = Operating / Active, 2 = Not Operating / InActive, 3 = SoldOut');
             $table->date('acquisition_date');
-            $table->timestamps();
+            $table->timestamps(0);
         });
         Schema::create('ac_assets_trx', function (Blueprint $table) {
             $table->id();
             $table->string('unique_id')->unique();
             $table->foreignId('asset_id')->nullable()->constrained('ac_assets');
             $table->foreignId('trx_id')->nullable()->constrained('ac_transactions');
-            $table->timestamps();
+            $table->timestamps(0);
         });
         Schema::create('ac_planned_payments', function (Blueprint $table) {
             $table->id();
@@ -84,7 +84,7 @@ return new class extends Migration
             $table->foreignId('trx_id')->nullable()->constrained('ac_transactions');
             $table->date('due_date')->nullable();
             $table->string('period')->nullable()->comment('1 = monthly, 2 = quarterly, 3 = Half_Yearly, 4 = Annualy');
-            $table->timestamps();
+            $table->timestamps(0);
         });
         Schema::create('ac_purchases', function (Blueprint $table) {
             $table->id();
@@ -99,20 +99,20 @@ return new class extends Migration
             $table->tinyInteger('status')->nullable()->comment('1 = piad, 2 = Partially paid, 3 = Not Paid');
             $table->date('date');
             $table->foreignId('category_id')->nullable()->constrained('ac_categories');
-            $table->timestamps();
+            $table->timestamps(0);
         });
         Schema::create('ac_purchase_trx', function (Blueprint $table) {
             $table->id();
             $table->string('unique_id')->unique();
             $table->foreignId('purchase_id')->nullable()->constrained('ac_purchases');
             $table->foreignId('trx_id')->nullable()->constrained('ac_transactions');
-            $table->timestamps();
+            $table->timestamps(0);
         });
         Schema::create('ac_settings', function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique();
             $table->string('value');
-            $table->timestamps();
+            $table->timestamps(0);
         });
         Schema::create('ac_loan_users', function (Blueprint $table) {
             $table->id();
@@ -121,7 +121,7 @@ return new class extends Migration
             $table->string('cnic');
             $table->string('company')->nullable();
             $table->text('note')->nullable();
-            $table->timestamps();
+            $table->timestamps(0);
         });
 
         Schema::create('ac_loans', function (Blueprint $table) {
@@ -138,14 +138,14 @@ return new class extends Migration
             $table->tinyInteger('status')->nullable()->comment('1 = Returned, 2 = Partially Returned, 3 = Not Returned');
             $table->date('date');
             $table->date('due_date')->nullable();
-            $table->timestamps();
+            $table->timestamps(0);
         });
         Schema::create('ac_loan_trx', function (Blueprint $table) {
             $table->id();
             $table->string('unique_id')->unique();
             $table->foreignId('loan_id')->nullable()->constrained('ac_loans');
             $table->foreignId('trx_id')->nullable()->constrained('ac_transactions');
-            $table->timestamps();
+            $table->timestamps(0);
         });
         Schema::create('ac_transfers', function (Blueprint $table) {
             $table->id();
@@ -167,7 +167,7 @@ return new class extends Migration
             $table->unsignedBigInteger('created_by');
             $table->foreign('created_by')->references('id')->on('users');
 
-            $table->timestamps();
+            $table->timestamps(0);
         });
 
         Schema::create('ac_user_wallets', function (Blueprint $table) {
@@ -181,7 +181,7 @@ return new class extends Migration
             $table->tinyInteger('status')->nullable()->comment('1 = Active, 2 = Freezed');
 
 
-            $table->timestamps();
+            $table->timestamps(0);
         });
         Schema::create('ac_user_transfers', function (Blueprint $table) {
             $table->id();
@@ -195,7 +195,7 @@ return new class extends Migration
             $table->foreign('from')->references('id')->on('users');
             $table->foreign('to')->references('id')->on('users');
             $table->date('date');
-            $table->timestamps();
+            $table->timestamps(0);
         });
     }
 
