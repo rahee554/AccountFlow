@@ -38,8 +38,7 @@
                 @AF_dtable_btns(['export_btn' => 'true', 'colvis' => 'true', 'search' => 'true'])
                 <table class="table table-responsive" id="assets_trx_dtable">
                     <thead class="text-uppercase text-gray-700 fw-bold">
-                        <th>
-                            <tr>
+ <tr>
                                 <td>TrxID</td>
                                 <td>Asset Name</td>
                                 <td>Value</td>
@@ -47,8 +46,7 @@
                                 <td>Category</td>
                                 <td>Trx Date</td>
                                 <td>Action</td>
-                            </tr>
-                        </th>
+                            <tr>
 
                     </thead>
                     <tbody></tbody>

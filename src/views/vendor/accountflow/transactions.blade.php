@@ -26,11 +26,18 @@
                 <!--end::Page title-->
                 <!--begin::Actions-->
                 <div class="d-flex align-items-center gap-2 gap-lg-3">
-                    <a href="#"
-                        class="btn btn-flex btn-outline btn-color-gray-700 btn-active-color-primary bg-body h-40px fs-7 fw-bold"
+                    <a href="#" class="btn btn-sm btn-flex btn-outline"
+                    data-bs-toggle="modal" data-bs-target="#multipleTrxModal">
+                    Add Multiple Records
+                </a>
+
+                    <a href="#" class="btn btn-sm btn-flex btn-primary"
                         data-bs-toggle="modal" data-bs-target="#transactionModal">
                         Add Record
                     </a>
+
+                   
+
                 </div>
                 <!--end::Actions-->
             </div>
@@ -47,7 +54,7 @@
 Value for 'desired_key': {{ $default_payment_method }} --}}
 
 
-<input type="text" class="form-control form-control-sm" id="date_range" placeholder="Select Range">
+        <input type="text" class="form-control form-control-sm" id="date_range" placeholder="Select Range">
         @AF_dtable_btns(['search' => true, 'colvis' => true, 'export_btn' => true])
         <div class="border rounded p-md-10 mt-2">
             <table class="table align-middle table-row-dashed fs-6 g-5 px-5" id="trx_dtable">
@@ -82,7 +89,9 @@ Value for 'desired_key': {{ $default_payment_method }} --}}
     </div>
     <!--end::Content container-->
 
-@include(config('accountflow.view_path') . 'modals.add_transaction')
+    @include(config('accountflow.view_path') . 'modals.add_transaction')
+    @include(config('accountflow.view_path') . 'modals.add_transaction_multiple')
+    @include(config('accountflow.view_path') . 'modals.edit_record')
 @endsection
 
 @push('scripts')
@@ -150,3 +159,46 @@ Value for 'desired_key': {{ $default_payment_method }} --}}
         });
     </script>
 @endpush
+
+
+<script>
+    $('.delete-btn').on('click', function() {
+        const transactionId = $(this).data('id'); // Get the transaction ID from data-id attribute
+
+        // Show SweetAlert confirmation dialog
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Make the AJAX request to delete the transaction
+                $.ajax({
+                    url: `/accounts/delete-transaction/${transactionId}`, // Adjust the URL as needed
+                    type: 'DELETE',
+                    success: function(response) {
+                        Swal.fire(
+                            'Deleted!',
+                            response.message,
+                            'success'
+                        );
+                        // Optionally, remove the deleted transaction from the UI
+                        $(`button[data-id="${transactionId}"]`).closest('tr')
+                            .remove(); // Adjust selector based on your HTML structure
+                    },
+                    error: function(xhr) {
+                        Swal.fire(
+                            'Error!',
+                            'There was an error deleting the transaction.',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    });
+</script>

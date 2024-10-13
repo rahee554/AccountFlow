@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\AccountFlow\Asset;
 use App\Models\AccountFlow\AssetTransaction;
+use App\Models\AccountFlow\Transaction;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
+
+
 
 class AssetsController extends Controller
 {
@@ -25,17 +28,17 @@ class AssetsController extends Controller
         $assets = Asset::select('id', 'name', 'description', 'value', 'category_id', 'status', 'acquisition_date');
 
         // Apply search filters if search value is provided
-// if ($request->has('search') && !empty($request->input('search')) && $request->has('search_columns')) {
-//     $searchValue = $request->input('search');
-//     $searchColumns = $request->input('search_columns');
+        // if ($request->has('search') && !empty($request->input('search')) && $request->has('search_columns')) {
+        //     $searchValue = $request->input('search');
+        //     $searchColumns = $request->input('search_columns');
 
-//     $assets->where(function ($query) use ($searchValue, $searchColumns) {
-//         foreach ($searchColumns as $columnIndex) {
-//             // Assuming $columnIndex is the index of the column to search
-//             $query->orWhere(DB::raw("CONVERT(`$columnIndex`, CHAR)"), 'like', '%' . $searchValue . '%');
-//         }
-//     });
-// }
+        //     $assets->where(function ($query) use ($searchValue, $searchColumns) {
+        //         foreach ($searchColumns as $columnIndex) {
+        //             // Assuming $columnIndex is the index of the column to search
+        //             $query->orWhere(DB::raw("CONVERT(`$columnIndex`, CHAR)"), 'like', '%' . $searchValue . '%');
+        //         }
+        //     });
+        // }
 
         return $request->ajax()
             ? DataTables::of($assets)
@@ -77,7 +80,7 @@ class AssetsController extends Controller
 
     public function getAssetsTrx(Request $request)
     {
-        $asset_trx = AssetTransaction::select('unique_id', 'asset_id', 'trx_id');
+        $asset_trx = AssetTransaction::select('asset_id', 'trx_id');
 
         return $request->ajax()
             ? DataTables::of($asset_trx)
@@ -117,8 +120,57 @@ class AssetsController extends Controller
             : abort(404);
     }
 
-    public function storeAsset(Request $request){
-        $data = $request->all();
-        //dd($data);
+    public function storeAsset(Request $request)
+    {
+        // Validate the request data
+        $validatedData = $request->validate([
+            'name' => 'required|string',
+            'value' => 'required|numeric',
+            'category' => 'required|numeric',
+            'status' => 'required|numeric',
+            'date' => 'nullable|date',
+            'description' => 'nullable|string',
+            'assetArray' => 'required|array',
+            'assetArray.*.amount' => 'required|numeric',
+            'assetArray.*.account' => 'required|numeric',
+            'assetArray.*.date' => 'required|date',
+        ]);
+    
+        // Wrap logic in a transaction
+        DB::transaction(function () use ($validatedData) {
+            // Step 1: Store the Asset data
+            $asset = new Asset;
+            $asset->name = $validatedData['name'];
+            $asset->value = $validatedData['value'];
+            $asset->acquisition_date = $validatedData['date'] ?? null;
+            $asset->category_id = $validatedData['category'];
+            $asset->status = $validatedData['status'];
+            $asset->description = $validatedData['description'] ?? null;
+            $asset->save();
+    
+            // Step 2: Store each AssetTransaction
+            foreach ($validatedData['assetArray'] as $transactionData) {
+                $trx = new Transaction;
+                $trx->unique_id = generateUniqueID(Transaction::class, 'unique_id');
+                $trx->account_id = $transactionData['account'];
+                $trx->category_id = $validatedData['category'];
+                $trx->amount = $transactionData['amount'];
+                $trx->type = 2;
+                $trx->date = $transactionData['date'];
+                $trx->description = 'Asset Trx {' . $asset->description . '}';
+                $trx->save();
+    
+                $assetTransaction = new AssetTransaction;
+                $assetTransaction->asset_id = $asset->id;
+                $assetTransaction->trx_id = $trx->id;
+                $assetTransaction->save();
+    
+                // Subtract from the account
+                AccountsController::subtractFromAccount($transactionData['account'], $transactionData['amount']);
+            }
+        });
+    
+        return response()->json(['message' => 'Asset and transactions stored successfully']);
     }
+    
 }

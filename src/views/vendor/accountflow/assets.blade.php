@@ -51,18 +51,16 @@
                         @AF_dtable_btns(['export_btn' => 'true', 'colvis' => 'true', 'search' => 'true', 'index'=>'1'])
                         <table class="table table-responsive" id="assets_dtable">
                             <thead class="text-uppercase text-gray-700 fw-bold">
-                                <th>
                                     <tr>
-                                        <td>Asset Name</td>
-                                        <td>Description</td>
-                                        <td>Value</td>
-                                        <td>Date</td>
-                                        <td>Category</td>
-                                        <td>status</td>
-                                        <td>Transactions</td>
-                                        <td>Action</td>
+                                        <th>Asset Name</th>
+                                        <th>Description</th>
+                                        <th>Value</th>
+                                        <th>Date</th>
+                                        <th>Category</th>
+                                        <th>status</th>
+                                        <th>Transactions</th>
+                                        <th>Action</th>
                                     </tr>
-                                </th>
 
                             </thead>
                             <tbody></tbody>

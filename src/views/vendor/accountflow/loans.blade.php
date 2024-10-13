@@ -38,8 +38,7 @@
                 @AF_dtable_btns(['export_btn' => 'true', 'colvis' => 'true', 'search' => 'true'])
                 <table class="table table-responsive" id="purchases_dtable">
                     <thead class="text-uppercase text-gray-700 fw-bold">
-                        <th>
-                            <tr>
+ <tr>
                                 <td>Loan User</td>
                                 <td>Description</td>
                                 <td>Amount</td>
@@ -48,8 +47,7 @@
                                 <td>status</td>
                                 <td>Transactions</td>
                                 <td>Action</td>
-                            </tr>
-                        </th>
+                            <tr>
                     </thead>
                     <tbody></tbody>
                 </table>

@@ -17,10 +17,9 @@ class AssetTransaction extends Model
     {
         return $this->belongsTo(Asset::class, 'asset_id');
     }
-
     public function transaction()
     {
-        return $this->hasOne(Transaction::class, 'id', 'trx_id');
+        return $this->belongsTo(Transaction::class, 'trx_id');
     }
     // Add other model-specific code as needed
 }

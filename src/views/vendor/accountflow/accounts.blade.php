@@ -17,8 +17,36 @@
                 <!--begin::Actions-->
                 <div class="d-flex align-items-center gap-2 gap-lg-3">
                     <a href="#"
-                        class="btn btn-flex btn-outline btn-color-gray-700 btn-active-color-primary bg-body h-40px fs-7 fw-bold"
-                        data-bs-toggle="modal" data-bs-target="#kt_modal_view_users">
+                        class="btn btn-sm btn-flex btn-outline btn-color-gray-700 btn-active-color-primary bg-body fs-7 fw-bold"
+                        data-bs-toggle="modal" data-bs-target="#accounts_transfer">
+                        Create Trasfer
+                    </a>
+
+                    <form id="updateAccount">
+                        @csrf
+                        <button type="submit"
+                            class="btn btn-sm btn-flex btn-outline btn-color-primary btn-active-color-primary bg-body fs-7 fw-bold">
+                            Update Balance
+                        </button>
+                    </form>
+
+                    @AF_AjaxForm([
+                        'id' => 'updateAccount',
+                        'route' => 'accounts.list.update',
+                        'method' => 'post',
+                        'logType' => 'swal',
+                        'onSuccess' => [
+                            'log' => 'swal', // options: 'swal', 'alert', 'console'
+                            'reload' => false, // true or false
+                            'dtable' => 'accounts_dtable', // ID of the DataTable to reinitialize
+                            //'reset' => true,
+                            //'disableSubmit' => true,
+                        ],
+                    ])
+
+                    <a href="#"
+                        class="btn btn-sm btn-flex btn-outline btn-color-gray-700 btn-active-color-primary bg-body fs-7 fw-bold"
+                        data-bs-toggle="modal" data-bs-target="#createAccount">
                         Create Account
                     </a>
                 </div>
@@ -84,18 +112,16 @@
                         @AF_dtable_btns(['export_btn' => 'true', 'colvis' => 'true', 'search' => 'true', 'index' => 2])
                         <table class="table table-responsive" id="transfers_dtable">
                             <thead class="text-uppercase text-gray-700 fw-bold">
-                                <th>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>amount</th>
-                                        <th>From Account</th>
-                                        <th>To Account</th>
-                                        <th>Description</th>
-                                        <th>Date</th>
-                                        <th>Created By</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </th>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>amount</th>
+                                    <th>From Account</th>
+                                    <th>To Account</th>
+                                    <th>Description</th>
+                                    <th>Date</th>
+                                    <th>Created By</th>
+                                    <th>Action</th>
+                                </tr>
                             </thead>
                             <tbody></tbody>
                         </table>
@@ -119,4 +145,6 @@
         <!--end::Content-->
     </div>
     <!--end::Content container-->
+    @include(config('accountflow.view_path') . 'modals.transfers')
+
 @endsection

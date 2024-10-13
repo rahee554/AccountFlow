@@ -39,8 +39,7 @@
                 @AF_dtable_btns(['export_btn' => 'true', 'colvis' => 'true', 'search' => 'true'])
                 <table class="table table-responsive" id="transfers_dtable">
                     <thead class="text-uppercase text-gray-700 fw-bold">
-                        <th>
-                            <tr>
+ <tr>
                                 <th>ID</th>
                                 <th>amount</th>
                                 <th>From Account</th>
@@ -49,8 +48,7 @@
                                 <th>Date</th>
                                 <th>Created By</th>
                                 <th>Action</th>
-                            </tr>
-                        </th>
+                            <tr>
                     </thead>
                     <tbody></tbody>
                 </table>

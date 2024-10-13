@@ -7,29 +7,35 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 use App\Models\AccountFlow\Category;
 use app\Helpers\AccountsHelper;
+
 class AccountsCategoriesController extends Controller
 {
     public function index()
     {
-        return view(config('accountflow.view_path') .'categories');
+        return view(config('accountflow.view_path') . 'categories');
     }
 
     public function getCategories()
     {
         $categories = Category::select([
-            'id', 'flow_type', 'name', 'parent_id', 'status',
-            'privacy', 'icon',
+            'id',
+            'flow_type',
+            'name',
+            'parent_id',
+            'status',
+            'privacy',
+            'icon',
         ])->get();
-    
+
         $parentCategories = $categories->keyBy('id');
-    
         return DataTables::of($categories)
             ->editColumn('name', function ($category) {
                 if (!$category->icon) {
                     $nameInitial = strtoupper(substr($category->name, 0, 1));
                     $symbol = '<div class="symbol-label text-primary">' . $nameInitial . '</div>';
                 } else {
-                    $symbol = '<div class="symbol-label" style="background-image:url(' . asset('assets/media/icons/accounts_icons/' . $category->icon) . ')"></div>';
+                    $assetPath = config('accountflow.asset_path');
+                    $symbol = '<div class="symbol-label" style="background-image:url(' . asset($assetPath . 'icons/accounts_icons/' . $category->icon) . ')"></div>';
                 }
                 return '<div class="d-flex flex-stack justify-content-start">
                         <div class="symbol symbol-50px symbol-circle">' . $symbol . '</div>
@@ -50,10 +56,10 @@ class AccountsCategoriesController extends Controller
                     '<span class="badge badge-light-success">Income</span>' :
                     '<span class="badge badge-light-danger">Expense</span>';
             })
-            
+
             ->editColumn('status', function ($category) {
-            
-         
+
+
                 return $category->status == 1 ?
                     '<span class="badge badge-light-success">Active</span>' :
                     '<span class="badge badge-light-danger">Inactive</span>';
@@ -70,5 +76,4 @@ class AccountsCategoriesController extends Controller
             ->rawColumns(['name', 'privacy', 'flow_type', 'parent_id', 'status', 'actions'])
             ->make(true);
     }
-    
 }

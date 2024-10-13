@@ -25,41 +25,46 @@
 
                         <div class="py-5 col-12 col-md-4">
                             <label for="date" class="text-uppercase  text-gray-600">Asset Name</label>
-                            <input type="text" name="name" class="form-control text-dark "
+                            <input type="text" name="name" class="form-control form-control-sm text-dark"
                                 placeholder="Asset Name">
                         </div>
 
 
-                        <div class="py-5 col-12 col-md-4">  
+                        <div class="py-5 col-12 col-md-4">
                             <label for="date" class="text-uppercase  text-gray-600">Asset Value</label>
-                            <input type="text" name="value" class="form-control text-dark "
-                                placeholder="Value">
+                            <input type="text" name="value" class="form-control form-control-sm text-dark" placeholder="Value">
                         </div>
 
-                        <div class="py-5 col-12 col-md-4">  
+                        <div class="py-5 col-12 col-md-4">
                             <label for="date" class="text-uppercase  text-gray-600">Category</label>
-                            <select class="form-select" data-kt-repeater="select2"
-                            data-dropdown-parent="#create_asset"
-                            data-placeholder="Select an option">
+                            <select class="form-select form-select-sm" name="category" data-control="select2"
+                                data-dropdown-parent="#create_asset" data-placeholder="Select an option">
 
-                            <option value=""></option>
-                            @foreach ($expense_categories as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}
-                                </option>
-                            @endforeach
+                                <option value=""></option>
+                                @foreach ($expense_categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->name }}
+                                    </option>
+                                @endforeach
 
-                        </select>
+                            </select>
                         </div>
-                        
 
-                                       
+
+
                         <div class="py-5 col-12 col-md-4">
                             <label for="date" class="text-uppercase  text-gray-600">Aquisiition
                                 Date</label>
-                            <input type="text" name="date" class="form-control text-dark "
-                                placeholder="Transaction Date" id="income-date">
+                            <input type="date" name="date" class="form-control form-control-sm text-dark " placeholder="Date">
                         </div>
 
+
+                        <div class="py-5 col-12 col-md-4">
+                            <label for="status" class="text-uppercase text-gray-600">Status</label>
+                            <select name="status" id="" class="form-select form-select-sm">
+                                <option value="1">Active / Operating</option>
+                                <option value="2">Inactive</option>
+                            </select>
+                        </div>
 
                         <div class="py-5 col-12">
                             <textarea name="description" id="" cols="30" rows="3" class="form-control"
@@ -69,21 +74,37 @@
 
                     <div class="separator"></div>
                     <!--begin::Repeater-->
-                    <div id="kt_docs_repeater_basic">
+                    <div id="assetArray">
                         <!--begin::Form group-->
                         <div class="form-group">
-                            <div data-repeater-list="kt_docs_repeater_basic">
+                            <div data-repeater-list="assetArray">
                                 <div data-repeater-item>
                                     <div class="form-group row">
                                         <div class="col-md-3">
                                             <label class="form-label">Amount</label>
-                                            <input type="number" name="amount" class="form-control form-control-sm mb-2 mb-md-0"
+                                            <input type="number" name="amount"
+                                                class="form-control form-control-sm mb-2 mb-md-0"
                                                 placeholder="Trx Amount" />
                                         </div>
-                              
+
+                                        <div class="col-md-3">
+                                            <label class="form-label">Account</label>
+                                            <select name="account" id="" class="form-select form-select-sm">
+                                                <option value=""></option>
+                                                @php
+                                                    $accounts = App\Models\AccountFlow\Account::all();
+                                                @endphp
+                                                @foreach ($accounts as $account)
+                                                    <option value="{{ $account->id }}">{{ $account->name }}</option>
+                                                @endforeach
+
+                                            </select>
+                                        </div>
+
                                         <div class="col-md-3">
                                             <label class="form-label">Date</label>
-                                            <input type="date" name="date" class="form-control form-control-sm mb-2 mb-md-0"
+                                            <input type="date" name="date"
+                                                class="form-control form-control-sm mb-2 mb-md-0"
                                                 placeholder="Transaction Date" />
                                         </div>
 
@@ -124,33 +145,32 @@
 </div>
 
 @push('scripts')
-<script>
-    $('#kt_docs_repeater_basic').repeater({
-        initEmpty: false,
+    <script>
+        $('#assetArray').repeater({
+            initEmpty: false,
 
-        defaultValues: {
-            'text-input': 'foo'
-        },
+            defaultValues: {
+                'text-input': 'foo'
+            },
 
-        show: function() {
-            $(this).slideDown();
-            // Re-init flatpickr
-            $(this).find('[data-kt-repeater="datepicker"]').flatpickr();
-        },
+            show: function() {
+                $(this).slideDown();
+                // Re-init flatpickr
+                $(this).find('[data-kt-repeater="datepicker"]').flatpickr();
+            },
 
-        hide: function(deleteElement) {
-            $(this).slideUp(deleteElement);
-        },
+            hide: function(deleteElement) {
+                $(this).slideUp(deleteElement);
+            },
 
-        ready: function() {
+            ready: function() {
 
-            // Init flatpickr
-            $('[data-kt-repeater="datepicker"]').flatpickr();
+                // Init flatpickr
+                $('[data-kt-repeater="datepicker"]').flatpickr();
 
-        }
-    });
-</script>
-
+            }
+        });
+    </script>
 @endpush
 
 @AF_AjaxForm([
@@ -160,8 +180,8 @@
     'logType' => 'swal',
     'onSuccess' => [
         'log' => 'swal', // options: 'swal', 'alert', 'console'
-        'reload' => false, // true or false
-        'dtable' => 'transfers_dtable', // ID of the DataTable to reinitialize
+        'reload' => true, // true or false
+        //'dtable' => 'transfers_dtable', // ID of the DataTable to reinitialize
         //'reset' => true,
         //'disableSubmit' => true,
     ],
