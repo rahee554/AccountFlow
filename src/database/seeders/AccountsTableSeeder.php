@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders\ArtflowStudio\AccountFlow;
+namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -111,76 +111,76 @@ class AccountsTableSeeder extends Seeder
         }
 
 
-        // DB::table('ac_transactions')->delete();
-        // DB::table('ac_transactions')->insert([
-        //     [
-        //         'unique_id' => '556488',
-        //         'account_id' => '1',
-        //         'category_id' => '10',
-        //         'amount' => '12345',
-        //     ],
-        // ]);
+        DB::table('ac_transactions')->delete();
+        DB::table('ac_transactions')->insert([
+            [
+                'unique_id' => '556488',
+                'account_id' => '1',
+                'category_id' => '10',
+                'amount' => '12345',
+            ],
+        ]);
 
-        // DB::table('ac_assets')->delete();
-        // DB::table('ac_assets')->insert([
-        //     [
-        //         'name' => 'Dummy Asset Name',
-        //         'description' => 'This is Asset Description',
-        //         'value' => '12345',
-        //         'category_id' => '16',
-        //         'status' => '1',
-        //         'acquisition_date' => '2020-12-10',
-        //     ],
-        // ]);
-        // DB::table('ac_assets_trx')->delete();
-        // DB::table('ac_assets_trx')->insert([
-        //     [
-        //         'unique_id' => '1',
-        //         'asset_id' => '1',
-        //         'trx_id' => '1'
-        //     ],
-        // ]);
+        DB::table('ac_assets')->delete();
+        DB::table('ac_assets')->insert([
+            [
+                'name' => 'Dummy Asset Name',
+                'description' => 'This is Asset Description',
+                'value' => '12345',
+                'category_id' => '16',
+                'status' => '1',
+                'acquisition_date' => '2020-12-10',
+            ],
+        ]);
+        DB::table('ac_assets_trx')->delete();
+        DB::table('ac_assets_trx')->insert([
+            [
+                'unique_id' => '1',
+                'asset_id' => '1',
+                'trx_id' => '1'
+            ],
+        ]);
 
-        // DB::table('ac_transfers')->delete();
-        // DB::table('ac_transfers')->insert([
-        //     [
-        //         'unique_id' => '546132',
-        //         'from_account' => '2',
-        //         'to_account' => '3',
-        //         'description' => 'this is description',
-        //         'date' => '2023-12-10',
-        //         'created_by' => '1',
-        //     ],
-        // ]);
+        DB::table('ac_transfers')->delete();
+        DB::table('ac_transfers')->insert([
+            [
+                'unique_id' => '546132',
+                'from_account' => '2',
+                'to_account' => '3',
+                'description' => 'this is description',
+                'date' => '2023-12-10',
+                'created_by' => '1',
+            ],
+        ]);
        
 
 
-        // DB::table('ac_user_wallets')->delete();
-        // DB::table('ac_user_wallets')->insert([
-        //     [
-        //         'user_id' => '1',
-        //         'balance' => '2500',
-        //         'status' => '1'
-        //     ],
-        // ]);
-        // DB::table('ac_loan_users')->delete();
-        // DB::table('ac_loan_users')->insert([
-        //     [
-        //         'name' => 'Loan User',
-        //         'contact' => '213456',
-        //         'cnic' => '123456789'
-        //     ],
-        // ]);
-        // DB::table('ac_loans')->delete();
-        // DB::table('ac_loans')->insert([
-        //     [
-        //         'name' => 'Name',
-        //         'amount' => '2500',
-        //         'loan_type' => '1',
-        //         'loan_user_id' => '1',
-        //         'status' => '3',
-        //         'date' => '2012-12-10'
-        //     ],
-        // ]);
+        DB::table('ac_user_wallets')->delete();
+        DB::table('ac_user_wallets')->insert([
+            [
+                'user_id' => '3',
+                'balance' => '2500',
+                'status' => '1'
+            ],
+        ]);
+        DB::table('ac_loan_users')->delete();
+        DB::table('ac_loan_users')->insert([
+            [
+                'name' => 'Loan User',
+                'contact' => '213456',
+                'cnic' => '123456789'
+            ],
+        ]);
+        DB::table('ac_loans')->delete();
+        DB::table('ac_loans')->insert([
+            [
+                'name' => 'Name',
+                'amount' => '2500',
+                'loan_type' => '1',
+                'loan_user_id' => '1',
+                'status' => '3',
+                'date' => '2012-12-10'
+            ],
+        ]);
     }
 }
