@@ -3,7 +3,8 @@
   "description": "A reusable dynamic accounts module for Laravel.",
   "autoload": {
     "psr-4": {
-      "ArtflowStudio\\AccountFlow\\": "src/"
+      "ArtflowStudio\\AccountFlow\\": "src/",
+      "ArtflowStudio\\AccountFlow\\App\\": "src/app/"
     }
   },
   "autoload-dev": {

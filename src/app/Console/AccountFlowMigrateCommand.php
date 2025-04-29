@@ -1,6 +1,6 @@
 <?php
 
-namespace ArtflowStudio\AccountFlow\Console;
+namespace ArtflowStudio\AccountFlow\App\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
