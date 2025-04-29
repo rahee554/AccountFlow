@@ -26,6 +26,10 @@ class TransactionsController extends Controller
     {
         return view(config('accountflow.view_path') . 'transactions');
     }
+     public function indexs()
+    {
+        return view(config('accountflow.view_path') . 'transactions');
+    }
 
     public function addIncome(Request $request)
     {

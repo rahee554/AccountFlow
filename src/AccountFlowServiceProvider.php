@@ -25,7 +25,7 @@ class AccountFlowServiceProvider extends ServiceProvider
 
         // Publish Views
         $this->publishes([
-            __DIR__ . '/views/vendor/accountflow' => resource_path('views/vendor/accountflow'),
+            __DIR__ . '/views/vendor/artflow-studio/accountflow' => resource_path('views/vendor/artflow-studio/accountflow'),
         ], 'accountflow-views');
 
         // Publish Models
@@ -35,8 +35,9 @@ class AccountFlowServiceProvider extends ServiceProvider
 
         // Publish Controllers
         $this->publishes([
-            __DIR__ . '/Controllers/AccountFlow/' => app_path('Http/Controllers/AccountFlow'),
+            __DIR__ . '/app/Http/Controllers/AccountFlow/' => app_path('Http/Controllers/AccountFlow'),
         ], 'accountflow-controllers');
+
 
         // Publish Routes
         $this->publishes([
@@ -45,11 +46,11 @@ class AccountFlowServiceProvider extends ServiceProvider
 
         // Publish Assets
         $this->publishes([
-            __DIR__ . '/public/vendor/accountflow/' => public_path('vendor/accountflow'),
+            __DIR__ . '/public/vendor/artflow-studio/accountflow/' => public_path('vendor/artflow-studio/accountflow'),
         ], 'accountflow-assets');
 
         // Load Views
-        $this->loadViewsFrom(__DIR__ . '/views/vendor/accountflow', 'accountflow');
+        $this->loadViewsFrom(__DIR__ . '/views/vendor/artflow-studio/accountflow', 'accountflow');
 
         // Load Routes
         $this->loadRoutesFrom(__DIR__ . '/routes/accountflow.php');
@@ -59,13 +60,17 @@ class AccountFlowServiceProvider extends ServiceProvider
             $this->commands([
                 \ArtflowStudio\AccountFlow\Console\InstallCommand::class,
                 \ArtflowStudio\AccountFlow\Console\AccountFlowMigrateCommand::class,
+                \ArtflowStudio\AccountFlow\Console\AccountFlowSeedCommand::class,
+
 
             ]);
         }
 
+        $this->loadViewsFrom(__DIR__ . '/views/vendor/accountflow', 'accountflow.view');
         // Merge Default Config
         $this->mergeConfigFrom(
-            __DIR__ . '/config/accountflow.php', 'accountflow'
+            __DIR__ . '/config/accountflow.php',
+            'accountflow'
         );
     }
 
