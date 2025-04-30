@@ -33,10 +33,10 @@ class InstallCommand extends Command
         $this->call('vendor:publish', ['--tag' => 'accountflow-assets', '--force' => true]);
 
         $this->info('Running migrations...');
-        $this->call('migrate:fresh', ['--path' => 'database/migrations/AccountFlow', '--force' => true]);
+        $this->call('migrate:fresh', ['--path' => 'database/migrations/AccountFlow', '--force' => false]);
         
         $this->info('Seeding the database...');
-        $this->call('db:seed', ['--class' => 'Database\Seeders\AccountsTableSeeder', '--force' => true]);
+        $this->call('db:seed', ['--class' => 'Database\Seeders\AccountsTableSeeder', '--force' => false]);
         
         $this->info('AccountFlow installed successfully.');
     }

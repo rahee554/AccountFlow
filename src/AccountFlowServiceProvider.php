@@ -58,9 +58,9 @@ class AccountFlowServiceProvider extends ServiceProvider
         // Registering the command
         if ($this->app->runningInConsole()) {
             $this->commands([
-                \ArtflowStudio\AccountFlow\Console\InstallCommand::class,
-                \ArtflowStudio\AccountFlow\Console\AccountFlowMigrateCommand::class,
-                \ArtflowStudio\AccountFlow\Console\AccountFlowSeedCommand::class,
+                \ArtflowStudio\AccountFlow\App\Console\InstallCommand::class,
+                \ArtflowStudio\AccountFlow\App\Console\AccountFlowMigrateCommand::class,
+                \ArtflowStudio\AccountFlow\App\Console\AccountFlowSeedCommand::class,
 
 
             ]);
