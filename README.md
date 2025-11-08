@@ -298,9 +298,9 @@ The package creates comprehensive accounting tables with proper relationships an
 Pre-built models with relationships:
 
 ```php
-use ArtflowStudio\AccountFlow\App\Models\Account;
-use ArtflowStudio\AccountFlow\App\Models\Transaction;
-use ArtflowStudio\AccountFlow\App\Models\Budget;
+use App\Models\AccountFlow\Account;
+use App\Models\AccountFlow\Transaction;
+use App\Models\AccountFlow\Budget;
 
 $account = Account::find(1);
 $transactions = $account->transactions()->latest()->get();
@@ -341,7 +341,7 @@ Extend models in your app:
 ```php
 namespace App\Models;
 
-use ArtflowStudio\AccountFlow\App\Models\Transaction as BaseTransaction;
+use App\Models\AccountFlow\Transaction as BaseTransaction;
 
 class Transaction extends BaseTransaction
 {

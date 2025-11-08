@@ -1,9 +1,9 @@
 <?php
 
-namespace ArtflowStudio\AccountFlow\App\Http\Controllers\AccountFlow;
+namespace App\Http\Controllers\AccountFlow;
 
 use App\Http\Controllers\Controller;
-use ArtflowStudio\AccountFlow\App\Models\Setting;
+use App\Models\AccountFlow\Setting;
 
 class DefaultController extends Controller
 {

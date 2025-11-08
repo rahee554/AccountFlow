@@ -1,6 +1,6 @@
 <?php
 
-namespace ArtflowStudio\AccountFlow\App\Models;
+namespace App\Models\AccountFlow;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

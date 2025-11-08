@@ -2,15 +2,15 @@
 
 return [
     'view_path' => 'vendor.artflow-studio.accountflow.',
-    'layout' => 'layouts.admin.app-fluid',
-    'print_layout' => 'layouts.public.app',
+    'layout' => 'vendor.artflow-studio.accountflow.layouts.app',
+    'print_layout' => 'vendor.artflow-studio.accountflow.layouts.print',
     'asset_path' => 'vendor/artflow-studio/accountflow/assets/',
-    'business_name' => fn () => appSettings()?->agency_name ?? '',
+    'business_name' => env('APP_NAME', 'AccountFlow'),
 
     // Define middlewares to be used in the route file
     'middlewares' => [
-        'tenant.web',
-        'auth',
+        'web',
+        //'auth',
     ],
 
     'categories' => [

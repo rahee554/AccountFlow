@@ -1,11 +1,11 @@
 <?php
 
-namespace ArtflowStudio\AccountFlow\App\Http\Controllers\AccountFlow;
+namespace App\Http\Controllers\AccountFlow;
 
 use App\Http\Controllers\Controller;
-use ArtflowStudio\AccountFlow\App\Models\Account;
-use ArtflowStudio\AccountFlow\App\Models\Transaction;
-use ArtflowStudio\AccountFlow\App\Models\Transfer;
+use App\Models\AccountFlow\Account;
+use App\Models\AccountFlow\Transaction;
+use App\Models\AccountFlow\Transfer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
