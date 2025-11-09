@@ -160,4 +160,3 @@ class TrialBalance extends Component
         ])->extends($layout)->section('content');
     }
 }
-

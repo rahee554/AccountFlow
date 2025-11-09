@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Accountflow\PlannedPayments;
 
-use App\Models\AccountFlow\Account;
-use App\Models\AccountFlow\Category;
-use App\Models\AccountFlow\PlannedPayment;
+use App\Models\Accountflow\Account;
+use App\Models\Accountflow\Category;
+use App\Models\Accountflow\PlannedPayment;
 use Livewire\Component;
 
 class CreatePlannedPayment extends Component
@@ -152,4 +152,3 @@ class CreatePlannedPayment extends Component
         return view($viewpath.'livewire.planned-payments.create-planned-payment')->extends($layout)->section('content');
     }
 }
-

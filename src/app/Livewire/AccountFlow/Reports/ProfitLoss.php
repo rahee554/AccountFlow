@@ -285,4 +285,3 @@ class ProfitLoss extends Component
         ])->extends($layout)->section('content');
     }
 }
-

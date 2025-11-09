@@ -14,4 +14,3 @@ class CreateUserWalletTransfers extends Component
         return view($viewpath.'livewire.wallets.create-user-wallet-transfers')->extends($layout);
     }
 }
-

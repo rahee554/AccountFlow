@@ -92,4 +92,3 @@ class EquityTransaction extends Model
         return $query->where('type', $type->value);
     }
 }
-

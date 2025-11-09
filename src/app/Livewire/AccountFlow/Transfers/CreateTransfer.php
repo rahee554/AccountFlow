@@ -174,4 +174,3 @@ class CreateTransfer extends Component
         return view($viewpath.'livewire.transfers.create-transfer')->extends($layout)->section('content');
     }
 }
-

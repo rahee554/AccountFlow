@@ -53,10 +53,10 @@ class CreateAsset extends Component
 
     public function render()
     {
-        $viewpath = config('accountflow.view_path');
+        $viewpath = config('accountflow.view_path').'livewire.assets.create-asset';
         $layout = config('accountflow.layout');
+        $title = 'Create Asset | '.config('accountflow.business_name');
 
-        return view($viewpath.'livewire.assets.create-asset')->extends($layout)->section('content');
+        return view($viewpath)->extends($layout)->section('content')->title($title);
     }
 }
-

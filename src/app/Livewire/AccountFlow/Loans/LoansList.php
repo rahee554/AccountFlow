@@ -14,4 +14,3 @@ class LoansList extends Component
         return view($viewpath.'livewire.loans.loans-list')->extends($layout)->section('content');
     }
 }
-

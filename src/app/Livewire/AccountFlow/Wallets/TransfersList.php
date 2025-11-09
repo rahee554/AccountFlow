@@ -14,4 +14,3 @@ class TransfersList extends Component
         return view($viewpath.'transfers-list')->extends($layout);
     }
 }
-

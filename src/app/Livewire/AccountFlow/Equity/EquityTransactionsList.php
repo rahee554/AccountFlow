@@ -14,4 +14,3 @@ class EquityTransactionsList extends Component
         return view($viewpath . 'livewire.equity.equity-transactions-list')->extends($layout)->section('content');
     }
 }
-

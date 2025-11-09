@@ -217,4 +217,3 @@ class Setting extends Model
         self::$cached = [];
     }
 }
-

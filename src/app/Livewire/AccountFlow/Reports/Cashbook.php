@@ -75,8 +75,9 @@ class Cashbook extends Component
 
     public function render()
     {
-        $viewpath = config('accountflow.view_path');
+        $viewpath = config('accountflow.view_path').'livewire.reports.cashbook';
         $layout = config('accountflow.layout');
+        $title = 'Cashbook | '.config('accountflow.business_name');
 
         // Base query
         $query = Transaction::query();
@@ -99,12 +100,11 @@ class Cashbook extends Component
 
         $transactions = (clone $query)->with(['account', 'category', 'paymentMethod'])->orderBy('date', 'desc')->paginate($this->perPage);
 
-        return view($viewpath.'livewire.reports.cashbook', [
+        return view($viewpath, [
             'transactions' => $transactions,
             'accounts' => $this->accounts,
             'totalDebit' => $totalDebit,
             'totalCredit' => $totalCredit,
-        ])->extends($layout)->section('content');
+        ])->extends($layout)->section('content')->title($title);
     }
 }
-

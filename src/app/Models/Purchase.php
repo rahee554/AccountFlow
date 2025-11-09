@@ -31,4 +31,3 @@ class Purchase extends Model
         return $this->belongsTo(Category::class);
     }
 }
-

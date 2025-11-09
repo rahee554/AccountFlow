@@ -14,4 +14,3 @@ class UserWalletsList extends Component
         return view($viewpath . 'livewire.wallets.user-wallets-list')->extends($layout);
     }
 }
-

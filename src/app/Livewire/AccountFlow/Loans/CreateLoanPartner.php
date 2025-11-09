@@ -14,4 +14,3 @@ class CreateLoanPartner extends Component
         return view($viewpath . 'livewire.loans.create-loan-partner')->extends($layout)->section('content');
     }
 }
-

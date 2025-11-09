@@ -14,4 +14,3 @@ class TransactionTemplate extends Component
         return view($viewpath.'livewire.transactions.transaction-template')->extends($layout)->section('content');
     }
 }
-

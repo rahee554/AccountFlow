@@ -214,4 +214,3 @@ class CreateTransaction extends Component
         )->extends($layout)->section('content');
     }
 }
-

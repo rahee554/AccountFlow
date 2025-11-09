@@ -106,6 +106,8 @@ class Settings extends Component
     {
 
         $viewpath = config('accountflow.view_path').'livewire.settings';
+        $layout = config('accountflow.layout');
+        $title = 'Settings | '.config('accountflow.business_name');
 
         return view($viewpath, [
             'salesCategories' => $this->salesCategories,
@@ -114,7 +116,6 @@ class Settings extends Component
             'settings' => $this->settings,
             'featureSettings' => $this->featureSettings,
             'paymentMethods' => $this->paymentMethods,
-        ])->extends(config('accountflow.layout'))->section('content');
+        ])->extends($layout)->section('content')->title($title);
     }
 }
-

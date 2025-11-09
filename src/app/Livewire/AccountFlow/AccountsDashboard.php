@@ -8,11 +8,7 @@ use App\Models\AccountFlow\Transaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
-use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 
-#[Layout('layouts.app')]
-#[Title('Accounts Dashboard')]
 class AccountsDashboard extends Component
 {
     public $fluid;
@@ -323,9 +319,11 @@ class AccountsDashboard extends Component
 
     public function render()
     {
-        $viewpath = config('accountflow.view_path');
+        $viewpath = config('accountflow.view_path').'livewire.accounts-dashboard';
+        $layout = config('accountflow.layout');
+        $title = 'Accounts Dashboard | '.config('accountflow.business_name');
 
-        return view($viewpath.'livewire.accounts-dashboard', [
+        return view($viewpath, [
             'fluid' => $this->fluid,
             'selectedPeriod' => $this->selectedPeriod,
             'recentTransactions' => $this->recentTransactions,
@@ -336,7 +334,6 @@ class AccountsDashboard extends Component
             'budgets' => $this->budgets ?? [],
             'plannedPayments' => $this->plannedPayments ?? [],
             'previousMetrics' => $this->previousMetrics,
-        ]);
+        ])->extends($layout)->section('content')->title($title);
     }
 }
-

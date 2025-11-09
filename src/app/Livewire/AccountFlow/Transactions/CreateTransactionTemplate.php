@@ -88,4 +88,3 @@ class CreateTransactionTemplate extends Component
         ])->extends($layout)->section('content');
     }
 }
-

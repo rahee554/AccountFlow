@@ -24,4 +24,3 @@ class AssetTransaction extends Model
     }
     // Add other model-specific code as needed
 }
-

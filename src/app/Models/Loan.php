@@ -31,4 +31,3 @@ class Loan extends Model
         return $this->belongsTo(LoanUser::class);
     }
 }
-

@@ -14,4 +14,3 @@ class EquityPartnersList extends Component
         return view($viewpath . 'livewire.equity.equity-partners-list')->extends($layout)->section('content');
     }
 }
-

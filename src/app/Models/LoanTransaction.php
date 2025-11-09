@@ -16,4 +16,3 @@ class LoanTransaction extends Model
         return $this->hasOne(Transaction::class, 'id', 'trx_id');
     }
 }
-

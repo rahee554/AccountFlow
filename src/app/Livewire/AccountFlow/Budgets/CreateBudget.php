@@ -46,10 +46,10 @@ class CreateBudget extends Component
 
     public function render()
     {
-        $viewpath = config('accountflow.view_path');
+        $viewpath = config('accountflow.view_path').'livewire.budgets.create-budget';
         $layout = config('accountflow.layout');
+        $title = 'Create Budget | '.config('accountflow.business_name');
 
-        return view($viewpath.'livewire.budgets.create-budget')->extends($layout);
+        return view($viewpath)->extends($layout)->section('content')->title($title);
     }
 }
-

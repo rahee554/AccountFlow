@@ -17,10 +17,10 @@ class BudgetsList extends Component
 
     public function render(): View
     {
-        $viewpath = config('accountflow.view_path');
+        $viewpath = config('accountflow.view_path').'livewire.budgets.budgets-list';
         $layout = config('accountflow.layout');
+        $title = 'Budgets List | '.config('accountflow.business_name');
 
-        return view($viewpath.'livewire.budgets.budgets-list', ['budgets' => $this->budgets])->extends($layout);
+        return view($viewpath, ['budgets' => $this->budgets])->extends($layout)->section('content')->title($title);
     }
 }
-

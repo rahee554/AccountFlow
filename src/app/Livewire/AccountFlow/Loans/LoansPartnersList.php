@@ -14,4 +14,3 @@ class LoansPartnersList extends Component
         return view($viewpath.'livewire.loans.loans-partners-list')->extends($layout)->section('content');
     }
 }
-

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Accountflow\Accounts;
 
-use App\Models\AccountFlow\Account;
+use App\Models\Accountflow\Account;
 use Livewire\Component;
 
 class CreateAccount extends Component
@@ -41,10 +41,10 @@ class CreateAccount extends Component
 
     public function render()
     {
-        $viewpath = config('accountflow.view_path');
+        $viewpath = config('accountflow.view_path').'livewire.accounts.create-account';
         $layout = config('accountflow.layout');
+        $title = 'Create Account | '.config('accountflow.business_name');
 
-        return view($viewpath.'livewire.accounts.create-account')->extends($layout)->section('content');
+        return view($viewpath)->extends($layout)->section('content')->title($title);
     }
 }
-

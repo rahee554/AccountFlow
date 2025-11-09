@@ -40,7 +40,7 @@ class AccountFlowLinkCommand extends Command
                 'source' => $packagePath . '/database/migrations',
                 'target' => $projectRoot . '/database/migrations',
                 'type' => 'directory',
-                'merge' => true,  // Merge files instead of creating subfolder
+                'merge' => true,  // Merge files (copy contents) instead of creating a symlink to a subfolder
             ],
             'views' => [
                 'source' => $packagePath . '/resources/views/vendor/artflow-studio/accountflow',
@@ -57,7 +57,7 @@ class AccountFlowLinkCommand extends Command
         $force = $this->option('force');
 
         foreach ($links as $name => $link) {
-            $this->createLink($link['source'], $link['target'], $force);
+            $this->createLink($link['source'], $link['target'], $force, $link['merge'] ?? false);
         }
 
         $this->info('✅ AccountFlow package files linked successfully!');
@@ -67,77 +67,170 @@ class AccountFlowLinkCommand extends Command
 
     /**
      * Create a symlink or copy files
+     *
+     * @param string $source
+     * @param string $target
+     * @param bool $force
+     * @param bool $merge  If true and target exists, copy contents into target instead of linking
      */
-    private function createLink($source, $target, $force = false)
+    private function createLink($source, $target, $force = false, $merge = false)
     {
+        // Normalize paths
+        $source = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $source);
+        $target = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $target);
+
         if (!File::exists($source)) {
             $this->error("Source path not found: {$source}");
             return;
         }
 
-        // Check if target exists
+        // If merge is requested and target exists, copy contents into target and return
+        if ($merge && File::exists($target)) {
+            $this->info("Merging files from {$source} into existing {$target}");
+            $this->copyContents($source, $target);
+            $this->line("✓ Merged: {$source} → {$target}");
+            return;
+        }
+
+        // If target exists (file/dir/link) handle according to $force or user choice
         if (File::exists($target) || is_link($target)) {
             if (!$force) {
                 $this->warn("Target already exists: {$target}");
                 if ($this->confirm('Overwrite?')) {
-                    File::deleteDirectory($target);
-                    if (is_link($target)) {
-                        unlink($target);
-                    }
+                    $this->removeTarget($target);
                 } else {
                     return;
                 }
             } else {
-                File::deleteDirectory($target);
-                if (is_link($target)) {
-                    unlink($target);
-                }
+                $this->removeTarget($target);
             }
         }
 
+        // Ensure parent directory exists
         $targetDir = dirname($target);
         if (!File::exists($targetDir)) {
             File::makeDirectory($targetDir, 0755, true);
         }
 
-        // Try to create symlink on Windows/Unix
+        // If merge requested and target doesn't exist yet, create dir and copy contents
+        if ($merge && !File::exists($target)) {
+            File::makeDirectory($target, 0755, true);
+            $this->copyContents($source, $target);
+            $this->line("✓ Copied: {$source} → {$target}");
+            return;
+        }
+
+        // Attempt to create a symlink/junction on the host OS, fallback to copying
         try {
-            if (PHP_OS_FAMILY === 'Windows') {
-                // On Windows, try mklink or copy instead
-                $this->createWindowsLink($source, $target);
+            $this->createPlatformLink($source, $target);
+        } catch (\Throwable $e) {
+            $this->warn("Could not create symlink/junction, copying files instead: {$e->getMessage()}");
+            if (is_dir($source)) {
+                File::copyDirectory($source, $target);
             } else {
-                // On Unix, create symlink
-                symlink($source, $target);
-                $this->line("✓ Linked: {$target}");
+                File::copy($source, $target);
             }
-        } catch (\Exception $e) {
-            $this->warn("Could not create symlink, copying files instead: {$e->getMessage()}");
-            File::copyDirectory($source, $target);
             $this->line("✓ Copied: {$source} → {$target}");
         }
     }
 
     /**
-     * Create a link on Windows using mklink or copy as fallback
+     * Remove a target (file/dir/link) safely
      */
-    private function createWindowsLink($source, $target)
+    private function removeTarget($target)
     {
-        $source = str_replace('/', '\\', $source);
-        $target = str_replace('/', '\\', $target);
+        // If it's a link, unlink
+        if (is_link($target)) {
+            @unlink($target);
+            return;
+        }
 
-        // Try mklink first (requires admin)
-        $cmd = "mklink /D \"{$target}\" \"{$source}\"";
-        
-        $process = Process::fromShellCommandline($cmd);
-        $process->run();
-
-        if ($process->isSuccessful()) {
-            $this->line("✓ Linked: {$target}");
+        // If directory, delete directory, otherwise delete file
+        if (File::isDirectory($target)) {
+            File::deleteDirectory($target);
         } else {
-            // Fallback to copying
-            File::copyDirectory($source, $target);
-            $this->line("✓ Copied: {$source} → {$target}");
+            @unlink($target);
+        }
+    }
+
+    /**
+     * Copy contents of one directory into another (merging)
+     */
+    private function copyContents($source, $destination)
+    {
+        $sourceFiles = File::allFiles($source);
+        foreach ($sourceFiles as $file) {
+            $relative = ltrim(str_replace($source, '', $file->getPathname()), DIRECTORY_SEPARATOR);
+            $destPath = $destination . DIRECTORY_SEPARATOR . $relative;
+            $destDir = dirname($destPath);
+            if (!File::exists($destDir)) {
+                File::makeDirectory($destDir, 0755, true);
+            }
+            File::copy($file->getPathname(), $destPath);
+        }
+    }
+
+    /**
+     * Attempt to create a link/junction depending on the platform.
+     * Throws on failure.
+     */
+    private function createPlatformLink($source, $target)
+    {
+        $isDir = is_dir($source);
+
+        // Use realpath where possible
+        $realSource = realpath($source) ?: $source;
+        $realTarget = $target;
+
+        if (PHP_OS_FAMILY === 'Windows') {
+            // Try PHP symlink first (may require privileges or developer mode)
+            try {
+                if (@symlink($realSource, $realTarget)) {
+                    $this->line("✓ Linked (symlink): {$target}");
+                    return;
+                }
+            } catch (\Throwable $e) {
+                // fall through to mklink attempt
+            }
+
+            // Try mklink/junction. Use /J (junction) for directories because it's more permissive.
+            if ($isDir) {
+                $cmd = sprintf('cmd /C mklink /J "%s" "%s"', $realTarget, $realSource);
+            } else {
+                // For files, mklink without flags
+                $cmd = sprintf('cmd /C mklink "%s" "%s"', $realTarget, $realSource);
+            }
+
+            $process = Process::fromShellCommandline($cmd);
+            $process->run();
+
+            if ($process->isSuccessful()) {
+                $this->line("✓ Linked (mklink): {$target}");
+                return;
+            }
+
+            // As a last attempt try mklink /D (directory symlink) if /J failed for a directory
+            if ($isDir) {
+                $cmd2 = sprintf('cmd /C mklink /D "%s" "%s"', $realTarget, $realSource);
+                $process2 = Process::fromShellCommandline($cmd2);
+                $process2->run();
+                if ($process2->isSuccessful()) {
+                    $this->line("✓ Linked (mklink /D): {$target}");
+                    return;
+                }
+            }
+
+            // If none succeeded, throw with collected output
+            $message = trim($process->getErrorOutput() . ' ' . $process->getOutput());
+            throw new \RuntimeException('mklink failed: ' . $message);
+        } else {
+            // Unix-like: try native symlink
+            if (!@symlink($realSource, $realTarget)) {
+                $err = error_get_last();
+                throw new \RuntimeException('symlink failed: ' . ($err['message'] ?? 'unknown error'));
+            }
+            $this->line("✓ Linked: {$target}");
+            return;
         }
     }
 }
-

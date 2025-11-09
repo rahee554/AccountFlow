@@ -123,14 +123,13 @@ class AccountsReport extends Component
     {
         $viewpath = config('accountflow.view_path').'livewire.accounts-report';
         $layout = config('accountflow.layout');
-
+        $title = 'Accounts Report | '.config('accountflow.business_name');
         return view($viewpath, [
             'parentCategories' => $this->categories->whereNull('parent_id'),
             'categories' => $this->categories,
             'totalAmount' => $this->totalAmount,
             'startDate' => $this->startDate,
             'endDate' => $this->endDate,
-        ])->extends($layout)->section('content');
+        ])->extends($layout)->section('content')->title($title);
     }
 }
-

@@ -34,4 +34,3 @@ class PaymentMethod extends Model
         return $this->belongsTo(\App\Models\Account::class);
     }
 }
-

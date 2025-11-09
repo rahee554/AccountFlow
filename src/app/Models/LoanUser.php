@@ -11,4 +11,3 @@ class LoanUser extends Model
 
     protected $table = 'ac_loan_partners';
 }
-

@@ -88,13 +88,13 @@ class CreateAssetTransaction extends Component
 
     public function render()
     {
-          $viewpath = config('accountflow.view_path');
+          $viewpath = config('accountflow.view_path').'livewire.assets.create-asset-transaction';
         $layout = config('accountflow.layout');
+        $title = 'Create Asset Transaction | '.config('accountflow.business_name');
 
 
-        return view($viewpath.'livewire.assets.create-asset-transaction', [
+        return view($viewpath, [
             'assets' => $this->assets,
-        ])->extends($layout)->section('content');
+        ])->extends($layout)->section('content')->title($title);
     }
 }
-

@@ -14,4 +14,3 @@ class UserWallets extends Component
         return view($viewpath)->extends($layout);
     }
 }
-

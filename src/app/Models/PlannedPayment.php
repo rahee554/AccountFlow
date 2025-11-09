@@ -46,4 +46,3 @@ class PlannedPayment extends Model
         return $this->belongsTo(Transaction::class, 'trx_id');
     }
 }
-

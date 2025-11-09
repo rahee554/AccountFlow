@@ -75,4 +75,3 @@ class CreatePaymentMethod extends Component
         ])->extends($layout);
     }
 }
-

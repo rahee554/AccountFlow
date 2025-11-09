@@ -14,4 +14,3 @@ class TransfersList extends Component
         return view($viewpath.'livewire.transfers.transfers-list')->extends($layout)->section('content');
     }
 }
-

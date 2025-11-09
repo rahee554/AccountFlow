@@ -227,10 +227,10 @@ class CreateCategory extends Component
 
     public function render()
     {
-        $viewpath = config('accountflow.view_path');
+        $viewpath = config('accountflow.view_path').'livewire.categories.create-category';
         $layout = config('accountflow.layout');
+        $title = 'Create Category | '.config('accountflow.business_name');
 
-        return view($viewpath.'livewire.categories.create-category')->extends($layout)->section('content');
+        return view($viewpath)->extends($layout)->section('content')->title($title);
     }
 }
-

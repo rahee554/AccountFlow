@@ -102,4 +102,3 @@ class TransactionTemplate extends Model
         return $query->where('type', $type);
     }
 }
-

@@ -8,11 +8,11 @@ class AssetsList extends Component
 {
     public function render()
     {
-        $viewpath = config('accountflow.view_path');
+        $viewpath = config('accountflow.view_path').'livewire.assets.assets-list';
         $layout = config('accountflow.layout');
+        $title = 'Assets List | '.config('accountflow.business_name');
 
-        return view($viewpath.'livewire.assets.assets-list')->extends($layout)->section('content');
+        return view($viewpath)->extends($layout)->section('content')->title($title);
 
     }
 }
-

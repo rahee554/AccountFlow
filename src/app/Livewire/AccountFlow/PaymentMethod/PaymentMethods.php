@@ -30,4 +30,3 @@ class PaymentMethods extends Component
         ])->extends($layout);
     }
 }
-

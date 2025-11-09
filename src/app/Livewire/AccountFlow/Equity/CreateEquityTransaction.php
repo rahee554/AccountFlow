@@ -14,4 +14,3 @@ class CreateEquityTransaction extends Component
         return view($viewpath . 'livewire.equity.create-equity-transaction')->extends($layout)->section('content');
     }
 }
-

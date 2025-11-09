@@ -1,524 +1,393 @@
 <!--begin::Enhanced Accounts Navigation-->
-<div class="accounts-nav-wrapper P-5">
-    <!-- Mobile Navigation Toggle -->
-    <div class="d-lg-none my-2">
-        <button class="btn btn-transparent w-100" type="button" data-bs-toggle="offcanvas"
-            data-bs-target="#mobileNavOffcanvas">
-            <i class="fas fa-bars me-2"></i><span class="d-inline d-md-none">Menu</span><span
-                class="d-none d-md-inline">Navigation Menu</span>
-        </button>
-    </div>
-
-    <!-- Desktop Navigation -->
-    <div class="accounts-nav p-5 d-none d-lg-flex flex-wrap">
-
-
-        <div class="nav-item dropdown">
-            <a class="nav-link {{ request()->routeIs('accountflow::dashboard') ? 'active' : '' }}"
-                href="{{ route('accountflow::dashboard') }}"
-                wire:navigate.hover="'{{ route('accountflow::dashboard') }}'">
-                <i class="fas fa-home fs-5"></i>
-                <span class="d-none d-xl-inline">Dashboard</span>
-            </a>
-        </div>
-
-        <div class="nav-item dropdown nav-visible">
-            <button class="nav-link dropdown-toggle {{ request()->routeIs('accountflow::accounts*') ? 'active' : '' }}"
-                type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-university fs-5"></i>
-                <span class="d-none d-xl-inline">Accounts</span>
-                <i class="fas fa-caret-down ms-1"></i>
+<div class="accounts-nav-wrapper">
+    <!-- Desktop Navigation with Responsive Offcanvas -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-gradient-primary">
+        <div class="container-fluid px-lg-4">
+            <!-- Mobile Toggle Button -->
+            <button class="navbar-toggler border-0 d-flex align-items-center gap-2" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#accountsNavOffcanvas" aria-controls="accountsNavOffcanvas">
+                <i class="fas fa-bars fs-5"></i>
+                <span class="menu-text">Menu</span>
             </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="{{ route('accountflow::accounts') }}"
-                    wire:navigate.hover="'{{ route('accountflow::accounts') }}'">
-                    <i class="fas fa-list me-2"></i>Accounts List
-                </a>
-                {{-- <a class="dropdown-item" href="{{ route('accountflow::users.wallets') }}"
-                    wire:navigate.hover="'{{ route('accountflow::users.wallets') }}'">
-                    <i class="fas fa-wallet me-2"></i>User Wallets
-                </a> --}}
-                <a class="dropdown-item" href="{{ route('accountflow::accounts.create') }}"
-                    wire:navigate.hover="'{{ route('accountflow::accounts.create') }}'">
-                    <i class="fas fa-plus-circle me-2"></i>Add Account
-                </a>
+
+            <!-- Desktop Navigation Menu -->
+            <div class="collapse navbar-collapse" id="navbarAccountsMenu">
+                <ul class="navbar-nav mx-auto flex-wrap gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('accountflow::dashboard') ? 'active' : '' }}"
+                            href="{{ route('accountflow::dashboard') }}"
+                            wire:navigate.hover>
+                            <i class="fas fa-home"></i>
+                            <span class="d-none d-xl-inline ms-2">Dashboard</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <button class="nav-link dropdown-toggle {{ request()->routeIs('accountflow::accounts*') ? 'active' : '' }}"
+                            id="accountsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-university"></i>
+                            <span class="d-none d-xl-inline ms-2">Accounts</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="accountsDropdown">
+                            <li><a class="dropdown-item" href="{{ route('accountflow::accounts') }}" wire:navigate.hover>
+                                <i class="fas fa-list me-2"></i>Accounts List</a></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::accounts.create') }}" wire:navigate.hover>
+                                <i class="fas fa-plus-circle me-2"></i>Add Account</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <button class="nav-link dropdown-toggle {{ request()->routeIs('accountflow::transactions*') ? 'active' : '' }}"
+                            id="transactionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span class="d-none d-xl-inline ms-2">Transactions</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="transactionsDropdown">
+                            <li><a class="dropdown-item" href="{{ route('accountflow::transactions') }}" wire:navigate.hover>
+                                <i class="fas fa-list me-2"></i>All Transactions</a></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::assets.transactions') }}" wire:navigate.hover>
+                                <i class="fas fa-arrow-up me-2 text-success"></i>Assets Transactions</a></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::transactions') }}?type=expense" wire:navigate.hover>
+                                <i class="fas fa-arrow-down me-2 text-danger"></i>Loans Transactions</a></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::transfers.list') }}" wire:navigate.hover>
+                                <i class="fas fa-exchange-alt me-2 text-info"></i>Transfers List</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::transactions.templates') }}" wire:navigate.hover>
+                                <i class="fas fa-copy me-2 text-info"></i>Transactions Template</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::transaction.create') }}" wire:navigate.hover>
+                                <i class="fas fa-plus-circle me-2"></i>Add Transaction</a></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::transactions.create') }}" wire:navigate.hover>
+                                <i class="fas fa-layer-group me-2"></i>Add Multiple Transactions</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <button class="nav-link dropdown-toggle {{ request()->routeIs('accountflow::budgets*') ? 'active' : '' }}"
+                            id="budgetsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-wallet"></i>
+                            <span class="d-none d-xl-inline ms-2">Budgets</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="budgetsDropdown">
+                            <li><a class="dropdown-item" href="{{ route('accountflow::budgets') }}" wire:navigate.hover>
+                                <i class="fas fa-list me-2"></i>Overview</a></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::budgets.create') }}" wire:navigate.hover>
+                                <i class="fas fa-plus-circle me-2"></i>Add Budget</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown d-none d-xxl-block">
+                        <button class="nav-link dropdown-toggle" id="plannedDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-calendar-check"></i>
+                            <span class="d-none d-xl-inline ms-2">Planned Payments</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="plannedDropdown">
+                            <li><a class="dropdown-item" href="{{ route('accountflow::planned-payments') }}" wire:navigate.hover>
+                                <i class="fas fa-list me-2"></i>Planned Payments List</a></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::planned-payments.create') }}" wire:navigate.hover>
+                                <i class="fas fa-plus-circle me-2"></i>Plan a Payment</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown d-none d-xl-block">
+                        <button class="nav-link dropdown-toggle {{ request()->routeIs('accountflow::report*') ? 'active' : '' }}"
+                            id="reportsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-chart-bar"></i>
+                            <span class="ms-2">Reports</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
+                            <li><a class="dropdown-item" href="{{ route('accountflow::report') }}" wire:navigate.hover>
+                                <i class="fas fa-chart-line me-2"></i>Financial Summary</a></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::report.cashbook') }}" wire:navigate.hover>
+                                <i class="fas fa-book-open me-2"></i>Cashbook</a></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::report.trial-balance') }}" wire:navigate.hover>
+                                <i class="fas fa-balance-scale me-2"></i>Trial Balance</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown d-none d-lg-block">
+                        <button class="nav-link dropdown-toggle" id="assetsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-gem"></i>
+                            <span class="d-none d-xl-inline ms-2">Assets</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="assetsDropdown">
+                            <li><a class="dropdown-item" href="{{ route('accountflow::assets') }}" wire:navigate.hover>
+                                <i class="fas fa-list me-2"></i>Assets List</a></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::assets.create') }}" wire:navigate.hover>
+                                <i class="fas fa-plus-circle me-2"></i>Add Asset</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown d-none d-lg-block">
+                        <button class="nav-link dropdown-toggle" id="equityDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-users"></i>
+                            <span class="d-none d-xl-inline ms-2">Equity</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="equityDropdown">
+                            <li><a class="dropdown-item" href="{{ route('accountflow::equity.partners') }}" wire:navigate.hover>
+                                <i class="fas fa-user-friends me-2"></i>Equity Partners</a></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::equity.transactions') }}" wire:navigate.hover>
+                                <i class="fas fa-exchange-alt me-2"></i>Equity Transactions</a></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::equity.partners.create') }}" wire:navigate.hover>
+                                <i class="fas fa-user-plus me-2"></i>Add Equity Partner</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown d-none d-lg-block">
+                        <button class="nav-link dropdown-toggle" id="loansDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-hand-holding-usd"></i>
+                            <span class="d-none d-xl-inline ms-2">Loans & Credits</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="loansDropdown">
+                            <li><a class="dropdown-item" href="{{ route('accountflow::loans') }}" wire:navigate.hover>
+                                <i class="fas fa-users me-2"></i>Overview</a></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::loans.partners') }}" wire:navigate.hover>
+                                <i class="fas fa-users me-2"></i>Loan Partners</a></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::loans.create') }}" wire:navigate.hover>
+                                <i class="fas fa-plus-circle me-2"></i>Create Loan</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('accountflow::audittrail*') ? 'active' : '' }}"
+                            href="{{ route('accountflow::audittrail') }}"
+                            wire:navigate.hover>
+                            <i class="fas fa-user-shield"></i>
+                            <span class="d-none d-xl-inline ms-2">Audit Trail</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item dropdown d-none d-lg-block">
+                        <button class="nav-link dropdown-toggle" id="settingsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-cog"></i>
+                            <span class="d-none d-xl-inline ms-2">Settings</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="settingsDropdown">
+                            <li><a class="dropdown-item" href="{{ route('accountflow::settings') }}" wire:navigate.hover>
+                                <i class="fas fa-user-cog me-2"></i>Account Settings</a></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::payment-methods') }}" wire:navigate.hover>
+                                <i class="fas fa-credit-card me-2"></i>Payment Methods</a></li>
+                            <li><a class="dropdown-item" href="{{ route('accountflow::categories') }}" wire:navigate.hover>
+                                <i class="fas fa-tags me-2"></i>Categories</a></li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
         </div>
-        <div class="nav-item dropdown nav-visible">
-            <button
-                class="nav-link dropdown-toggle {{ request()->routeIs('accountflow::transactions*') ? 'active' : '' }}"
-                type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-exchange-alt fs-5"></i>
-                <span class="d-none d-xl-inline">Transactions</span>
-                <i class="fas fa-caret-down ms-1"></i>
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="{{ route('accountflow::transactions') }}"
-                    wire:navigate.hover="'{{ route('accountflow::transactions') }}'">
-                    <i class="fas fa-list me-2"></i>All Transactions
-                </a>
-                <a class="dropdown-item" href="{{ route('accountflow::assets.transactions') }}"
-                    wire:navigate.hover="'{{ route('accountflow::assets.transactions') }}'">
-                    <i class="fas fa-arrow-up me-2 text-success"></i>Assets Transactions
-                </a>
-                <a class="dropdown-item" href="{{ route('accountflow::transactions') }}?type=expense"
-                    wire:navigate.hover="'{{ route('accountflow::transactions') }}?type=expense'">
-                    <i class="fas fa-arrow-down me-2 text-danger"></i>Loans Transactions
-                </a>
-                <a class="dropdown-item" href="{{ route('accountflow::transfers.list') }}"
-                    wire:navigate.hover="'{{ route('accountflow::transfers.list') }}'">
-                    <i class="fas fa-exchange-alt me-2 text-info"></i>Transfers List
-                </a>
-                <div class="dropdown-divider"></div>
+    </nav>
 
-                <a class="dropdown-item" href="{{ route('accountflow::transactions.templates') }}"
-                    wire:navigate.hover="'{{ route('accountflow::transactions.templates') }}'">
-                    <i class="fas fa-copy me-2 text-info"></i>Transactions Template
-                </a>
-
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="{{ route('accountflow::transaction.create') }}"
-                    wire:navigate.hover="'{{ route('accountflow::transaction.create') }}'">
-                    <i class="fas fa-plus-circle me-2"></i>Add Transaction
-                </a>
-                <a class="dropdown-item" href="{{ route('accountflow::transactions.create') }}"
-                    wire:navigate.hover="'{{ route('accountflow::transactions.create') }}'">
-                    <i class="fas fa-layer-group me-2"></i>Add Multiple Transactions
-                </a>
-            </div>
-        </div>
-        <div class="nav-item dropdown nav-visible">
-            <button class="nav-link dropdown-toggle {{ request()->routeIs('accountflow::budgets*') ? 'active' : '' }}"
-                type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-wallet fs-5"></i>
-                <span class="d-none d-xl-inline">Budgets</span>
-                <i class="fas fa-caret-down ms-1"></i>
-            </button>
-            <div class="dropdown-menu">
-
-                <a class="dropdown-item" href="{{ route('accountflow::budgets') }}"
-                    wire:navigate.hover="'{{ route('accountflow::budgets') }}'">
-                    <i class="fas fa-list me-2"></i>Overview
-                </a>
-                <a class="dropdown-item" href="{{ route('accountflow::budgets.create') }}"
-                    wire:navigate.hover="'{{ route('accountflow::budgets.create') }}'">
-                    <i class="fas fa-plus-circle me-2"></i>Add Budget
-                </a>
-            </div>
-        </div>
-
-
-        <div class="nav-item dropdown nav-collapsible">
-            <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-calendar-check fs-5"></i>
-                <span class="d-none d-xl-inline">Planned Payments</span>
-                <i class="fas fa-caret-down ms-1"></i>
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="{{ route('accountflow::planned-payments') }}"
-                    wire:navigate.hover="'{{ route('accountflow::planned-payments') }}'">
-                    <i class="fas fa-list me-2"></i>Planned Payments List
-                </a>
-                <a class="dropdown-item" href="{{ route('accountflow::planned-payments.create') }}"
-                    wire:navigate.hover="'{{ route('accountflow::planned-payments.create') }}'">
-                    <i class="fas fa-plus-circle me-2"></i>Plan a Payment
-                </a>
-            </div>
-        </div>
-        <div class="nav-item dropdown nav-collapsible">
-            <button class="nav-link dropdown-toggle {{ request()->routeIs('accountflow::report*') ? 'active' : '' }}"
-                type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-chart-bar fs-5"></i>
-                <span class="d-none d-xl-inline">Reports</span>
-                <i class="fas fa-caret-down ms-1"></i>
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="{{ route('accountflow::report') }}"
-                    wire:navigate.hover="'{{ route('accountflow::report') }}'">
-                    <i class="fas fa-chart-line me-2"></i>Financial Summary
-                </a>
-                <a class="dropdown-item" href="{{ route('accountflow::report.cashbook') }}"
-                    wire:navigate.hover="'{{ route('accountflow::report.cashbook') }}'">
-                    <i class="fas fa-book-open me-2"></i>Cashbook
-                </a>
-                <a class="dropdown-item" href="{{ route('accountflow::report.trial-balance') }}"
-                    wire:navigate.hover="'{{ route('accountflow::report.trial-balance') }}'">
-                    <i class="fas fa-balance-scale me-2"></i>Trial Balance
-                </a>
-                <a class="dropdown-item" href="#" wire:navigate.hover="'#'">
-                    <i class="fas fa-chart-pie me-2"></i>Expense Analysis
-                </a>
-                <a class="dropdown-item" href="#" wire:navigate.hover="'#'">
-                    <i class="fas fa-chart-area me-2"></i>Income Analysis
-                </a>
-                <a class="dropdown-item" href="#" wire:navigate.hover="'#'">
-                    <i class="fas fa-balance-scale me-2"></i>Balance Sheet
-                </a>
-                <a class="dropdown-item" href="#" wire:navigate.hover="'#'">
-                    <i class="fas fa-file-invoice-dollar me-2"></i>P&L Statement
-                </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#" wire:navigate.hover="'#'">
-                    <i class="fas fa-calendar-alt me-2"></i>Monthly Report
-                </a>
-            </div>
-        </div>
-        <div class="nav-item dropdown nav-collapsible">
-            <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-gem fs-5"></i>
-                <span class="d-none d-xl-inline">Assets</span>
-                <i class="fas fa-caret-down ms-1"></i>
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="{{ route('accountflow::assets') }}"
-                    wire:navigate.hover="'{{ route('accountflow::assets') }}'">
-                    <i class="fas fa-list me-2"></i>Assets List
-                </a>
-                <a class="dropdown-item" href="{{ route('accountflow::assets.create') }}"
-                    wire:navigate.hover="'{{ route('accountflow::assets.create') }}'">
-                    <i class="fas fa-plus-circle me-2"></i>Add Asset
-                </a>
-            </div>
-        </div>
-
-
-
-        <div class="nav-item dropdown nav-collapsible">
-            <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-users fs-5"></i>
-                <span class="d-none d-xl-inline">Equity</span>
-                <i class="fas fa-caret-down ms-1"></i>
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="{{ route('accountflow::equity.partners') }}"
-                    wire:navigate.hover="'{{ route('accountflow::equity.partners') }}'">
-                    <i class="fas fa-user-friends me-2"></i>Equity Partners
-                </a>
-                <a class="dropdown-item" href="{{ route('accountflow::equity.transactions') }}"
-                    wire:navigate.hover="'{{ route('accountflow::equity.transactions') }}'">
-                    <i class="fas fa-exchange-alt me-2"></i>Equity Transactions
-                </a>
-                <a class="dropdown-item" href="{{ route('accountflow::equity.partners.create') }}"
-                    wire:navigate.hover="'{{ route('accountflow::equity.partners.create') }}'">
-                    <i class="fas fa-user-plus me-2"></i>Add Equity Partner
-                </a>
-                <a class="dropdown-item" href="{{ route('accountflow::equity.partners.create') }}"
-                    wire:navigate.hover="'{{ route('accountflow::equity.partners.create') }}'">
-                    <i class="fas fa-plus-circle me-2"></i>Add Equity Transaction
-                </a>
-            </div>
-        </div>
-
-        <div class="nav-item dropdown nav-collapsible">
-            <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-hand-holding-usd fs-5"></i>
-                <span class="d-none d-xl-inline">Loans & Credits</span>
-                <i class="fas fa-caret-down ms-1"></i>
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="{{ route('accountflow::loans') }}"
-                    wire:navigate.hover="'{{ route('accountflow::loans') }}'">
-                    <i class="fas fa-users me-2"></i>Overview
-                </a>
-
-                <a class="dropdown-item" href="{{ route('accountflow::loans.partners') }}"
-                    wire:navigate.hover="'{{ route('accountflow::loans.partners') }}'">
-                    <i class="fas fa-users me-2"></i>Loan Partners
-                </a>
-                <a class="dropdown-item" href="{{ route('accountflow::loans.create') }}"
-                    wire:navigate.hover="'{{ route('accountflow::loans.create') }}'">
-                    <i class="fas fa-plus-circle me-2"></i>Create Loan
-                </a>
-                <a class="dropdown-item" href="{{ route('accountflow::loans.partners') }}"
-                    wire:navigate.hover="'{{ route('accountflow::loans.partners') }}'">
-                    <i class="fas fa-exchange-alt me-2"></i>Add Loan Transaction
-                </a>
-            </div>
-        </div>
-
-        <div class="nav-item dropdown nav-visible">
-            <a class="nav-link {{ request()->routeIs('accountflow::audittrail*') ? 'active' : '' }}"
-                href="{{ route('accountflow::audittrail') }}"
-                wire:navigate.hover="'{{ route('accountflow::audittrail') }}'">
-                <i class="fas fa-user-shield fs-5"></i>
-                <span class="d-none d-xl-inline">Audit Trail</span>
-            </a>
-        </div>
-
-
-        <div class="nav-item dropdown nav-collapsible">
-            <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-cog fs-5"></i>
-                <span class="d-none d-xl-inline">Settings</span>
-                <i class="fas fa-caret-down ms-1"></i>
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="{{ route('accountflow::settings') }}"
-                    wire:navigate.hover="'{{ route('accountflow::settings') }}'">
-                    <i class="fas fa-user-cog me-2"></i>Account Settings
-                </a>
-                <a class="dropdown-item" href="{{route('accountflow::payment-methods')}}" wire:navigate.hover="'#'">
-                    <i class="fas fa-credit-card me-2"></i>Payment Methods
-                </a>
-                <a class="dropdown-item" href="{{ route('accountflow::categories') }}"
-                    wire:navigate.hover="'{{ route('accountflow::categories') }}'">
-                    <i class="fas fa-tags me-2"></i>Categories
-                </a>
-                <a class="dropdown-item" href="#" wire:navigate.hover="'#'">
-                    <i class="fas fa-file-export me-2"></i>Export/Import
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mobile Offcanvas Navigation -->
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="mobileNavOffcanvas">
-        <div class="offcanvas-header">
+    <!-- Mobile Offcanvas Navigation - Automatically triggered on small screens -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="accountsNavOffcanvas">
+        <div class="offcanvas-header bg-gradient-primary text-white">
             <h5 class="offcanvas-title">
                 <i class="fas fa-chart-pie me-2"></i>Accounts Menu
             </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
         </div>
-        <div class="offcanvas-body">
-            <div class="mobile-nav-menu">
-                <a class="mobile-nav-item {{ request()->routeIs('accountflow::dashboard') ? 'active' : '' }}"
-                    href="{{ route('accountflow::dashboard') }}">
-                    <i class="fas fa-home"></i>
-                    <span>Dashboard</span>
-                </a>
-                <div class="mobile-nav-section">
-                    <div class="mobile-nav-title">
-                        <i class="fas fa-university"></i>
-                        <span>Accounts</span>
+        <div class="offcanvas-body p-0">
+            <ul class="navbar-nav flex-column w-100">
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('accountflow::dashboard') ? 'active' : '' }}"
+                        href="{{ route('accountflow::dashboard') }}"
+                        wire:navigate.hover
+                        data-bs-dismiss="offcanvas">
+                        <i class="fas fa-home me-2"></i>Dashboard
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#accountsCollapse" role="button" aria-expanded="false">
+                        <i class="fas fa-university me-2"></i>Accounts<i class="fas fa-chevron-right ms-auto"></i>
+                    </a>
+                    <div class="collapse" id="accountsCollapse">
+                        <ul class="navbar-nav ps-3">
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::accounts') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-list me-2"></i>Accounts List</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::accounts.create') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-plus-circle me-2"></i>Add Account</a></li>
+                        </ul>
                     </div>
-                    <a class="mobile-nav-subitem" href="{{ route('accountflow::accounts') }}">
-                        <i class="fas fa-list"></i>Accounts List
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#transactionsCollapse" role="button" aria-expanded="false">
+                        <i class="fas fa-exchange-alt me-2"></i>Transactions<i class="fas fa-chevron-right ms-auto"></i>
                     </a>
-                    <a class="mobile-nav-subitem" href="{{ route('accountflow::accounts.create') }}">
-                        <i class="fas fa-plus-circle"></i>Add Account
-                    </a>
-                </div>
-                <div class="mobile-nav-section">
-                    <div class="mobile-nav-title">
-                        <i class="fas fa-wallet"></i>
-                        <span>Budgets</span>
+                    <div class="collapse" id="transactionsCollapse">
+                        <ul class="navbar-nav ps-3">
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::transactions') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-list me-2"></i>All Transactions</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::assets.transactions') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-arrow-up me-2 text-success"></i>Assets Transactions</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::transactions') }}?type=expense" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-arrow-down me-2 text-danger"></i>Loans Transactions</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::transfers.list') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-exchange-alt me-2 text-info"></i>Transfers List</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::transactions.templates') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-copy me-2 text-info"></i>Transactions Template</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::transaction.create') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-plus-circle me-2"></i>Add Transaction</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::transactions.create') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-layer-group me-2"></i>Add Multiple</a></li>
+                        </ul>
                     </div>
-                    <a class="mobile-nav-subitem" href="{{ route('accountflow::budgets') }}">
-                        <i class="fas fa-list"></i>Budgets List
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#budgetsCollapse" role="button" aria-expanded="false">
+                        <i class="fas fa-wallet me-2"></i>Budgets<i class="fas fa-chevron-right ms-auto"></i>
                     </a>
-                    <a class="mobile-nav-subitem" href="{{ route('accountflow::budgets.create') }}">
-                        <i class="fas fa-plus-circle"></i>Add Budget
-                    </a>
-                </div>
-                <div class="mobile-nav-section">
-                    <div class="mobile-nav-title">
-                        <i class="fas fa-user-shield"></i>
-                        <span>Audit Trail</span>
+                    <div class="collapse" id="budgetsCollapse">
+                        <ul class="navbar-nav ps-3">
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::budgets') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-list me-2"></i>Overview</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::budgets.create') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-plus-circle me-2"></i>Add Budget</a></li>
+                        </ul>
                     </div>
-                    <a class="mobile-nav-subitem" href="{{ route('accountflow::audittrail') }}">
-                        <i class="fas fa-list"></i>Audit Trail Logs
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#plannedCollapse" role="button" aria-expanded="false">
+                        <i class="fas fa-calendar-check me-2"></i>Planned Payments<i class="fas fa-chevron-right ms-auto"></i>
                     </a>
-                </div>
-                <div class="mobile-nav-section">
-                    <div class="mobile-nav-title">
-                        <i class="fas fa-exchange-alt"></i>
-                        <span>Transactions</span>
+                    <div class="collapse" id="plannedCollapse">
+                        <ul class="navbar-nav ps-3">
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::planned-payments') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-list me-2"></i>Planned Payments</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::planned-payments.create') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-plus-circle me-2"></i>Plan a Payment</a></li>
+                        </ul>
                     </div>
-                    <a class="mobile-nav-subitem" href="{{ route('accountflow::transactions') }}?type=transfer">
-                        <i class="fas fa-exchange-alt"></i>Transfers List
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#reportsCollapse" role="button" aria-expanded="false">
+                        <i class="fas fa-chart-bar me-2"></i>Reports<i class="fas fa-chevron-right ms-auto"></i>
                     </a>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-plus-circle"></i>Create Transfer
-                    </a>
-                </div>
-                <div class="mobile-nav-section">
-                    <div class="mobile-nav-title">
-                        <i class="fas fa-tags"></i>
-                        <span>Categories</span>
+                    <div class="collapse" id="reportsCollapse">
+                        <ul class="navbar-nav ps-3">
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::report') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-chart-line me-2"></i>Financial Summary</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::report.cashbook') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-book-open me-2"></i>Cashbook</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::report.trial-balance') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-balance-scale me-2"></i>Trial Balance</a></li>
+                        </ul>
                     </div>
-                    <a class="mobile-nav-subitem" href="{{ route('accountflow::categories') }}">
-                        <i class="fas fa-list"></i>All Categories
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#assetsCollapse" role="button" aria-expanded="false">
+                        <i class="fas fa-gem me-2"></i>Assets<i class="fas fa-chevron-right ms-auto"></i>
                     </a>
-                    <a class="mobile-nav-subitem" href="{{ route('accountflow::categories') }}?type=income">
-                        <i class="fas fa-arrow-up text-success"></i>Income Categories
-                    </a>
-                    <a class="mobile-nav-subitem" href="{{ route('accountflow::categories') }}?type=expense">
-                        <i class="fas fa-arrow-down text-danger"></i>Expense Categories
-                    </a>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-plus-circle"></i>Add Category
-                    </a>
-                </div>
-                <div class="mobile-nav-section">
-                    <div class="mobile-nav-title">
-                        <i class="fas fa-calendar-check"></i>
-                        <span>Planned Payments</span>
+                    <div class="collapse" id="assetsCollapse">
+                        <ul class="navbar-nav ps-3">
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::assets') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-list me-2"></i>Assets List</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::assets.create') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-plus-circle me-2"></i>Add Asset</a></li>
+                        </ul>
                     </div>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-list"></i>Planned Payments List
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#equityCollapse" role="button" aria-expanded="false">
+                        <i class="fas fa-users me-2"></i>Equity<i class="fas fa-chevron-right ms-auto"></i>
                     </a>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-plus-circle"></i>Plan a Payment
-                    </a>
-                </div>
-                <div class="mobile-nav-section">
-                    <div class="mobile-nav-title">
-                        <i class="fas fa-hand-holding-usd"></i>
-                        <span>Loans & Credits</span>
+                    <div class="collapse" id="equityCollapse">
+                        <ul class="navbar-nav ps-3">
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::equity.partners') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-user-friends me-2"></i>Equity Partners</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::equity.transactions') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-exchange-alt me-2"></i>Equity Transactions</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::equity.partners.create') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-user-plus me-2"></i>Add Equity Partner</a></li>
+                        </ul>
                     </div>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-users"></i>Loan Users
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#loansCollapse" role="button" aria-expanded="false">
+                        <i class="fas fa-hand-holding-usd me-2"></i>Loans & Credits<i class="fas fa-chevron-right ms-auto"></i>
                     </a>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-plus-circle"></i>Create Loan
-                    </a>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-exchange-alt"></i>Add Loan Transaction
-                    </a>
-                </div>
-                <div class="mobile-nav-section">
-                    <div class="mobile-nav-title">
-                        <i class="fas fa-gem"></i>
-                        <span>Assets</span>
+                    <div class="collapse" id="loansCollapse">
+                        <ul class="navbar-nav ps-3">
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::loans') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-users me-2"></i>Overview</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::loans.partners') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-users me-2"></i>Loan Partners</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::loans.create') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-plus-circle me-2"></i>Create Loan</a></li>
+                        </ul>
                     </div>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-list"></i>Assets List
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('accountflow::audittrail*') ? 'active' : '' }}"
+                        href="{{ route('accountflow::audittrail') }}"
+                        wire:navigate.hover
+                        data-bs-dismiss="offcanvas">
+                        <i class="fas fa-user-shield me-2"></i>Audit Trail
                     </a>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-plus-circle"></i>Add Asset
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#settingsCollapse" role="button" aria-expanded="false">
+                        <i class="fas fa-cog me-2"></i>Settings<i class="fas fa-chevron-right ms-auto"></i>
                     </a>
-                </div>
-                <div class="mobile-nav-section">
-                    <div class="mobile-nav-title">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Reports</span>
+                    <div class="collapse" id="settingsCollapse">
+                        <ul class="navbar-nav ps-3">
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::settings') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-user-cog me-2"></i>Account Settings</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::payment-methods') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-credit-card me-2"></i>Payment Methods</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::categories') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-tags me-2"></i>Categories</a></li>
+                        </ul>
                     </div>
-                    <a class="mobile-nav-subitem" href="{{ route('accountflow::report') }}">
-                        <i class="fas fa-chart-line"></i>Financial Summary
-                    </a>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-chart-pie"></i>Expense Analysis
-                    </a>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-chart-area"></i>Income Analysis
-                    </a>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-balance-scale"></i>Balance Sheet
-                    </a>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-file-invoice-dollar"></i>P&L Statement
-                    </a>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-calendar-alt"></i>Monthly Report
-                    </a>
-                </div>
-                <div class="mobile-nav-section">
-                    <div class="mobile-nav-title">
-                        <i class="fas fa-cog"></i>
-                        <span>Settings</span>
-                    </div>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-user-cog"></i>Account Settings
-                    </a>
-                    <a class="mobile-nav-subitem" href="{{route('accountflow::payment-methods')}}">
-                        <i class="fas fa-credit-card"></i>Payment Methodss
-                    </a>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-tags"></i>Categories
-                    </a>
-                    <a class="mobile-nav-subitem" href="#">
-                        <i class="fas fa-file-export"></i>Export/Import
-                    </a>
-                </div>
-            </div>
+                </li>
+            </ul>
         </div>
     </div>
 
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Close offcanvas when clicking on links
+                document.querySelectorAll('.offcanvas-body .nav-link[data-bs-dismiss="offcanvas"]').forEach(link => {
+                    link.addEventListener('click', function () {
+                        const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('accountsNavOffcanvas'));
+                        if (offcanvas) {
+                            offcanvas.hide();
+                        }
+                    });
+                });
+            });
+        </script>
+    @endpush
+
     @push('styles')
         <style>
-            /* Ensure only the FontAwesome caret is shown (avoid duplicate Bootstrap caret) */
-            .accounts-nav .nav-link.dropdown-toggle::after {
-                display: none !important;
+            /* Gradient Background */
+            .bg-gradient-primary {
+                background: linear-gradient(135deg, #00aaff 0%, #0077cc 100%);
             }
 
-            /* Enhanced Navigation Styles with Responsive Design */
             .accounts-nav-wrapper {
-                background: linear-gradient(90deg, #00aaff 0%, #0077cc 100%);
-                border-bottom: 1px solid #e4e6ef;
                 margin-bottom: 2rem;
-                position: relative;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             }
 
-            .accounts-nav {
-                display: flex;
-                gap: 0;
-                padding: 0.75rem 0;
-
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: none;
-                -ms-overflow-style: none;
+            /* Navbar Customization */
+            .navbar {
+                padding: 1rem 0;
             }
 
-            .accounts-nav::-webkit-scrollbar {
-                display: none;
-            }
-
-            .accounts-nav .nav-item {
-                position: relative;
-                flex-shrink: 0;
-                margin: 0 0.15rem;
-            }
-
-            .accounts-nav .nav-link {
+            .navbar .nav-link {
+                color: #ffffff !important;
+                padding: 0.5rem 0.75rem;
+                border-radius: 0.375rem;
+                transition: all 0.15s ease;
+                font-size: 0.875rem;
+                font-weight: 500;
                 display: flex;
                 align-items: center;
                 gap: 0.5rem;
-                padding: 0.75rem 1.5rem;
+            }
+
+            .navbar .nav-link:hover {
+                background-color: rgba(255, 255, 255, 0.2);
                 color: #ffffff;
-                text-decoration: none;
-                font-weight: 500;
-                font-size: 0.875rem;
-                border-radius: 0.375rem;
-                transition: all 0.15s ease;
-                white-space: nowrap;
-                position: relative;
             }
 
-            .accounts-nav .nav-link:hover {
-                color: #009ef7;
-                background-color: #f1faff;
-            }
-
-            .accounts-nav .nav-link.active {
-                color: #009ef7;
-                background-color: #f1faff;
+            .navbar .nav-link.active {
+                background-color: rgba(255, 255, 255, 0.3);
                 font-weight: 600;
             }
 
-            .accounts-nav .nav-link.active::after {
-                content: '';
-                position: absolute;
-                bottom: -0.75rem;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 6px;
-                height: 6px;
-                background: #009ef7;
-                border-radius: 50%;
-            }
-
-            .accounts-nav .dropdown-menu {
-                min-width: 200px;
+            .navbar .dropdown-menu {
                 border: 1px solid #e4e6ef;
                 box-shadow: 0 0.5rem 1.5rem 0.5rem rgba(0, 0, 0, 0.075);
                 border-radius: 0.475rem;
                 padding: 0.5rem 0;
                 margin-top: 0.5rem;
-                position: absolute;
             }
 
-            .accounts-nav .dropdown-item {
+            .navbar .dropdown-item {
                 display: flex;
                 align-items: center;
                 gap: 0.5rem;
@@ -528,106 +397,166 @@
                 transition: all 0.15s ease;
             }
 
-            .accounts-nav .dropdown-item:hover {
+            .navbar .dropdown-item:hover {
                 background-color: #f1faff;
                 color: #009ef7;
             }
 
-            .accounts-nav .dropdown-item i {
+            .navbar .dropdown-item i {
                 width: 16px;
                 text-align: center;
             }
 
-            .accounts-nav .dropdown-divider {
-                margin: 0.5rem 0;
+            /* Navbar Toggler Customization */
+            .navbar-toggler {
+                color: white !important;
+                padding: 0.5rem 1rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.875rem;
+                font-weight: 500;
             }
 
-            /* Mobile Navigation Styles */
-            .mobile-nav-menu {
+            .navbar-toggler .menu-text {
+                display: none;
+                white-space: nowrap;
+            }
+
+            @media (max-width: 991.98px) {
+                .navbar-toggler .menu-text {
+                    display: inline-block;
+                }
+            }
+
+            /* Offcanvas Customization */
+            .offcanvas {
+                width: 280px !important;
+            }
+
+            .offcanvas-header {
+                border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            }
+
+            .offcanvas-body {
                 padding: 0;
             }
 
-            .mobile-nav-item {
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-                padding: 1rem;
+            .offcanvas-body .nav-link {
                 color: #5e6278;
-                text-decoration: none;
-                border-radius: 0.5rem;
-                margin-bottom: 0.25rem;
-                transition: all 0.15s ease;
-            }
-
-            .mobile-nav-item:hover,
-            .mobile-nav-item.active {
-                background-color: #f1faff;
-                color: #009ef7;
-            }
-
-            .mobile-nav-section {
-                margin-bottom: 1.5rem;
-            }
-
-            .mobile-nav-title {
-                display: flex;
-                align-items: center;
-                gap: 0.75rem;
                 padding: 0.75rem 1rem;
-                color: #181c32;
-                font-weight: 600;
+                border-radius: 0;
                 font-size: 0.875rem;
-                background-color: #f8f9fa;
-                border-radius: 0.5rem;
-                margin-bottom: 0.5rem;
-            }
-
-            .mobile-nav-subitem {
+                transition: all 0.15s ease;
                 display: flex;
                 align-items: center;
-                gap: 0.75rem;
-                padding: 0.75rem 1rem 0.75rem 2.5rem;
-                color: #5e6278;
-                text-decoration: none;
-                border-radius: 0.5rem;
-                margin-bottom: 0.25rem;
-                transition: all 0.15s ease;
-                font-size: 0.875rem;
             }
 
-            .mobile-nav-subitem:hover {
+            .offcanvas-body .nav-link:hover {
                 background-color: #f1faff;
                 color: #009ef7;
+                padding-left: 1.25rem;
             }
 
-            .mobile-nav-subitem i {
-                width: 16px;
+            .offcanvas-body .nav-link.active {
+                background-color: #f1faff;
+                color: #009ef7;
+                font-weight: 600;
+                border-left: 3px solid #009ef7;
+                padding-left: calc(1rem - 3px);
+            }
+
+            .offcanvas-body .nav-link[data-bs-toggle="collapse"] {
+                justify-content: space-between;
+                cursor: pointer;
+            }
+
+            .offcanvas-body .collapse .nav-link {
+                padding-left: 2rem;
+                font-size: 0.8125rem;
+            }
+
+            .offcanvas-body .collapse .nav-link:hover {
+                padding-left: 2.25rem;
+            }
+
+            .offcanvas-body .navbar-nav {
+                gap: 0;
+            }
+
+            .offcanvas-body .navbar-nav .nav-item {
+                width: 100%;
+            }
+
+            /* Responsive Breakpoints */
+            @media (min-width: 992px) {
+                .navbar-expand-lg .navbar-collapse {
+                    display: flex !important;
+                    flex-basis: auto;
+                }
+
+                .navbar-expand-lg .navbar-toggler {
+                    display: none !important;
+                }
+
+                .navbar-toggler {
+                    display: none !important;
+                }
+            }
+
+            @media (max-width: 991.98px) {
+                .navbar .nav-link {
+                    padding: 0.75rem 1rem;
+                    font-size: 0.8rem;
+                }
+
+                .navbar .nav-link span {
+                    display: none;
+                }
+
+                .d-none.d-xl-block {
+                    display: none !important;
+                }
+
+                .d-none.d-xxl-block {
+                    display: none !important;
+                }
+            }
+
+            @media (max-width: 767.98px) {
+                .offcanvas {
+                    width: 250px !important;
+                }
+
+                .container-fluid {
+                    padding-right: 0;
+                    padding-left: 0;
+                }
+            }
+
+            /* Mobile optimized */
+            @media (max-width: 576px) {
+                .offcanvas {
+                    width: 100% !important;
+                }
+
+                .navbar {
+                    padding: 0.75rem 0;
+                }
+            }
+
+            /* Animation for collapse */
+            .collapse {
+                transition: all 0.15s ease;
+            }
+
+            /* Icons styling */
+            .navbar i,
+            .offcanvas-body i {
+                width: 18px;
                 text-align: center;
             }
-
-            /* Responsive Behavior */
-            @media (max-width: 1400px) {
-                .nav-collapsible:nth-last-child(n+3) {
-                    display: none;
-                }
-
-                .more-dropdown {
-                    display: block !important;
-                }
-            }
-
-            @media (max-width: 1200px) {
-                .nav-collapsible:nth-last-child(n+2) {
-                    display: none;
-                }
-            }
-
-            @media (max-width: 992px) {
-                .nav-collapsible {
-                    display: none;
-                }
-            }
-
+        
             /* Enhanced Gradient Cards */
             .gradient-card {
                 background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));

@@ -119,4 +119,3 @@ class CreateTransactionMultiple extends Component
         ])->extends($layout)->section('content');
     }
 }
-

@@ -8,9 +8,9 @@ class AssetTransactions extends Component
 {
     public function render()
     {
-          $viewpath = config('accountflow.view_path');
+          $viewpath = config('accountflow.view_path').'livewire.assets.asset-transactions';
         $layout = config('accountflow.layout');
-        return view($viewpath . 'livewire.assets.asset-transactions')->extends($layout )->section('content');
+        $title = 'Asset Transactions | '.config('accountflow.business_name');
+        return view($viewpath)->extends($layout )->section('content')->title($title);
     }
 }
-

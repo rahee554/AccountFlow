@@ -25,4 +25,3 @@ class PurchaseTransaction extends Model
     }
     // Add other model-specific code as needed
 }
-

@@ -14,4 +14,3 @@ class PlannedPaymentsList extends Component
         return view($viewpath.'livewire.planned-payments.planned-payments-list')->extends($layout)->section('content');
     }
 }
-
