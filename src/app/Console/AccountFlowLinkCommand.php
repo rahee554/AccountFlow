@@ -42,6 +42,12 @@ class AccountFlowLinkCommand extends Command
                 'type' => 'directory',
                 'merge' => true,  // Merge files (copy contents) instead of creating a symlink to a subfolder
             ],
+            'seeders' => [
+                'source' => $packagePath . '/database/seeders',
+                'target' => $projectRoot . '/database/seeders',
+                'type' => 'files',  // Copy only files, not the directory itself
+                'copy_files_only' => true,
+            ],
             'views' => [
                 'source' => $packagePath . '/resources/views/vendor/artflow-studio/accountflow',
                 'target' => $projectRoot . '/resources/views/vendor/artflow-studio/accountflow',
@@ -57,7 +63,7 @@ class AccountFlowLinkCommand extends Command
         $force = $this->option('force');
 
         foreach ($links as $name => $link) {
-            $this->createLink($link['source'], $link['target'], $force, $link['merge'] ?? false);
+            $this->createLink($link['source'], $link['target'], $force, $link['merge'] ?? false, $link['copy_files_only'] ?? false);
         }
 
         $this->info('✅ AccountFlow package files linked successfully!');
@@ -72,8 +78,9 @@ class AccountFlowLinkCommand extends Command
      * @param string $target
      * @param bool $force
      * @param bool $merge  If true and target exists, copy contents into target instead of linking
+     * @param bool $copyFilesOnly  If true, copy only files (not directory itself) to avoid nested links
      */
-    private function createLink($source, $target, $force = false, $merge = false)
+    private function createLink($source, $target, $force = false, $merge = false, $copyFilesOnly = false)
     {
         // Normalize paths
         $source = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $source);
@@ -81,6 +88,32 @@ class AccountFlowLinkCommand extends Command
 
         if (!File::exists($source)) {
             $this->error("Source path not found: {$source}");
+            return;
+        }
+
+        // If copyFilesOnly is requested, copy only individual files to the target directory
+        // This prevents nested links and ensures files go into existing project folder
+        if ($copyFilesOnly && is_dir($source)) {
+            // Ensure target directory exists
+            if (!File::exists($target)) {
+                File::makeDirectory($target, 0755, true);
+            }
+
+            $sourceFiles = File::files($source);
+            foreach ($sourceFiles as $file) {
+                $fileName = $file->getFilename();
+                $destPath = $target . DIRECTORY_SEPARATOR . $fileName;
+
+                // Skip if file already exists, unless force is enabled
+                if (File::exists($destPath) && !$force) {
+                    $this->warn("File already exists: {$destPath}");
+                    continue;
+                }
+
+                File::copy($file->getPathname(), $destPath);
+            }
+
+            $this->line("✓ Copied {" . count($sourceFiles) . "} file(s): {$source} → {$target}");
             return;
         }
 

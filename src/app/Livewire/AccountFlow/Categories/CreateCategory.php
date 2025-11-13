@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Accountflow\Categories;
+namespace App\Livewire\AccountFlow\Categories;
 
 use App\Models\AccountFlow\Category;
 use Illuminate\Support\Facades\Auth;

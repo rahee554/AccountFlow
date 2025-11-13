@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Accountflow\Transfers;
+namespace App\Livewire\AccountFlow\Transfers;
 
 use App\Http\Controllers\AccountFlow\AccountsController;
 use App\Models\AccountFlow\Account;

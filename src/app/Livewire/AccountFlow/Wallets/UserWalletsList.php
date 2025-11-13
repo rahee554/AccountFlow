@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Accountflow\Wallets;
+namespace App\Livewire\AccountFlow\Wallets;
 
 use Livewire\Component;
 

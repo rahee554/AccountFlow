@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Accountflow\Assets;
+namespace App\Livewire\AccountFlow\Assets;
 
 use App\Models\AccountFlow\Asset;
 use App\Models\AccountFlow\Category;

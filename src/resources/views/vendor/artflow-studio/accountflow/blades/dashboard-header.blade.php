@@ -1,3 +1,17 @@
+@php
+    use Illuminate\Support\Str;
+
+    $route = request()->route();
+    $prefix = $route ? $route->getPrefix() : null;
+    $path = '/'.ltrim(request()->path(), '/');
+
+    // Show when route prefix or URL path contains "accounts"
+    $isActualRoute = ($prefix && Str::contains($prefix, 'accounts')) 
+                     || Str::contains($path, '/accounts') 
+                     || Str::startsWith($path, 'accounts');
+@endphp
+
+@if($isActualRoute)
 <!--begin::Enhanced Accounts Navigation-->
 <div class="accounts-nav-wrapper">
     <!-- Desktop Navigation with Responsive Offcanvas -->
@@ -922,3 +936,6 @@
     @endpush
 </div>
 <!--end::Enhanced Accounts Navigation-->
+@endif
+
+

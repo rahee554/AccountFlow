@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Accountflow\AuditTrail;
+namespace App\Livewire\AccountFlow\AuditTrail;
 
 use Livewire\Component;
 

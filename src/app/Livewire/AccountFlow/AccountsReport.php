@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Accountflow;
+namespace App\Livewire\AccountFlow;
 
 use App\Models\AccountFlow\Category;
 use Carbon\Carbon;

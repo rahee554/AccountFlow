@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Accountflow\PaymentMethod;
+namespace App\Livewire\AccountFlow\PaymentMethod;
 
 use Livewire\Component;
 

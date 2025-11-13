@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Accountflow\PlannedPayments;
+namespace App\Livewire\AccountFlow\PlannedPayments;
 
 use App\Models\Accountflow\Account;
 use App\Models\Accountflow\Category;

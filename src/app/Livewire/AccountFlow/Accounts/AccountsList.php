@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Accountflow\Accounts;
+namespace App\Livewire\AccountFlow\Accounts;
 
 use Livewire\Component;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Accountflow\Equity;
+namespace App\Livewire\AccountFlow\Equity;
 
 use Livewire\Component;
 

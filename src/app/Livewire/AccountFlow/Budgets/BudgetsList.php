@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Accountflow\Budgets;
+namespace App\Livewire\AccountFlow\Budgets;
 
 use App\Models\AccountFlow\Budget;
 use Illuminate\View\View;

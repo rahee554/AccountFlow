@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Accountflow\Reports;
+namespace App\Livewire\AccountFlow\Reports;
 
 use App\Models\AccountFlow\Category;
 use App\Models\AccountFlow\Transaction;
