@@ -10,7 +10,12 @@ class AuditTrail extends Model
     protected $table = 'ac_audit_trail';
 
     protected $fillable = [
-        'model_type', 'model_id', 'action', 'before', 'after', 'user_id', 'created_at',
+        'model_type', 'model_id', 'action', 'before', 'after', 'user_id',
+    ];
+
+    protected $casts = [
+        'before' => 'array',
+        'after' => 'array',
     ];
 
     public function user()

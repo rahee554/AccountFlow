@@ -2,11 +2,11 @@
 
 namespace App\Livewire\AccountFlow\Transactions;
 
-use App\Http\Controllers\AccountFlow\AccountsController;
 use App\Models\AccountFlow\Account;
 use App\Models\AccountFlow\Category;
 use App\Models\AccountFlow\PaymentMethod;
 use App\Models\AccountFlow\Transaction;
+use ArtflowStudio\AccountFlow\Facades\Accountflow;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -87,10 +87,10 @@ class CreateTransactionMultiple extends Component
                 // Gracefully update account balance based on transaction type
                 if ($transaction->type == 1) {
                     // Income: add to account
-                    AccountsController::addToAccount($transaction->account_id, $transaction->amount);
+                    Accountflow::accounts()->addToBalance($transaction->account_id, $transaction->amount);
                 } elseif ($transaction->type == 2) {
                     // Expense: subtract from account
-                    AccountsController::subtractFromAccount($transaction->account_id, $transaction->amount);
+                    Accountflow::accounts()->subtractFromBalance($transaction->account_id, $transaction->amount);
                 }
             }
         });

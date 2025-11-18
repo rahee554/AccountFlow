@@ -13,6 +13,11 @@ class AccountFlowServiceProvider extends ServiceProvider
     public function boot()
     {
         // ============================================
+        // Register Middleware Alias
+        // ============================================
+        $this->app['router']->aliasMiddleware('accountflow.feature', \ArtflowStudio\AccountFlow\App\Http\Middleware\CheckAccountflowFeature::class);
+
+        // ============================================
         // Publish Configuration (only config is published)
         // ============================================
         $this->publishes([

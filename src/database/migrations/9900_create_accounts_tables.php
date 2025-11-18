@@ -288,7 +288,7 @@ return new class extends Migration
             $table->json('before')->nullable();
             $table->json('after')->nullable();
             $table->foreignId('user_id')->nullable()->constrained('users');
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamps(0);
         });
 
         Schema::create('ac_trx_templates', function (Blueprint $table) {

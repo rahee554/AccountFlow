@@ -2,9 +2,9 @@
 
 namespace App\Livewire\AccountFlow\Transfers;
 
-use App\Http\Controllers\AccountFlow\AccountsController;
 use App\Models\AccountFlow\Account;
 use App\Models\AccountFlow\Transfer;
+use ArtflowStudio\AccountFlow\Facades\Accountflow;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -133,7 +133,7 @@ class CreateTransfer extends Component
             }
 
             // Update account balances
-            AccountsController::updateAccountBalance();
+            Accountflow::accounts()->updateAllAccountBalances();
 
             if ($this->isEdit) {
                 return redirect()->route('accountflow::transfers');

@@ -31,6 +31,6 @@ class PaymentMethod extends Model
 
     public function account(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(\App\Models\Account::class);
+        return $this->belongsTo(Account::class);
     }
 }

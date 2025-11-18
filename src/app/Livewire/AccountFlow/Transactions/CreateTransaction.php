@@ -2,12 +2,12 @@
 
 namespace App\Livewire\AccountFlow\Transactions;
 
-use App\Http\Controllers\AccountFlow\AccountsController;
 use App\Models\AccountFlow\Account;
 use App\Models\AccountFlow\Category;
 use App\Models\AccountFlow\PaymentMethod;
 use App\Models\AccountFlow\Setting;
 use App\Models\AccountFlow\Transaction;
+use ArtflowStudio\AccountFlow\Facades\Accountflow;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -143,19 +143,19 @@ class CreateTransaction extends Component
                     // Revert previous transaction effect
                     if ($transaction->type == 1) {
                         // Previous was income, subtract from account
-                        AccountsController::subtractFromAccount($transaction->account_id, $transaction->amount);
+                        Accountflow::accounts()->subtractFromBalance($transaction->account_id, $transaction->amount);
                     } else {
                         // Previous was expense, add back to account
-                        AccountsController::addToAccount($transaction->account_id, $transaction->amount);
+                        Accountflow::accounts()->addToBalance($transaction->account_id, $transaction->amount);
                     }
 
                     // Apply new transaction effect
                     if ($this->type == 1) {
                         // New is income, add to account
-                        AccountsController::addToAccount($this->account_id, $this->amount);
+                        Accountflow::accounts()->addToBalance($this->account_id, $this->amount);
                     } else {
                         // New is expense, subtract from account
-                        AccountsController::subtractFromAccount($this->account_id, $this->amount);
+                        Accountflow::accounts()->subtractFromBalance($this->account_id, $this->amount);
                     }
                 }
 
@@ -186,9 +186,9 @@ class CreateTransaction extends Component
 
                 // Apply effect based on type
                 if ($this->type == 1) {
-                    AccountsController::addToAccount($transaction->account_id, $transaction->amount);
+                    Accountflow::accounts()->addToBalance($transaction->account_id, $transaction->amount);
                 } else {
-                    AccountsController::subtractFromAccount($transaction->account_id, $transaction->amount);
+                    Accountflow::accounts()->subtractFromBalance($transaction->account_id, $transaction->amount);
                 }
 
                 session()->flash('success', 'Transaction created successfully!');
