@@ -5,7 +5,10 @@
     "psr-4": {
       "ArtflowStudio\\AccountFlow\\": "src/",
       "ArtflowStudio\\AccountFlow\\App\\": "src/app/"
-    }
+    },
+    "files": [
+      "src/app/Helpers/AccountFlowHelper.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {

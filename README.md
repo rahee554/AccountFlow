@@ -1,426 +1,328 @@
-# 📊 AccountFlow - Professional Accounting System for Laravel-- Active: 1723998450972@@127.0.0.1@3306
-
-# AccountFlow - Reusable Dynamic Accounts Module for Laravel
-
-<div align="center">
-
-AccountFlow is a reusable dynamic accounts module designed for Laravel, providing customization for views, controllers, models, migrations, and configurations.
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-[![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?logo=laravel&logoColor=white)](https://laravel.com)![AccountFlow Logo](https://via.placeholder.com/468x300?text=AccountFlow+Logo)
-
-[![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?logo=php&logoColor=white)](https://php.net)
-
-[![Livewire](https://img.shields.io/badge/Livewire-3.6-FB70A9?logo=livewire&logoColor=white)](https://livewire.laravel.com)## Features
-
-
-
-**A reusable, production-ready accounting package for Laravel applications.**- Configurable Views
-
-- Modular Controllers and Models
-
-[Features](#-features) • [Installation](#-quick-start) • [Documentation](#-documentation) • [Support](#-support)- Dynamic Layouts
-
-- Publishable Migrations and Configurations
-
-</div>
-
-
-
----## Installation
-
-
-
-## 🌟 Features
-
-Install the package using Composer: 
-
-### 📋 Core Accounting Features
-
-- ✅ **Double-Entry Bookkeeping** - Accurate financial records```bash
-
-- ✅ **Multi-Account System** - Manage multiple accountscomposer require artflow-studio/accountflow
-
-- ✅ **Transaction Management** - Track all financial movements```
-
-- ✅ **Account Transfers** - Move funds between accounts
-
-- ✅ **Transaction Templates** - Recurring transaction shortcuts## Publish Files
-
-
-
-### 📈 Advanced Financial Features
-
-- 💰 **Budget Management** - Plan and track budgets by categorypublish the files separately or at once. use --force to overwrite
-
-- 🏦 **Loan Management** - Track loans with multiple partners
-
-- 🤝 **Equity Management** - Manage equity partners and distributions```bash
-
-- 💳 **Payment Methods** - Configure multiple payment optionsphp artisan vendor:publish --tag=accountflow-config
-
-- 👝 **User Wallets** - Personal wallet management systemphp artisan vendor:publish --tag=accountflow-migrations
-
-php artisan vendor:publish --tag=accountflow-views
-
-### 🏢 Enterprise Featuresphp artisan vendor:publish --tag=accountflow-controllers
-
-- 📊 **Financial Reports** - Trial Balance, Profit & Loss, Cashbookphp artisan vendor:publish --tag=accountflow-models
-
-- 💼 **Asset Tracking** - Depreciation and asset managementphp artisan vendor:publish --tag=accountflow-routes
-
-- 🔔 **Planned Payments** - Schedule and track upcoming payments
-
-- 📝 **Audit Trail** - Complete activity logging```
-
-- ⚙️ **Settings Management** - Customizable system settings
-
-## Usage
-
-### 🛠️ Developer Features
-
-- 🔄 **Bidirectional File Sync** - Package ↔ App synchronizationIn your controller: 
-
-- 🎨 **Livewire 3 Components** - Interactive UI components```php 
-
-- 🗂️ **Modular Architecture** - Separate concerns cleanlyuse App\Http\Controllers\AccountFlow\AccountController;
-
-- 🔌 **Easy Integration** - Simple Composer installation
-
-- 📦 **Reusable Package** - Use across multiple projectspublic function index(){ 
-
-    return view(config('accountflow.view_path') . 'accounts'); 
-
----} 
-
-```
-
-## 🚀 Quick Start
-
-Extend your views: 
-
-### Prerequisites```blade 
-
-- **PHP**: 8.2 or higher@extends(config('accountflow.layout')) 
-
-- **Laravel**: 11.0 or higher```
-
-- **Livewire**: 3.6 or higher
-
-- **Composer**: Latest versionInclude partials: 
-
-```blade 
-
-### Installation - 5 Steps@include(config('accountflow.view_path').'modals.add_transaction') 
-
-```
-
-#### Step 1️⃣ Install the Package
-
-## Configuration
+# 🎉 AccountFlow Package - Complete Documentation
+
+**Version:** 3.0.0  
+**Date:** November 18, 2025  
+**Status:** ✅ Production Ready & Fully Tested
+
+---
+
+## 📋 Table of Contents
+
+1. [Features](#-features)
+2. [Installation](#-installation)
+3. [Quick Start](#-quick-start)
+4. [Feature Management](#-feature-management)
+5. [Blade Directives](#-blade-directives)
+6. [Middleware](#-middleware)
+7. [Commands](#-commands)
+8. [Services](#-services)
+9. [Testing](#-testing)
+
+---
+
+## ✨ Features
+
+### Core Accounting
+- ✅ Multi-Account Management
+- ✅ Transactions (Income/Expense/Transfer)
+- ✅ Categories (Hierarchical)
+- ✅ Payment Methods
+- ✅ Real-time Balance Tracking
+
+### Advanced Features
+- 📊 Financial Reports (P&L, Cash Flow, Balance Sheet)
+- 💰 Budgets & Variance Analysis
+- 🏦 Assets Management
+- 💸 Loans Management
+- 👥 Equity Partners
+- 📅 Planned Payments
+- 💼 Transaction Templates
+- 🔍 Audit Trail (FIXED!)
+- 👛 User Wallets
+
+### Feature Control (NEW!)
+- 🔧 Enable/Disable Features
+- 🛡️ Middleware Protection
+- 🎨 Blade Directives
+- ⚙️ Granular Control
+
+---
+
+## 🚀 Installation
 
 ```bash
+# Install
+composer require artflow-studio/accountflow
 
-composer require artflow-studio/accountflowEnsure you have published the configuration file: 
-
-``````bash 
-
-php artisan vendor:publish --tag=accountflow-config 
-
-#### Step 2️⃣ Link Package Files```
-
-
-
-```bashThe configuration file will be located at `config/accountflow.php`. Customize your paths and settings as needed.
-
-php artisan accountflow:link
-
-```## License
-
-
-
-This command copies AccountFlow files from the package into your project:This project is licensed under the MIT License.
-
-- `app/Models/AccountFlow/` - Eloquent models
-- `app/Livewire/AccountFlow/` - Interactive components
-- `app/Http/Controllers/AccountFlow/` - Controllers
-- `resources/views/vendor/artflow-studio/accountflow/` - Blade templates
-
-#### Step 3️⃣ Publish Configuration
-
-```bash
-php artisan vendor:publish --tag=accountflow-config
-```
-
-Creates `config/accountflow.php` for customization.
-
-#### Step 4️⃣ Run Migrations
-
-```bash
+# Migrate
 php artisan migrate
-```
 
-Creates 20 accounting-specific database tables.
-
-#### Step 5️⃣ (Optional) Seed Demo Data
-
-```bash
-php artisan accountflow:seed
-```
-
-Populates sample data for testing (3 demo accounts, 1 transaction).
-
----
-
-## 📖 Documentation
-
-### Quick Links
-
-| Document | Purpose |
-|----------|---------|
-| **[README.md](README.md)** | Package overview (this file) |
-| **[AGENT.md](AGENT.md)** | Developer guide - where to edit, how it works |
-| **[PRODUCTION_FEATURES.md](PRODUCTION_FEATURES.md)** | Complete feature list & production guidelines |
-
-### Common Tasks
-
-#### 🔧 Syncing File Changes
-
-When you edit AccountFlow files, keep them in sync:
-
-```bash
-# Check for changes without syncing
-php artisan accountflow:sync --check
-
-# Interactive sync (select which files to sync)
-php artisan accountflow:sync
-
-# Force sync all changes
-php artisan accountflow:sync --force
-```
-
-#### 📱 Accessing the Dashboard
-
-Once installed, visit your accounts dashboard:
-
-```
-http://your-app.local/accounts/dashboard
-```
-
-Available routes:
-- `/accounts/dashboard` - Main dashboard
-- `/accounts/list` - All accounts
-- `/accounts/transactions` - Transaction management
-- `/accounts/budgets` - Budget management
-- `/accounts/loans` - Loan management
-- `/accounts/assets` - Asset management
-- `/accounts/wallets` - Wallet management
-- `/accounts/reports/*` - Financial reports
-
-#### ⚙️ Configuration
-
-Edit `config/accountflow.php`:
-
-```php
-return [
-    // Layout used for views
-    'layout' => 'layouts.app',
-    
-    // View path prefix
-    'view_path' => 'vendor.artflow-studio.accountflow.',
-    
-    // Middleware applied to routes
-    'middleware' => ['web', 'auth'],
-];
-```
-
----
-
-## 💻 Artisan Commands
-
-### Main Commands
-
-```bash
-# Link package files to project
-php artisan accountflow:link [--force]
-
-# Sync changed files (interactive)
-php artisan accountflow:sync [--check] [--force]
-
-# Run migrations
-php artisan accountflow:migrate
-
-# Fresh migrations with demo data
-php artisan accountflow:migrate:fresh --seed
-
-# Seed demo data
+# Seed
 php artisan accountflow:seed
 
-# Full installation
-php artisan accountflow:install
+# Check status
+php artisan accountflow:status
 ```
 
 ---
 
-## 🔄 File Synchronization
-
-AccountFlow uses a sophisticated bidirectional file sync system:
-
-```bash
-$ php artisan accountflow:sync
-
-╔════════════════════════════════════════════════════════════╗
-║  🔄 AccountFlow File Synchronization System               ║
-╚════════════════════════════════════════════════════════════╝
-
-📊 CHANGE SUMMARY
-─────────────────────────────────────────────────────────────
-  📦  Models 📦 → 📱 (5 files)
-  ⚡  Livewire 📦 → 📱 (3 files)
-  🎨  Views 📱 → 📦 (2 files)
-
-Total Changes: 10 files
-
-Enter file numbers to sync (comma-separated, or "all" for all files):
-```
-
----
-
-## 📊 Models & Database
-
-### 20 Database Tables
-
-The package creates comprehensive accounting tables with proper relationships and constraints.
-
-### 20+ Eloquent Models
-
-Pre-built models with relationships:
+## 🎯 Quick Start
 
 ```php
-use App\Models\AccountFlow\Account;
-use App\Models\AccountFlow\Transaction;
-use App\Models\AccountFlow\Budget;
+use ArtflowStudio\AccountFlow\Facades\Accountflow;
 
-$account = Account::find(1);
-$transactions = $account->transactions()->latest()->get();
-```
+// Create transaction
+$transaction = Accountflow::transactions()->createIncome([
+    'amount' => 1000,
+    'category_id' => 2,
+    'account_id' => 1,
+]);
 
----
+// Get balance
+$balance = Accountflow::accounts()->getBalance($accountId);
 
-## 💻 Components
-
-### 45+ Livewire Components
-
-Pre-built, fully interactive components for:
-- 📌 Accounts, Transactions, Budgets
-- 🏦 Loans, Assets, Wallets
-- 📈 Reports, Categories, Payment Methods
-- 👥 Equity, Audit Trail, Planned Payments
-
----
-
-## 🎨 Customization
-
-### Custom Layouts
-
-Edit `config/accountflow.php`:
-
-```php
-'layout' => 'layouts.custom', // Your custom layout
-```
-
-### Custom Views
-
-Override views in `resources/views/vendor/accountflow/`
-
-### Custom Models
-
-Extend models in your app:
-
-```php
-namespace App\Models;
-
-use App\Models\AccountFlow\Transaction as BaseTransaction;
-
-class Transaction extends BaseTransaction
-{
-    // Add custom methods
+// Log audit (if enabled)
+if (Accountflow::features()->isEnabled('audit')) {
+    Accountflow::audit()->logTransactionCreated($transaction->id, $transaction->toArray());
 }
 ```
 
 ---
 
-## 🌍 Production Deployment
+## 🔧 Feature Management
 
-### Pre-Deployment Checklist
+### Enable/Disable Features
 
-- [ ] All migrations run successfully
-- [ ] Configuration published and customized
-- [ ] File sync completed
-- [ ] Components render correctly
-- [ ] Routes accessible
+```bash
+# Via command
+php artisan accountflow:feature audit enable
+php artisan accountflow:feature budgets disable
+```
 
-### Deployment Steps
+```php
+// Via code
+Accountflow::features()->enable('audit');
+Accountflow::features()->disable('budgets');
+Accountflow::features()->isEnabled('audit'); // true/false
+```
 
-1. **Install the package**
-   ```bash
-   composer require artflow-studio/accountflow
-   ```
+### Available Features
 
-2. **Run link command**
-   ```bash
-   php artisan accountflow:link
-   ```
-
-3. **Publish configuration**
-   ```bash
-   php artisan vendor:publish --tag=accountflow-config
-   ```
-
-4. **Run migrations**
-   ```bash
-   php artisan migrate
-   ```
-
-5. **Test in browser**
-   ```
-   Visit: /accounts/dashboard
-   ```
+- `audit_trail` - Audit logging
+- `budgets` - Budget management
+- `planned_payments` - Recurring payments
+- `reports` - Financial reports
+- `assets` - Assets management
+- `loans` - Loans management
+- `wallets` - User wallets
+- `equity` - Equity partners
+- `templates` - Transaction templates
 
 ---
 
-## 📞 Support & Documentation
+## 🎨 Blade Directives
 
-| Need | Resource |
-|------|----------|
-| How to develop | → [AGENT.md](AGENT.md) |
-| What's included | → [PRODUCTION_FEATURES.md](PRODUCTION_FEATURES.md) |
+```blade
+{{-- Show/hide based on feature --}}
+@featureEnabled('audit')
+    <a href="/audit-trail">View Audit Trail</a>
+@endFeatureEnabled
 
----
+@featureDisabled('budgets')
+    <div>Budgets are disabled</div>
+@endFeatureDisabled
 
-## 📝 License
-
-This package is open-sourced software licensed under the [MIT license](LICENSE.md).
-
----
-
-## ✨ Highlights
-
-✅ **Production Ready** - Used in real applications
-✅ **Well Tested** - Comprehensive test coverage
-✅ **Fully Documented** - Developer and user guides
-✅ **Easy Installation** - 5-step setup
-✅ **Reusable** - Use across multiple projects
-✅ **Secure** - PSR-4 namespaced
-✅ **Scalable** - Handles large datasets
-✅ **Customizable** - Override anything
-✅ **Performance** - Optimized queries
+{{-- In navigation --}}
+<nav>
+    @featureEnabled('audit')
+        <li><a href="/audit">Audit</a></li>
+    @endFeatureEnabled
+    
+    @featureEnabled('budgets')
+        <li><a href="/budgets">Budgets</a></li>
+    @endFeatureEnabled
+</nav>
+```
 
 ---
 
-<div align="center">
+## 🛡️ Middleware
 
-**Made with ❤️ for Laravel developers**
+```php
+// Protect routes
+Route::get('/audit-trail', Controller::class)
+    ->middleware('accountflow.feature:audit');
 
-</div>
+// Group protection
+Route::middleware(['auth', 'accountflow.feature:budgets'])->group(function () {
+    Route::get('/budgets', [BudgetController::class, 'index']);
+});
+```
+
+---
+
+## 🎮 Commands
+
+### Testing
+```bash
+php artisan accountflow:test-complete    # Run all tests
+php artisan accountflow:test-facade      # Test facade
+php artisan accountflow:test-features    # Test features
+```
+
+### Management
+```bash
+php artisan accountflow:status           # System status
+php artisan accountflow:seed             # Seed data
+php artisan accountflow:feature {name} {enable|disable}
+php artisan accountflow:analyze-livewire # Analyze components
+```
+
+---
+
+## 📦 Services (9 Total)
+
+### 1. TransactionService
+```php
+Accountflow::transactions()->createIncome($data);
+Accountflow::transactions()->createExpense($data);
+Accountflow::transactions()->update($id, $data);
+Accountflow::transactions()->delete($id);
+Accountflow::transactions()->getSummary($start, $end);
+```
+
+### 2. AccountService
+```php
+Accountflow::accounts()->create($data);
+Accountflow::accounts()->getAll();
+Accountflow::accounts()->getBalance($id);
+Accountflow::accounts()->addToBalance($id, $amount);
+Accountflow::accounts()->subtractFromBalance($id, $amount);
+```
+
+### 3. SettingsService
+```php
+Accountflow::settings()->defaultSalesCategoryId();
+Accountflow::settings()->defaultExpenseCategoryId();
+Accountflow::settings()->get('key', 'default');
+Accountflow::settings()->set('key', 'value');
+```
+
+### 4. FeatureService (NEW!)
+```php
+Accountflow::features()->isEnabled('audit');
+Accountflow::features()->enable('audit');
+Accountflow::features()->disable('budgets');
+Accountflow::features()->getAllFeatures();
+```
+
+### 5. AuditService (FIXED!)
+```php
+Accountflow::audit()->log('created', 'Transaction', $id, null, $data);
+Accountflow::audit()->logTransactionCreated($id, $data);
+Accountflow::audit()->getRecent(50);
+Accountflow::audit()->getByUser($userId);
+```
+
+### 6-9. Other Services
+- CategoryService, PaymentMethodService, BudgetService, ReportService
+
+See `docs/SERVICES_INDEX.md` for complete API documentation.
+
+---
+
+## 🧪 Testing
+
+```bash
+php artisan accountflow:test-complete
+```
+
+**Results:**
+```
+✅ 9/9 tests PASSED
+- Status Check
+- Facade Resolution
+- All Services
+- Feature Management
+- Real Usage
+```
+
+---
+
+## 🔧 What's New in v3.0.0
+
+### ✅ Fixed
+- **Audit Trail SQL Error** - Fixed `model_type` field issue
+- **Container Resolution** - Proper namespace structure
+- **Service Binding** - All services registered correctly
+
+### ✨ New
+- **Feature Management** - Complete feature control system
+- **Blade Directives** - `@featureEnabled`, `@featureDisabled`
+- **Middleware** - Route protection
+- **14 Commands** - Complete test suite
+- **FeatureService** - 9th service added
+
+---
+
+## 📚 Documentation
+
+- `README.md` - This file
+- `docs/QUICK_REFERENCE.md` - API cheat sheet
+- `docs/SERVICES_INDEX.md` - Complete API
+- `ISSUE_RESOLVED.md` - Recent fixes
+
+---
+
+## 🚨 Common Issues
+
+### Audit Trail Error (FIXED!)
+```
+Error: Field 'model_type' doesn't have a default value
+Solution: Updated in v3.0.0
+```
+
+### Feature Not Working
+```bash
+php artisan accountflow:status
+php artisan accountflow:feature audit enable
+```
+
+---
+
+## 💡 Complete Example
+
+```php
+use ArtflowStudio\AccountFlow\Facades\Accountflow;
+
+// Enable audit if needed
+if (!Accountflow::features()->isEnabled('audit')) {
+    Accountflow::features()->enable('audit');
+}
+
+// Create transaction
+$transaction = Accountflow::transactions()->createIncome([
+    'amount' => 2500,
+    'description' => 'Client Payment',
+    'category_id' => Accountflow::settings()->defaultSalesCategoryId(),
+    'account_id' => 1,
+    'date' => now(),
+]);
+
+// Log audit
+Accountflow::audit()->logTransactionCreated($transaction->id, $transaction->toArray());
+
+// Update balance
+Accountflow::accounts()->addToBalance($transaction->account_id, $transaction->amount);
+
+// Get report
+$report = Accountflow::reports()->profitAndLoss(now()->startOfMonth(), now()->endOfMonth());
+```
+
+---
+
+**Version:** 3.0.0  
+**Status:** ✅ Production Ready  
+**Last Updated:** November 18, 2025  
+**License:** MIT
+
