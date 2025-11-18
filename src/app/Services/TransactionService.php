@@ -61,6 +61,15 @@ class TransactionService
             // Create the transaction
             $transaction = Transaction::create($transactionData);
 
+            // Update account balance based on transaction type
+            // Type 1 = Income (add to balance)
+            // Type 2 = Expense (subtract from balance)
+            if ($normalizedType == 1) {
+                AccountService::addToBalance($transactionData['account_id'], $transactionData['amount']);
+            } elseif ($normalizedType == 2) {
+                AccountService::subtractFromBalance($transactionData['account_id'], $transactionData['amount']);
+            }
+
             return $transaction;
         });
     }
@@ -138,6 +147,11 @@ class TransactionService
     public static function update(Transaction $transaction, array $data): Transaction
     {
         return DB::transaction(function () use ($transaction, $data) {
+            // Store original values for balance reversal
+            $originalAmount = $transaction->amount;
+            $originalType = $transaction->type;
+            $originalAccountId = $transaction->account_id;
+
             // Prepare update data
             $updateData = [];
 
@@ -182,6 +196,33 @@ class TransactionService
             // Validate before updating
             if (!empty($updateData)) {
                 self::validateTransactionData(array_merge($transaction->toArray(), $updateData));
+
+                // Check if balance-affecting fields changed
+                $amountChanged = isset($updateData['amount']) && $updateData['amount'] != $originalAmount;
+                $typeChanged = isset($updateData['type']) && $updateData['type'] != $originalType;
+                $accountChanged = isset($updateData['account_id']) && $updateData['account_id'] != $originalAccountId;
+
+                // If balance-affecting fields changed, reverse the old impact
+                if ($amountChanged || $typeChanged || $accountChanged) {
+                    // Reverse the original transaction impact on the original account
+                    if ($originalType == 1) {
+                        AccountService::subtractFromBalance($originalAccountId, $originalAmount);
+                    } elseif ($originalType == 2) {
+                        AccountService::addToBalance($originalAccountId, $originalAmount);
+                    }
+
+                    // Apply the new transaction impact on the new account
+                    $newType = $updateData['type'] ?? $originalType;
+                    $newAmount = $updateData['amount'] ?? $originalAmount;
+                    $newAccountId = $updateData['account_id'] ?? $originalAccountId;
+
+                    if ($newType == 1) {
+                        AccountService::addToBalance($newAccountId, $newAmount);
+                    } elseif ($newType == 2) {
+                        AccountService::subtractFromBalance($newAccountId, $newAmount);
+                    }
+                }
+
                 $transaction->update($updateData);
             }
 
@@ -191,6 +232,7 @@ class TransactionService
 
     /**
      * Delete a transaction
+     * Reverses the account balance impact when deleted
      *
      * @param Transaction $transaction
      *
@@ -199,12 +241,23 @@ class TransactionService
     public static function delete(Transaction $transaction): bool
     {
         return DB::transaction(function () use ($transaction) {
+            // Reverse the transaction impact on the account before deletion
+            // This ensures account balance stays accurate
+            if ($transaction->type == 1) {
+                // Income: subtract from balance
+                AccountService::subtractFromBalance($transaction->account_id, $transaction->amount);
+            } elseif ($transaction->type == 2) {
+                // Expense: add back to balance
+                AccountService::addToBalance($transaction->account_id, $transaction->amount);
+            }
+
             return $transaction->delete();
         });
     }
 
     /**
      * Reverse/void a transaction (create a reversing entry)
+     * Creates a reversing transaction with negative amount to offset the original
      *
      * @param Transaction $transaction
      * @param string|null $reason
@@ -215,9 +268,10 @@ class TransactionService
     {
         return DB::transaction(function () use ($transaction, $reason) {
             // Create reversing transaction with negative amount
+            // This will automatically apply the opposite balance impact through the create method
             $reversingData = [
-                'amount' => -$transaction->amount,
-                'type' => $transaction->type,
+                'amount' => abs($transaction->amount), // Use positive amount
+                'type' => $transaction->type == 1 ? 2 : 1, // Reverse the type (income becomes expense, vice versa)
                 'payment_method' => $transaction->payment_method,
                 'account_id' => $transaction->account_id,
                 'category_id' => $transaction->category_id,

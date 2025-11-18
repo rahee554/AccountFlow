@@ -22,8 +22,20 @@ class Settings extends Component
     public $paymentMethods = [];
     public $transactionTypes = [];
 
+    public $isAdmin = false;
+
+    public $isAdminManagementEnabled = true;
+
     public function mount()
     {
+        // Check if admin management is enabled
+        $adminConfig = config('accountflow.admin_management', []);
+        $this->isAdminManagementEnabled = $adminConfig['enabled'] ?? true;
+
+        // Check if current user is admin
+        $user = auth()->user();
+        $this->isAdmin = $this->checkIsAdmin($user, $adminConfig);
+
         // Load all settings
         $allSettings = Setting::all();
 
@@ -91,6 +103,12 @@ class Settings extends Component
 
     public function toggleFeature($key)
     {
+        // Check if user is admin before allowing toggle
+        if (!$this->isAdmin) {
+            session()->flash('error', 'Only administrators can modify feature settings.');
+            return;
+        }
+
         $current = $this->featureSettings[$key] ?? 'disabled';
         $newValue = $current === 'enabled' ? 'disabled' : 'enabled';
         $this->featureSettings[$key] = $newValue;
@@ -100,6 +118,39 @@ class Settings extends Component
             'value' => $newValue,
         ]);
         session()->flash('success', ucfirst($key).' feature '.($newValue === 'enabled' ? 'enabled' : 'disabled').'.');
+    }
+
+    /**
+     * Check if user is admin based on config
+     */
+    private function checkIsAdmin($user, array $adminConfig): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        $check = $adminConfig['check'] ?? 'isAdmin';
+
+        // If check is callable
+        if (is_callable($check)) {
+            return $check($user);
+        }
+
+        // If check is a string method name
+        if (is_string($check) && method_exists($user, $check)) {
+            return (bool) $user->{$check}();
+        }
+
+        // Check for common admin properties/methods
+        if (property_exists($user, 'is_admin') && $user->is_admin) {
+            return true;
+        }
+
+        if (property_exists($user, 'role') && $user->role === 'admin') {
+            return true;
+        }
+
+        return false;
     }
 
     public function render()
@@ -116,6 +167,8 @@ class Settings extends Component
             'settings' => $this->settings,
             'featureSettings' => $this->featureSettings,
             'paymentMethods' => $this->paymentMethods,
+            'isAdmin' => $this->isAdmin,
+            'isAdminManagementEnabled' => $this->isAdminManagementEnabled,
         ])->extends($layout)->section('content')->title($title);
     }
 }

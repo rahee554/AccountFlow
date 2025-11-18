@@ -1,425 +1,936 @@
-# 🤖 AccountFlow Package - Agent Documentation
+# 🤖 AccountFlow Package - Comprehensive Agent Guide
 
-This document explains the AccountFlow package structure, what it does, and where to make changes.
+**Version**: 3.0.0  
+**Status**: ✅ Production Ready & Fully Tested  
+**Last Updated**: November 18, 2025
 
----
-
-## 📋 What is AccountFlow?
-
-AccountFlow is a comprehensive accounting and financial management system built into the ArtflowERP as a reusable Laravel package. It provides:
-
-- **Double-Entry Accounting**: Accounts, transactions, transfers
-- **Budget Management**: Create and track budgets
-- **Asset Tracking**: Manage company assets and movements
-- **Loan Management**: Track loans and loan users
-- **Financial Reports**: Dashboard, profit/loss, trial balance, cashbook
-- **Payment Methods**: Manage various payment methods
-- **Audit Trail**: Complete transaction history
-- **User Wallets**: Individual user wallet balances
+This document comprehensively explains the AccountFlow package architecture, API usage, and how to extend it effectively.
 
 ---
 
-## 📁 Package Directory Structure
+## 📋 Table of Contents
+
+1. [Package Overview](#-package-overview)
+2. [Directory Structure](#-directory-structure)
+3. [Using the Facade API](#-using-the-facade-api)
+4. [Working with Services](#-working-with-services)
+5. [Livewire Components](#-livewire-components)
+6. [Database Models](#-database-models)
+7. [Blade Directives & Middleware](#-blade-directives--middleware)
+8. [Artisan Commands](#-artisan-commands)
+9. [Making Changes](#-making-changes)
+10. [Common Tasks](#-common-tasks)
+11. [Testing & Debugging](#-testing--debugging)
+12. [Troubleshooting](#-troubleshooting)
+
+---
+
+## 🎯 Package Overview
+
+### What It Does
+AccountFlow is a **complete, production-ready accounting system** that handles:
+- Multi-account financial tracking
+- Transaction management (Income, Expense, Transfer)
+- Budget planning and tracking
+- Asset and loan management
+- Financial reporting and analysis
+- Audit logging of all changes
+
+### Technology Stack
+- **Laravel 12** with Livewire 3
+- **Flux UI** for beautiful components
+- **Eloquent ORM** for database interaction
+- **Tailwind CSS v4** for styling
+
+### Key Characteristics
+- ✅ Reusable across multiple Laravel projects
+- ✅ Feature toggles for selective functionality
+- ✅ Complete permission system
+- ✅ Fully tested and production-ready
+- ✅ Extensible architecture
+
+---
+
+## 📁 Directory Structure
 
 ```
 vendor/artflow-studio/accountflow/
+│
 ├── src/
 │   ├── app/
-│   │   ├── Console/                    # Artisan commands
-│   │   │   ├── InstallCommand.php
-│   │   │   ├── AccountFlowLinkCommand.php
-│   │   │   ├── AccountFlowSyncCommand.php        ← File sync utility
-│   │   │   ├── AccountFlowMigrateCommand.php
-│   │   │   ├── AccountFlowMigrateFreshCommand.php
-│   │   │   └── AccountFlowSeedCommand.php
+│   │   ├── Console/
+│   │   │   ├── InstallCommand.php              ← Initialize package
+│   │   │   ├── LinkCommand.php                 ← Link package files
+│   │   │   ├── SyncCommand.php                 ← Sync changes
+│   │   │   ├── MigrateCommand.php              ← Run migrations
+│   │   │   ├── MigrateFreshCommand.php         ← Fresh install
+│   │   │   ├── SeedCommand.php                 ← Seed demo data
+│   │   │   ├── FeatureCommand.php              ← Manage features
+│   │   │   └── TestCommand.php                 ← Test package
 │   │   │
 │   │   ├── Http/
-│   │   │   └── Controllers/AccountFlow/
-│   │   │       ├── AccountsController.php         ← Web controllers
-│   │   │       └── DefaultController.php
+│   │   │   └── Controllers/
+│   │   │       ├── AccountsController.php      ← Account management
+│   │   │       └── DefaultController.php       ← Default routes
 │   │   │
-│   │   ├── Livewire/                  # UI Components
+│   │   ├── Livewire/
 │   │   │   └── AccountFlow/
-│   │   │       ├── AccountsDashboard.php          ← Dashboard
-│   │   │       ├── Accounts/                      ← Account management
-│   │   │       ├── Transactions/                  ← Transaction management
-│   │   │       ├── Budgets/                       ← Budget management
-│   │   │       ├── Loans/                         ← Loan management
-│   │   │       ├── Assets/                        ← Asset tracking
-│   │   │       ├── Equity/                        ← Equity tracking
-│   │   │       ├── Reports/                       ← Financial reports
-│   │   │       ├── PaymentMethod/                 ← Payment methods
-│   │   │       ├── Categories/                    ← Categories
-│   │   │       ├── Wallets/                       ← User wallets
-│   │   │       ├── AuditTrail/                    ← Audit logs
-│   │   │       ├── PlannedPayments/               ← Payment planning
-│   │   │       └── Settings.php                   ← Settings component
+│   │   │       ├── AccountsDashboard.php       ← Main dashboard
+│   │   │       ├── Accounts/
+│   │   │       │   ├── AccountsList.php        ← Account list
+│   │   │       │   └── AccountForm.php         ← Create/edit form
+│   │   │       ├── Transactions/
+│   │   │       │   ├── TransactionsList.php    ← View transactions
+│   │   │       │   └── TransactionForm.php     ← Create form
+│   │   │       ├── Budgets/
+│   │   │       │   ├── BudgetsList.php
+│   │   │       │   └── BudgetForm.php
+│   │   │       ├── Reports/
+│   │   │       │   ├── ProfitLossReport.php
+│   │   │       │   ├── TrialBalanceReport.php
+│   │   │       │   └── CashbookReport.php
+│   │   │       ├── Loans/
+│   │   │       ├── Assets/
+│   │   │       ├── Equity/
+│   │   │       ├── AuditTrail/
+│   │   │       ├── PaymentMethod/
+│   │   │       ├── Categories/
+│   │   │       ├── Wallets/
+│   │   │       ├── PlannedPayments/
+│   │   │       └── Settings.php                ← Settings panel
 │   │   │
-│   │   └── Models/                    # Eloquent Models
-│   │       ├── Account.php                        ← Main account model
-│   │       ├── Transaction.php                    ← Transaction model
-│   │       ├── Transfer.php                       ← Transfer model
-│   │       ├── Budget.php
-│   │       ├── Loan.php
-│   │       ├── LoanTransaction.php
-│   │       ├── LoanUser.php
-│   │       ├── Asset.php
-│   │       ├── AssetTransaction.php
-│   │       ├── Category.php
-│   │       ├── PaymentMethod.php
-│   │       ├── UserWallet.php
-│   │       ├── EquityPartner.php
-│   │       ├── EquityTransaction.php
-│   │       ├── AuditTrail.php
-│   │       ├── Setting.php
-│   │       ├── TransactionTemplate.php
-│   │       ├── PlannedPayment.php
-│   │       └── Purchase related models
+│   │   ├── Models/
+│   │   │   ├── Account.php                     ← Main account model
+│   │   │   ├── Transaction.php                 ← Transaction model
+│   │   │   ├── Transfer.php                    ← Account transfer
+│   │   │   ├── Budget.php                      ← Budget model
+│   │   │   ├── Loan.php, LoanTransaction.php
+│   │   │   ├── Asset.php, AssetTransaction.php
+│   │   │   ├── Category.php                    ← Category model
+│   │   │   ├── PaymentMethod.php               ← Payment methods
+│   │   │   ├── UserWallet.php                  ← User wallets
+│   │   │   ├── EquityPartner.php
+│   │   │   ├── AuditTrail.php                  ← Audit logging
+│   │   │   ├── Setting.php                     ← Settings model
+│   │   │   ├── TransactionTemplate.php
+│   │   │   ├── PlannedPayment.php
+│   │   │   └── [Other models...]
+│   │   │
+│   │   ├── Services/
+│   │   │   ├── TransactionService.php          ← Transaction operations
+│   │   │   ├── AccountService.php              ← Account operations
+│   │   │   ├── SettingsService.php             ← Settings operations
+│   │   │   ├── FeatureService.php              ← Feature management
+│   │   │   ├── AuditService.php                ← Audit logging
+│   │   │   ├── CategoryService.php
+│   │   │   ├── PaymentMethodService.php
+│   │   │   ├── BudgetService.php
+│   │   │   └── ReportService.php
+│   │   │
+│   │   ├── Facades/
+│   │   │   └── Accountflow.php                 ← Main facade
+│   │   │
+│   │   └── Support/
+│   │       └── AccountflowServiceProvider.php  ← Service provider
 │   │
 │   ├── config/
-│   │   └── accountflow.php                        ← Configuration file
+│   │   └── accountflow.php                     ← Configuration
 │   │
 │   ├── database/
-│   │   ├── migrations/                            ← DO NOT MODIFY (Production)
-│   │   └── seeders/                               ← Demo data seeder
+│   │   ├── migrations/
+│   │   │   ├── 0001_create_accounts_table.php
+│   │   │   ├── 0002_create_transactions_table.php
+│   │   │   └── [Other migrations...]
+│   │   └── seeders/
+│   │       └── AccountFlowSeeder.php           ← Demo data
 │   │
 │   ├── resources/
 │   │   └── views/
 │   │       └── vendor/artflow-studio/accountflow/
-│   │           ├── blades/                        ← Blade templates
-│   │           └── livewire/                      ← Livewire view files
-│   │
-│   ├── public/
-│   │   └── vendor/artflow-studio/accountflow/
-│   │       └── assets/                            ← CSS, JS, images
+│   │           ├── blades/                     ← Blade templates
+│   │           └── livewire/                   ← Livewire views
+│   │               ├── accounts/
+│   │               ├── transactions/
+│   │               ├── reports/
+│   │               └── [Other views...]
 │   │
 │   ├── routes/
-│   │   └── accountflow.php                        ← All package routes
+│   │   └── accountflow.php                     ← All routes defined
 │   │
-│   └── AccountFlowServiceProvider.php             ← Main service provider
+│   └── AccountFlowServiceProvider.php          ← Main provider
 │
-├── AGENT.md                                       ← This file
-├── PRODUCTION_FEATURES.md                        ← What was added
-└── [Other documentation files]
+├── docs/
+│   ├── QUICK_REFERENCE.md                      ← API cheat sheet
+│   ├── SERVICES_INDEX.md                       ← Complete API
+│   └── [Other documentation]
+│
+├── tests/
+│   ├── Feature/
+│   ├── Unit/
+│   └── [Test files...]
+│
+├── README.md                                   ← Package overview
+├── AGENT.md                                    ← This file
+├── composer.json                               ← Dependencies
+└── PRODUCTION_FEATURES.md                      ← Latest features
 ```
 
 ---
 
-## 🎯 Where to Make Changes
+## 🎯 Using the Facade API
 
-### 1. **Add New Features / Modify Business Logic**
+The **Facade** is the primary way agents interact with AccountFlow. It provides a clean, fluent API for all operations.
 
-#### In the Package (for new features)
-Edit in: `vendor/artflow-studio/accountflow/src/`
+### 1. Transaction Operations
 
-**Example**: Add a new expense category
-- Edit: `src/config/accountflow.php` → Add to categories array
-- Then sync: `php artisan accountflow:sync`
-
-#### In the Project (for customizations)
-Edit in: `app/`, `config/`, etc.
-
-**Example**: Customize the accounts dashboard
-- Edit: `app/Livewire/AccountFlow/AccountsDashboard.php`
-- Then sync back: `php artisan accountflow:sync`
-
----
-
-### 2. **Add New Livewire Component**
-
-**Scenario**: You want to add a new report view
-
-**Steps**:
-1. Create in package: `vendor/artflow-studio/accountflow/src/app/Livewire/AccountFlow/Reports/MyNewReport.php`
-2. Create view: `vendor/artflow-studio/accountflow/src/resources/views/vendor/.../livewire/reports/my-new-report.blade.php`
-3. Run sync: `php artisan accountflow:sync`
-4. Add route: `src/routes/accountflow.php`
-5. Run sync again: `php artisan accountflow:sync`
-
----
-
-### 3. **Modify Models**
-
-**Scenario**: Add a new relationship or method to the Account model
-
-**Steps**:
-1. Edit: `vendor/artflow-studio/accountflow/src/app/Models/Account.php`
-2. Or edit: `app/Models/AccountFlow/Account.php` (in your project)
-3. Run sync: `php artisan accountflow:sync`
-
----
-
-### 4. **Update Configuration**
-
-**File**: `config/accountflow.php` in your project root
-
-**Options to customize**:
+#### Create Income Transaction
 ```php
-'layout' => 'layouts.admin.app-fluid',           // Admin layout
-'business_name' => fn () => '...',               // Business name
-'middlewares' => ['tenant.web', 'auth'],         // Route middleware
-'categories' => [                                // Income/expense categories
-    'income' => [...],
-    'expense' => [...],
-],
+use ArtflowStudio\AccountFlow\Facades\Accountflow;
+
+$transaction = Accountflow::transactions()->createIncome([
+    'amount' => 1000,
+    'description' => 'Client Payment',
+    'category_id' => 2,           // Required
+    'account_id' => 1,            // Required
+    'payment_method_id' => 1,     // Optional
+    'date' => now(),              // Defaults to now()
+    'reference' => 'INV-001',     // Optional
+]);
+
+// Returns: Transaction model with all attributes
 ```
 
----
-
-### 5. **Add Views/Blade Templates**
-
-**Location**: `resources/views/vendor/artflow-studio/accountflow/`
-
-**Sync from package**:
-```bash
-php artisan accountflow:sync
-```
-
----
-
-## 🔄 File Syncing Process
-
-### Understanding Copy vs Symlink
-
-On **Windows**, files are **copied** (not symlinked) because Windows doesn't support true symlinks without admin privileges.
-
-**This means**:
-- ✅ Changes in project copy to package
-- ✅ Changes in package copy to project
-- ❌ Real-time sync not automatic
-
-### How to Sync Files
-
-```bash
-# Check what files have changed (without making changes)
-php artisan accountflow:sync --check
-
-# Sync all changed files (interactive - asks for confirmation)
-php artisan accountflow:sync
-
-# Force sync without prompting
-php artisan accountflow:sync --force
-```
-
-### Sync Output Example
-
-```
-📁 Syncing Livewire Components...
-  ✓ Synced: AccountsDashboard.php
-  ✓ Synced: Accounts\AccountsList.php
-  ✓ Synced: Transactions\Transactions.php
-
-📁 Syncing Models...
-  ✓ Synced: Account.php
-  ✓ Synced: Transaction.php
-
-✅ Sync complete!
-  ✓ Synced: 5 files
-```
-
----
-
-## ⚠️ Production Considerations
-
-### ❌ DO NOT MODIFY MIGRATIONS
-
-**Reason**: This package is used in production on other apps. Migrations cannot be changed once deployed.
-
-**What to do instead**:
-- Add new features in models
-- Create custom traits or observers
-- Extend existing models
-
-### ✅ SAFE TO MODIFY
-
-- Livewire components
-- Controllers
-- Models (add methods, relationships)
-- Views and templates
-- Config file
-- Routes
-
-### 🔒 Database Schema
-
-Current tables:
-- accounts
-- transactions
-- transfers
-- budgets
-- loans, loan_transactions, loan_users
-- assets, asset_transactions
-- categories
-- payment_methods
-- user_wallets
-- equity_partners, equity_transactions
-- audit_trails
-- settings
-- purchase, purchase_transactions
-- transaction_templates
-- planned_payments
-
-**Cannot add new tables** - Must extend existing models.
-
----
-
-## 🎨 Customization Examples
-
-### Example 1: Add a Custom Account Type
-
-**File**: `config/accountflow.php`
+#### Create Expense Transaction
 ```php
-'account_types' => [
-    'bank' => 'Bank Account',
-    'cash' => 'Cash',
-    'wallet' => 'Digital Wallet',
-    'custom' => 'Custom Type',  // Add this
-],
+$transaction = Accountflow::transactions()->createExpense([
+    'amount' => 500,
+    'description' => 'Office Supplies',
+    'category_id' => 5,
+    'account_id' => 1,
+    'date' => now(),
+]);
 ```
 
-### Example 2: Extend Account Model
-
-**File**: `app/Models/AccountFlow/Account.php`
+#### Create Transfer Between Accounts
 ```php
-class Account extends Model
-{
-    // Add custom method
-    public function getDailyBalance($date)
-    {
-        return $this->transactions()
-            ->whereDate('date', '<=', $date)
-            ->sum('amount');
-    }
-    
-    // Add custom relationship
-    public function department()
-    {
-        return $this->belongsTo(Department::class);
-    }
+$transfer = Accountflow::transactions()->transfer([
+    'from_account_id' => 1,
+    'to_account_id' => 2,
+    'amount' => 1000,
+    'description' => 'Fund transfer',
+    'date' => now(),
+]);
+```
+
+#### Update Transaction
+```php
+$transaction = Accountflow::transactions()->update($id, [
+    'amount' => 1200,
+    'description' => 'Updated description',
+]);
+```
+
+#### Delete Transaction
+```php
+Accountflow::transactions()->delete($id);
+// Automatically adjusts balances
+```
+
+#### Get Transaction Summary
+```php
+$summary = Accountflow::transactions()->getSummary(
+    start: now()->startOfMonth(),
+    end: now()->endOfMonth(),
+    accountId: 1  // Optional filter
+);
+
+// Returns: ['income' => ..., 'expense' => ..., 'net' => ...]
+```
+
+### 2. Account Operations
+
+#### Create Account
+```php
+$account = Accountflow::accounts()->create([
+    'name' => 'Business Bank Account',
+    'type' => 'bank',              // bank, cash, wallet, etc.
+    'code' => 'ACC-001',           // Unique code
+    'opening_balance' => 10000,    // Starting balance
+]);
+```
+
+#### Get All Accounts
+```php
+$accounts = Accountflow::accounts()->getAll();
+// Returns collection of Account models
+```
+
+#### Get Account Balance
+```php
+$balance = Accountflow::accounts()->getBalance($accountId);
+// Returns: 5250.50
+```
+
+#### Adjust Account Balance
+```php
+// Add to balance
+Accountflow::accounts()->addToBalance($accountId, 1000);
+
+// Subtract from balance
+Accountflow::accounts()->subtractFromBalance($accountId, 500);
+```
+
+### 3. Feature Management
+
+#### Check if Feature is Enabled
+```php
+if (Accountflow::features()->isEnabled('audit')) {
+    // Audit feature is active
 }
 ```
 
-### Example 3: Create Custom Report
-
-**File**: `app/Livewire/AccountFlow/Reports/CustomReport.php`
+#### Enable Feature
 ```php
-namespace App\Livewire\AccountFlow\Reports;
+Accountflow::features()->enable('budgets');
+// Now budgets module is available
+```
+
+#### Disable Feature
+```php
+Accountflow::features()->disable('loan_module');
+// Loan features are hidden
+```
+
+#### Get All Features
+```php
+$features = Accountflow::features()->getAllFeatures();
+// Returns array of all features with enabled/disabled status
+```
+
+### 4. Category Operations
+
+#### Get All Categories
+```php
+$categories = Accountflow::categories()->getAll();
+// Hierarchical category structure
+```
+
+#### Get Categories by Type
+```php
+$incomeCategories = Accountflow::categories()->getByType('income');
+$expenseCategories = Accountflow::categories()->getByType('expense');
+```
+
+### 5. Settings Operations
+
+#### Get Setting
+```php
+$value = Accountflow::settings()->get('default_account_id', 1);
+// Returns: 1 (or default value if not found)
+```
+
+#### Set Setting
+```php
+Accountflow::settings()->set('business_name', 'Acme Corp');
+// Now stored in database
+```
+
+#### Get Default Categories
+```php
+$salesCategoryId = Accountflow::settings()->defaultSalesCategoryId();
+$expenseCategoryId = Accountflow::settings()->defaultExpenseCategoryId();
+```
+
+### 6. Audit Operations
+
+#### Log Custom Event
+```php
+Accountflow::audit()->log(
+    action: 'transaction_approved',
+    modelType: 'Transaction',
+    modelId: $transaction->id,
+    oldValue: null,
+    newValue: $transaction->toArray()
+);
+```
+
+#### Log Transaction Created
+```php
+Accountflow::audit()->logTransactionCreated(
+    $transaction->id,
+    $transaction->toArray()
+);
+```
+
+#### Get Recent Audit Logs
+```php
+$logs = Accountflow::audit()->getRecent(50);
+// Last 50 audit trail entries
+```
+
+#### Get Audit Logs by User
+```php
+$logs = Accountflow::audit()->getByUser($userId);
+// All actions by specific user
+```
+
+### 7. Report Operations
+
+#### Get Profit & Loss Report
+```php
+$report = Accountflow::reports()->profitAndLoss(
+    start: now()->startOfYear(),
+    end: now()->endOfYear()
+);
+
+// Returns: ['income' => ..., 'expenses' => ..., 'net_profit' => ...]
+```
+
+#### Get Trial Balance
+```php
+$report = Accountflow::reports()->trialBalance(
+    date: now()
+);
+
+// Returns: Balanced debit/credit columns
+```
+
+#### Get Cashbook Report
+```php
+$report = Accountflow::reports()->cashbook(
+    accountId: 1,
+    start: now()->startOfMonth(),
+    end: now()->endOfMonth()
+);
+
+// Returns: Daily cash flow
+```
+
+---
+
+## 🔧 Working with Services
+
+### What Are Services?
+
+Services are business logic classes that handle operations. Access them via the Facade.
+
+### Available Services
+
+| Service | Purpose | Access |
+|---------|---------|--------|
+| TransactionService | Create/read/update/delete transactions | `Accountflow::transactions()` |
+| AccountService | Manage accounts | `Accountflow::accounts()` |
+| CategoryService | Manage categories | `Accountflow::categories()` |
+| FeatureService | Enable/disable features | `Accountflow::features()` |
+| SettingsService | Store/retrieve settings | `Accountflow::settings()` |
+| AuditService | Log and retrieve audit trails | `Accountflow::audit()` |
+| ReportService | Generate financial reports | `Accountflow::reports()` |
+| BudgetService | Manage budgets | `Accountflow::budgets()` |
+| PaymentMethodService | Manage payment methods | `Accountflow::paymentMethods()` |
+
+### Complete Example: Create Transaction with Audit
+
+```php
+use ArtflowStudio\AccountFlow\Facades\Accountflow;
+
+public function processPayment($paymentData)
+{
+    // Enable audit if needed
+    if (!Accountflow::features()->isEnabled('audit_trail')) {
+        Accountflow::features()->enable('audit_trail');
+    }
+
+    // Create transaction
+    $transaction = Accountflow::transactions()->createIncome([
+        'amount' => $paymentData['amount'],
+        'description' => $paymentData['description'],
+        'category_id' => Accountflow::settings()->defaultSalesCategoryId(),
+        'account_id' => 1,
+        'date' => now(),
+    ]);
+
+    // Log the transaction
+    Accountflow::audit()->logTransactionCreated(
+        $transaction->id,
+        $transaction->toArray()
+    );
+
+    // Update account balance
+    Accountflow::accounts()->addToBalance(
+        $transaction->account_id,
+        $transaction->amount
+    );
+
+    // Store setting for next time
+    Accountflow::settings()->set('last_transaction_date', now());
+
+    return $transaction;
+}
+```
+
+---
+
+## 🎨 Livewire Components
+
+### Available Components
+
+All components are in `app/Livewire/AccountFlow/` namespace.
+
+#### 1. AccountsDashboard
+The main dashboard showing account overview, recent transactions, balances.
+
+```blade
+<!-- In your view -->
+<livewire:account-flow.accounts-dashboard />
+```
+
+#### 2. AccountsList
+Display all accounts in a table/list with filtering.
+
+```blade
+<livewire:account-flow.accounts.accounts-list />
+```
+
+#### 3. TransactionsList
+Display transactions with filters, search, and pagination.
+
+```blade
+<livewire:account-flow.transactions.transactions-list :accountId="1" />
+```
+
+#### 4. TransactionForm
+Create or edit a transaction (income, expense, or transfer).
+
+```blade
+<!-- Create new transaction -->
+<livewire:account-flow.transactions.transaction-form />
+
+<!-- Edit existing -->
+<livewire:account-flow.transactions.transaction-form :transaction="$transaction" />
+```
+
+#### 5. Reports Components
+- `ProfitLossReport.php` - P&L statement
+- `TrialBalanceReport.php` - Trial balance
+- `CashbookReport.php` - Cash flow
+
+```blade
+<livewire:account-flow.reports.profit-loss-report />
+<livewire:account-flow.reports.trial-balance-report />
+<livewire:account-flow.reports.cashbook-report :accountId="1" />
+```
+
+#### 6. CategoriesList
+Manage income/expense categories.
+
+```blade
+<livewire:account-flow.categories.categories-list />
+```
+
+#### 7. Settings
+Configure AccountFlow settings.
+
+```blade
+<livewire:account-flow.settings />
+```
+
+### Creating Custom Components
+
+#### Step 1: Create Component Class
+```php
+namespace App\Livewire\AccountFlow;
 
 use Livewire\Component;
-use App\Models\AccountFlow\Transaction;
+use ArtflowStudio\AccountFlow\Facades\Accountflow;
 
-class CustomReport extends Component
+class MyCustomComponent extends Component
 {
+    public function mount()
+    {
+        $this->accounts = Accountflow::accounts()->getAll();
+    }
+
     public function render()
     {
-        $transactions = Transaction::all();
-        return view('accountflow::reports.custom', [
-            'transactions' => $transactions,
-        ]);
+        return view('livewire.account-flow.my-custom-component');
     }
 }
 ```
 
+#### Step 2: Create View
+```blade
+<!-- resources/views/livewire/account-flow/my-custom-component.blade.php -->
+<div class="p-6">
+    <h2 class="text-2xl font-bold mb-4">My Custom Component</h2>
+    
+    @foreach ($accounts as $account)
+        <div class="mb-4 p-4 border rounded">
+            <h3>{{ $account->name }}</h3>
+            <p>Balance: ${{ $account->balance }}</p>
+        </div>
+    @endforeach
+</div>
+```
+
+#### Step 3: Register Route
+```php
+// In routes/accountflow.php or web.php
+Route::get('/custom-page', MyCustomComponent::class);
+```
+
 ---
 
-## 🛠️ Commands Reference
+## 📊 Database Models
+
+### Key Models and Usage
+
+#### Account Model
+```php
+// Get account with relationships
+$account = Account::with('transactions', 'budget')->find($id);
+
+// Get balance
+$balance = $account->getBalance();
+
+// Query accounts
+$bankAccounts = Account::where('type', 'bank')->get();
+```
+
+#### Transaction Model
+```php
+// Get recent transactions
+$transactions = Transaction::latest()->limit(10)->get();
+
+// Filter by type
+$income = Transaction::where('type', 'income')->sum('amount');
+
+// With relationships
+$transactions = Transaction::with('account', 'category', 'paymentMethod')->get();
+```
+
+#### Category Model
+```php
+// Get by type
+$expenseCategories = Category::where('type', 'expense')->get();
+
+// Hierarchical query
+$category = Category::with('children')->find($id);
+```
+
+---
+
+## 🎨 Blade Directives & Middleware
+
+### Feature Directives
+
+#### Show If Feature Enabled
+```blade
+@featureEnabled('audit')
+    <a href="/audit-trail">View Audit Trail</a>
+@endFeatureEnabled
+```
+
+#### Show If Feature Disabled
+```blade
+@featureDisabled('budgets')
+    <div class="alert">Budgets feature is not available</div>
+@endFeatureDisabled
+```
+
+### Middleware Protection
+
+#### Protect Routes
+```php
+Route::get('/audit', AuditController::class)
+    ->middleware('accountflow.feature:audit');
+
+Route::middleware('accountflow.feature:budgets')->group(function () {
+    Route::get('/budgets', [BudgetController::class, 'index']);
+    Route::post('/budgets', [BudgetController::class, 'store']);
+});
+```
+
+---
+
+## 🛠️ Artisan Commands
+
+### Installation Commands
 
 ```bash
-# Link package files to project
-php artisan accountflow:link [--force]
+# Initialize package
+php artisan accountflow:install
 
-# Sync files between package and project
-php artisan accountflow:sync [--check] [--force]
+# Link package files
+php artisan accountflow:link [--force]
 
 # Publish configuration
 php artisan vendor:publish --tag=accountflow-config
+```
 
-# Migrate database (add new tables only if safe)
+### Database Commands
+
+```bash
+# Run migrations
 php artisan accountflow:migrate
 
-# Fresh migration with seed (development only!)
+# Fresh migration with seeding (development only!)
 php artisan accountflow:migrate:fresh --seed
 
 # Seed demo data
 php artisan accountflow:seed
+```
 
-# Test model loading
-php artisan test:accountflow-models
+### Feature Management
 
-# List all routes
-php artisan route:list | grep accountflow
+```bash
+# Enable feature
+php artisan accountflow:feature audit enable
+
+# Disable feature
+php artisan accountflow:feature budgets disable
+
+# List features
+php artisan accountflow:feature list
+```
+
+### File Synchronization
+
+```bash
+# Check changes (no modifications)
+php artisan accountflow:sync --check
+
+# Interactive sync
+php artisan accountflow:sync
+
+# Force sync
+php artisan accountflow:sync --force
+```
+
+### Testing Commands
+
+```bash
+# Test complete package
+php artisan accountflow:test-complete
+
+# Test facade
+php artisan accountflow:test-facade
+
+# Test features
+php artisan accountflow:test-features
+
+# Check status
+php artisan accountflow:status
 ```
 
 ---
 
-## 📊 Database Relationships
+## 📝 Making Changes
 
-### Main Flows
+### Where to Edit
+
+**For package features**: Edit in `vendor/artflow-studio/accountflow/src/`  
+**For project customizations**: Edit in `app/Livewire/AccountFlow/`, `app/Models/AccountFlow/`, etc.
+
+### Change Workflow
 
 ```
-Account
-  ├── transactions() → Transaction
-  ├── transfers_from() → Transfer (from_account_id)
-  ├── transfers_to() → Transfer (to_account_id)
-  ├── budget() → Budget
-  └── audit_trails() → AuditTrail
+1. Make change in appropriate location
+   ↓
+2. Run: php artisan accountflow:sync --force
+   ↓
+3. Test in browser
+   ↓
+4. Run tests: php artisan test
+   ↓
+5. Format code: vendor/bin/pint --dirty
+```
 
-Transaction
-  ├── account() → Account
-  ├── category() → Category
-  └── payment_method() → PaymentMethod
+### Important Notes
 
-Transfer
-  ├── from_account() → Account
-  └── to_account() → Account
+⚠️ **Never modify migrations** - This package is used in production  
+✅ **Safe to modify**: Components, models (add methods), views, routes, config
 
-Budget
-  └── account() → Account
+---
+
+## 📋 Common Tasks
+
+### Create New Transaction
+```php
+use ArtflowStudio\AccountFlow\Facades\Accountflow;
+
+$transaction = Accountflow::transactions()->createIncome([
+    'amount' => 1500,
+    'description' => 'Client Payment',
+    'category_id' => 1,
+    'account_id' => 1,
+    'date' => now(),
+]);
+```
+
+### Get Account Balance
+```php
+$balance = Accountflow::accounts()->getBalance($accountId);
+```
+
+### Generate P&L Report
+```php
+$report = Accountflow::reports()->profitAndLoss(
+    now()->startOfYear(),
+    now()->endOfYear()
+);
+```
+
+### Enable Feature
+```php
+Accountflow::features()->enable('loan_module');
+```
+
+### Create Custom Component
+```bash
+# Create Livewire component
+php artisan make:livewire AccountFlow/MyReport
+
+# Then use the facade inside
+```
+
+### Transfer Money Between Accounts
+```php
+$transfer = Accountflow::transactions()->transfer([
+    'from_account_id' => 1,
+    'to_account_id' => 2,
+    'amount' => 5000,
+    'description' => 'Fund transfer',
+]);
 ```
 
 ---
 
-## 🔐 Important Notes
+## 🧪 Testing & Debugging
 
-### Production Package
-- **Cannot modify migrations** - affects production apps
-- **Can add features** - new columns handled via new migrations
-- **Should extend** - add traits, observers, custom methods
-- **Backward compatible** - all changes must work with existing data
+### Run Tests
+```bash
+# All tests
+php artisan test
 
-### Development
-- Edit files in both locations
-- Run `php artisan accountflow:sync` to keep both in sync
-- Test thoroughly before production deployment
+# Specific test
+php artisan test --filter testCreateTransaction
 
-### File Permissions
-- Models: PSR-4 namespace must match file path
-- Livewire: PSR-4 namespace must match file path
-- Controllers: Follow Laravel conventions
+# With coverage
+php artisan test --coverage
+```
 
----
+### Debug with Tinker
+```bash
+php artisan tinker
 
-## 📞 Quick Reference
+# Inside tinker
+use ArtflowStudio\AccountFlow\Facades\Accountflow;
+$accounts = Accountflow::accounts()->getAll();
+dd($accounts);
+```
 
-| Need | Action | File |
-|------|--------|------|
-| Add category | Edit config | `config/accountflow.php` |
-| New component | Create & sync | `app/Livewire/AccountFlow/...` |
-| Extend model | Add method | `app/Models/AccountFlow/...` |
-| Custom route | Add & sync | `app/routes/accountflow.php` |
-| Fix bug | Edit & sync | Appropriate file |
-| Add calculation | Add method | Model file |
+### Check Status
+```bash
+php artisan accountflow:status
+```
 
 ---
 
-## 🎓 Next Steps
+## 🐛 Troubleshooting
 
-1. Familiarize yourself with the directory structure
-2. Run `php artisan accountflow:sync` to sync all files
-3. Make your first change (e.g., edit a component)
-4. Run sync again to confirm it works
-5. Test the changes in the browser
+### Facade Not Resolving
+```php
+// Make sure to import
+use ArtflowStudio\AccountFlow\Facades\Accountflow;
+
+// Check status
+php artisan accountflow:status
+```
+
+### Balance Not Updating
+```bash
+# Manually recalculate
+php artisan tinker
+>>> $account = Account::find(1);
+>>> $balance = $account->transactions()->sum('amount');
+>>> $account->update(['balance' => $balance]);
+```
+
+### Component Not Loading
+```bash
+# Sync files
+php artisan accountflow:sync --force
+
+# Clear caches
+php artisan cache:clear
+php artisan view:clear
+```
+
+### Features Not Visible
+```bash
+# Republish views
+php artisan vendor:publish --tag=accountflow-views --force
+
+# Clear view cache
+php artisan view:clear
+
+# Enable feature
+php artisan accountflow:feature audit enable
+```
 
 ---
 
-**This package is actively developed and maintained for production use.**
+## 🚀 Best Practices
+
+### ✅ DO
+- Use the Facade for all operations
+- Check features before using them
+- Log important operations to audit trail
+- Use Eloquent for querying
+- Validate input before processing
+- Run tests after changes
+- Format code with Pint
+
+### ❌ DON'T
+- Modify migrations directly
+- Use raw SQL queries
+- Skip validation
+- Create duplicate accounts
+- Disable audit in production
+- Hardcode category IDs
+- Skip syncing after changes
+
+---
+
+## 📚 Quick Reference
+
+### Facade Methods
+```php
+Accountflow::transactions()->createIncome($data)
+Accountflow::transactions()->createExpense($data)
+Accountflow::transactions()->transfer($data)
+Accountflow::accounts()->create($data)
+Accountflow::accounts()->getBalance($id)
+Accountflow::features()->isEnabled('feature')
+Accountflow::features()->enable('feature')
+Accountflow::settings()->get('key', 'default')
+Accountflow::audit()->log($action, $model, $id, $old, $new)
+Accountflow::reports()->profitAndLoss($start, $end)
+```
+
+### Blade Directives
+```blade
+@featureEnabled('audit')...@endFeatureEnabled
+@featureDisabled('budgets')...@endFeatureDisabled
+```
+
+### Middleware
+```php
+->middleware('accountflow.feature:audit')
+->middleware('accountflow.feature:budgets')
+```
+
+---
+
+**Version**: 3.0.0 | **Status**: ✅ Production Ready | **Last Updated**: November 18, 2025
 

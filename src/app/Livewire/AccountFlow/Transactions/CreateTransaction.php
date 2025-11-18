@@ -118,6 +118,19 @@ class CreateTransaction extends Component
         return $this->type == 1 ? $this->income_categories : $this->expense_categories;
     }
 
+    public function getAccountBalanceProperty()
+    {
+        if (!$this->account_id) {
+            return null;
+        }
+
+        try {
+            return Accountflow::accounts()->getBalance($this->account_id);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
     public function storeTransaction()
     {
         $this->validate([
@@ -131,35 +144,10 @@ class CreateTransaction extends Component
 
         try {
             if ($this->isEdit) {
-                // Update existing transaction
+                // Update existing transaction using TransactionService
                 $transaction = Transaction::findOrFail($this->transactionId);
 
-                // If account, amount, or type changed, adjust balances
-                if (
-                    $transaction->account_id != $this->account_id ||
-                    $transaction->amount != $this->amount ||
-                    $transaction->type != $this->type
-                ) {
-                    // Revert previous transaction effect
-                    if ($transaction->type == 1) {
-                        // Previous was income, subtract from account
-                        Accountflow::accounts()->subtractFromBalance($transaction->account_id, $transaction->amount);
-                    } else {
-                        // Previous was expense, add back to account
-                        Accountflow::accounts()->addToBalance($transaction->account_id, $transaction->amount);
-                    }
-
-                    // Apply new transaction effect
-                    if ($this->type == 1) {
-                        // New is income, add to account
-                        Accountflow::accounts()->addToBalance($this->account_id, $this->amount);
-                    } else {
-                        // New is expense, subtract from account
-                        Accountflow::accounts()->subtractFromBalance($this->account_id, $this->amount);
-                    }
-                }
-
-                $transaction->update([
+                Accountflow::transactions()->update($transaction, [
                     'amount' => $this->amount,
                     'payment_method' => $this->payment_method,
                     'account_id' => $this->account_id,
@@ -171,9 +159,8 @@ class CreateTransaction extends Component
 
                 session()->flash('success', 'Transaction updated successfully!');
             } else {
-                // Create new transaction
-                $transaction = Transaction::create([
-                    'unique_id' => generateUniqueID(Transaction::class, 'unique_id'),
+                // Create new transaction using TransactionService
+                Accountflow::transactions()->create([
                     'amount' => $this->amount,
                     'payment_method' => $this->payment_method,
                     'account_id' => $this->account_id,
@@ -181,15 +168,8 @@ class CreateTransaction extends Component
                     'date' => $this->date,
                     'description' => $this->description,
                     'type' => $this->type,
-                    'added_by' => Auth::id(),
+                    'user_id' => Auth::id(),
                 ]);
-
-                // Apply effect based on type
-                if ($this->type == 1) {
-                    Accountflow::accounts()->addToBalance($transaction->account_id, $transaction->amount);
-                } else {
-                    Accountflow::accounts()->subtractFromBalance($transaction->account_id, $transaction->amount);
-                }
 
                 session()->flash('success', 'Transaction created successfully!');
             }

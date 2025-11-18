@@ -59,16 +59,22 @@
                         <ul class="dropdown-menu" aria-labelledby="transactionsDropdown">
                             <li><a class="dropdown-item" href="{{ route('accountflow::transactions') }}" wire:navigate.hover>
                                 <i class="fas fa-list me-2"></i>All Transactions</a></li>
+                            @featureEnabled('assets')
                             <li><a class="dropdown-item" href="{{ route('accountflow::assets.transactions') }}" wire:navigate.hover>
                                 <i class="fas fa-arrow-up me-2 text-success"></i>Assets Transactions</a></li>
+                            @endFeatureEnabled
                             <li><a class="dropdown-item" href="{{ route('accountflow::transactions') }}?type=expense" wire:navigate.hover>
                                 <i class="fas fa-arrow-down me-2 text-danger"></i>Loans Transactions</a></li>
+                            @featureEnabled('transfers')
                             <li><a class="dropdown-item" href="{{ route('accountflow::transfers.list') }}" wire:navigate.hover>
                                 <i class="fas fa-exchange-alt me-2 text-info"></i>Transfers List</a></li>
+                            @endFeatureEnabled
                             <li><hr class="dropdown-divider"></li>
+                            @featureEnabled('templates')
                             <li><a class="dropdown-item" href="{{ route('accountflow::transactions.templates') }}" wire:navigate.hover>
                                 <i class="fas fa-copy me-2 text-info"></i>Transactions Template</a></li>
                             <li><hr class="dropdown-divider"></li>
+                            @endFeatureEnabled
                             <li><a class="dropdown-item" href="{{ route('accountflow::transaction.create') }}" wire:navigate.hover>
                                 <i class="fas fa-plus-circle me-2"></i>Add Transaction</a></li>
                             <li><a class="dropdown-item" href="{{ route('accountflow::transactions.create') }}" wire:navigate.hover>
@@ -76,6 +82,7 @@
                         </ul>
                     </li>
 
+                    @featureEnabled('budgets')
                     <li class="nav-item dropdown">
                         <button class="nav-link dropdown-toggle {{ request()->routeIs('accountflow::budgets*') ? 'active' : '' }}"
                             id="budgetsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -89,7 +96,9 @@
                                 <i class="fas fa-plus-circle me-2"></i>Add Budget</a></li>
                         </ul>
                     </li>
+                    @endFeatureEnabled
 
+                    @featureEnabled('planned_payments')
                     <li class="nav-item dropdown d-none d-xxl-block">
                         <button class="nav-link dropdown-toggle" id="plannedDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-calendar-check"></i>
@@ -102,7 +111,9 @@
                                 <i class="fas fa-plus-circle me-2"></i>Plan a Payment</a></li>
                         </ul>
                     </li>
+                    @endFeatureEnabled
 
+                    @featureEnabled('reports')
                     <li class="nav-item dropdown d-none d-xl-block">
                         <button class="nav-link dropdown-toggle {{ request()->routeIs('accountflow::report*') ? 'active' : '' }}"
                             id="reportsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -112,13 +123,17 @@
                         <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
                             <li><a class="dropdown-item" href="{{ route('accountflow::report') }}" wire:navigate.hover>
                                 <i class="fas fa-chart-line me-2"></i>Financial Summary</a></li>
+                            @featureEnabled('cashbook')
                             <li><a class="dropdown-item" href="{{ route('accountflow::report.cashbook') }}" wire:navigate.hover>
                                 <i class="fas fa-book-open me-2"></i>Cashbook</a></li>
+                            @endFeatureEnabled
                             <li><a class="dropdown-item" href="{{ route('accountflow::report.trial-balance') }}" wire:navigate.hover>
                                 <i class="fas fa-balance-scale me-2"></i>Trial Balance</a></li>
                         </ul>
                     </li>
+                    @endFeatureEnabled
 
+                    @featureEnabled('assets')
                     <li class="nav-item dropdown d-none d-lg-block">
                         <button class="nav-link dropdown-toggle" id="assetsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-gem"></i>
@@ -131,7 +146,9 @@
                                 <i class="fas fa-plus-circle me-2"></i>Add Asset</a></li>
                         </ul>
                     </li>
+                    @endFeatureEnabled
 
+                    @featureEnabled('equity')
                     <li class="nav-item dropdown d-none d-lg-block">
                         <button class="nav-link dropdown-toggle" id="equityDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-users"></i>
@@ -146,7 +163,9 @@
                                 <i class="fas fa-user-plus me-2"></i>Add Equity Partner</a></li>
                         </ul>
                     </li>
+                    @endFeatureEnabled
 
+                    @featureEnabled('loans')
                     <li class="nav-item dropdown d-none d-lg-block">
                         <button class="nav-link dropdown-toggle" id="loansDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-hand-holding-usd"></i>
@@ -161,7 +180,9 @@
                                 <i class="fas fa-plus-circle me-2"></i>Create Loan</a></li>
                         </ul>
                     </li>
+                    @endFeatureEnabled
 
+                    @featureEnabled('audit')
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('accountflow::audittrail*') ? 'active' : '' }}"
                             href="{{ route('accountflow::audittrail') }}"
@@ -170,6 +191,7 @@
                             <span class="d-none d-xl-inline ms-2">Audit Trail</span>
                         </a>
                     </li>
+                    @endFeatureEnabled
 
                     <li class="nav-item dropdown d-none d-lg-block">
                         <button class="nav-link dropdown-toggle" id="settingsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -179,10 +201,14 @@
                         <ul class="dropdown-menu" aria-labelledby="settingsDropdown">
                             <li><a class="dropdown-item" href="{{ route('accountflow::settings') }}" wire:navigate.hover>
                                 <i class="fas fa-user-cog me-2"></i>Account Settings</a></li>
+                            @featureEnabled('payment_methods')
                             <li><a class="dropdown-item" href="{{ route('accountflow::payment-methods') }}" wire:navigate.hover>
                                 <i class="fas fa-credit-card me-2"></i>Payment Methods</a></li>
+                            @endFeatureEnabled
+                            @featureEnabled('categories')
                             <li><a class="dropdown-item" href="{{ route('accountflow::categories') }}" wire:navigate.hover>
                                 <i class="fas fa-tags me-2"></i>Categories</a></li>
+                            @endFeatureEnabled
                         </ul>
                     </li>
                 </ul>
@@ -228,16 +254,23 @@
                     <div class="collapse" id="transactionsCollapse">
                         <ul class="navbar-nav ps-3">
                             <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::transactions') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-list me-2"></i>All Transactions</a></li>
+                            @featureEnabled('assets')
                             <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::assets.transactions') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-arrow-up me-2 text-success"></i>Assets Transactions</a></li>
+                            @endFeatureEnabled
                             <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::transactions') }}?type=expense" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-arrow-down me-2 text-danger"></i>Loans Transactions</a></li>
+                            @featureEnabled('transfers')
                             <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::transfers.list') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-exchange-alt me-2 text-info"></i>Transfers List</a></li>
+                            @endFeatureEnabled
+                            @featureEnabled('templates')
                             <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::transactions.templates') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-copy me-2 text-info"></i>Transactions Template</a></li>
+                            @endFeatureEnabled
                             <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::transaction.create') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-plus-circle me-2"></i>Add Transaction</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::transactions.create') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-layer-group me-2"></i>Add Multiple</a></li>
                         </ul>
                     </div>
                 </li>
 
+                @featureEnabled('budgets')
                 <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="collapse" href="#budgetsCollapse" role="button" aria-expanded="false">
                         <i class="fas fa-wallet me-2"></i>Budgets<i class="fas fa-chevron-right ms-auto"></i>
@@ -249,7 +282,9 @@
                         </ul>
                     </div>
                 </li>
+                @endFeatureEnabled
 
+                @featureEnabled('planned_payments')
                 <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="collapse" href="#plannedCollapse" role="button" aria-expanded="false">
                         <i class="fas fa-calendar-check me-2"></i>Planned Payments<i class="fas fa-chevron-right ms-auto"></i>
@@ -261,7 +296,9 @@
                         </ul>
                     </div>
                 </li>
+                @endFeatureEnabled
 
+                @featureEnabled('reports')
                 <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="collapse" href="#reportsCollapse" role="button" aria-expanded="false">
                         <i class="fas fa-chart-bar me-2"></i>Reports<i class="fas fa-chevron-right ms-auto"></i>
@@ -269,12 +306,16 @@
                     <div class="collapse" id="reportsCollapse">
                         <ul class="navbar-nav ps-3">
                             <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::report') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-chart-line me-2"></i>Financial Summary</a></li>
+                            @featureEnabled('cashbook')
                             <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::report.cashbook') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-book-open me-2"></i>Cashbook</a></li>
+                            @endFeatureEnabled
                             <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::report.trial-balance') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-balance-scale me-2"></i>Trial Balance</a></li>
                         </ul>
                     </div>
                 </li>
+                @endFeatureEnabled
 
+                @featureEnabled('assets')
                 <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="collapse" href="#assetsCollapse" role="button" aria-expanded="false">
                         <i class="fas fa-gem me-2"></i>Assets<i class="fas fa-chevron-right ms-auto"></i>
@@ -286,7 +327,9 @@
                         </ul>
                     </div>
                 </li>
+                @endFeatureEnabled
 
+                @featureEnabled('equity')
                 <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="collapse" href="#equityCollapse" role="button" aria-expanded="false">
                         <i class="fas fa-users me-2"></i>Equity<i class="fas fa-chevron-right ms-auto"></i>
@@ -299,7 +342,9 @@
                         </ul>
                     </div>
                 </li>
+                @endFeatureEnabled
 
+                @featureEnabled('loans')
                 <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="collapse" href="#loansCollapse" role="button" aria-expanded="false">
                         <i class="fas fa-hand-holding-usd me-2"></i>Loans & Credits<i class="fas fa-chevron-right ms-auto"></i>
@@ -312,7 +357,9 @@
                         </ul>
                     </div>
                 </li>
+                @endFeatureEnabled
 
+                @featureEnabled('audit')
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('accountflow::audittrail*') ? 'active' : '' }}"
                         href="{{ route('accountflow::audittrail') }}"
@@ -321,6 +368,7 @@
                         <i class="fas fa-user-shield me-2"></i>Audit Trail
                     </a>
                 </li>
+                @endFeatureEnabled
 
                 <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="collapse" href="#settingsCollapse" role="button" aria-expanded="false">
@@ -329,8 +377,12 @@
                     <div class="collapse" id="settingsCollapse">
                         <ul class="navbar-nav ps-3">
                             <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::settings') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-user-cog me-2"></i>Account Settings</a></li>
+                            @featureEnabled('payment_methods')
                             <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::payment-methods') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-credit-card me-2"></i>Payment Methods</a></li>
+                            @endFeatureEnabled
+                            @featureEnabled('categories')
                             <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::categories') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-tags me-2"></i>Categories</a></li>
+                            @endFeatureEnabled
                         </ul>
                     </div>
                 </li>

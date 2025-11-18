@@ -104,6 +104,11 @@ class AccountsTableSeeder extends Seeder
 
             'transaction_templates' => 'enabled',
             'audit_trail' => 'enabled',
+            'payment_methods_module' => 'enabled',
+            'categories_module' => 'enabled',
+            'transfers_module' => 'enabled',
+            'profit_loss_report' => 'enabled',
+            'trial_balance_report' => 'enabled',
 
             // Default Values
             'default_transaction_type' => 2,

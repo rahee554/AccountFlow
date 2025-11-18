@@ -79,6 +79,17 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 @endif
+
+                                <!-- Account Balance Display -->
+                                @if($account_id && $this->accountBalance !== null)
+                                    <div class="mt-1 small text-muted">
+                                        <i class="fas fa-wallet me-1"></i>
+                                        Current Balance: 
+                                        <strong class="text-{{ $this->accountBalance >= 0 ? 'success' : 'danger' }}">
+                                            PKR {{ number_format($this->accountBalance, 2) }}
+                                        </strong>
+                                    </div>
+                                @endif
                             </div>
 
                             <!-- Transaction Type -->

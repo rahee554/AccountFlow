@@ -1,5 +1,22 @@
 # AccountFlow - Quick Reference Card
 
+## 🔴 CRITICAL FIX (Nov 18, 2025) ✅
+
+**Account Balances Now Update Automatically!**
+
+Previously, transactions were created without updating account balances. This has been **FIXED**.
+
+Now when you use TransactionService methods:
+- ✅ `createIncome()` → Balance automatically +$amount
+- ✅ `createExpense()` → Balance automatically -$amount
+- ✅ `update()` → Balance automatically adjusted
+- ✅ `delete()` → Balance automatically reversed
+- ✅ `reverse()` → Creates proper offsetting transaction
+
+**See:** BUG_FIX_SUMMARY.md and SYSTEM_ANALYSIS_AND_RECOMMENDATIONS.md for details.
+
+---
+
 ## Import the Facade
 
 ```php

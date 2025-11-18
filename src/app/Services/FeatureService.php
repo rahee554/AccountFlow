@@ -27,6 +27,12 @@ class FeatureService
             'cashbook' => 'cashbook_module',
             'multi_accounts' => 'multi_accounts_module',
             'templates' => 'transaction_templates',
+            'transaction_templates' => 'transaction_templates',
+            'payment_methods' => 'payment_methods_module',
+            'categories' => 'categories_module',
+            'transfers' => 'transfers_module',
+            'profit_loss' => 'profit_loss_report',
+            'trial_balance' => 'trial_balance_report',
         ];
 
         $key = $featureMap[$feature] ?? $feature;
@@ -78,6 +84,12 @@ class FeatureService
             'cashbook' => 'cashbook_module',
             'multi_accounts' => 'multi_accounts_module',
             'templates' => 'transaction_templates',
+            'transaction_templates' => 'transaction_templates',
+            'payment_methods' => 'payment_methods_module',
+            'categories' => 'categories_module',
+            'transfers' => 'transfers_module',
+            'profit_loss' => 'profit_loss_report',
+            'trial_balance' => 'trial_balance_report',
         ];
 
         $key = $featureMap[$feature] ?? $feature;
@@ -100,16 +112,21 @@ class FeatureService
     {
         $features = [
             'audit_trail' => 'Audit Trail',
-            'budgets_module' => 'Budgets',
-            'planned_payments_module' => 'Planned Payments',
-            'trial_balance_module' => 'Reports & Trial Balance',
-            'assets_module' => 'Assets',
-            'loan_module' => 'Loans',
-            'user_wallet_module' => 'User Wallets',
-            'equity_module' => 'Equity',
-            'cashbook_module' => 'Cashbook',
-            'multi_accounts_module' => 'Multi Accounts',
+            'budgets_module' => 'Budgets Module',
+            'planned_payments_module' => 'Planned Payments Module',
+            'trial_balance_module' => 'Trial Balance Module',
+            'assets_module' => 'Assets Module',
+            'loan_module' => 'Loan Module',
+            'user_wallet_module' => 'User Wallet Module',
+            'equity_module' => 'Equity Module',
+            'cashbook_module' => 'Cashbook Module',
+            'multi_accounts_module' => 'Multi Accounts Module',
             'transaction_templates' => 'Transaction Templates',
+            'payment_methods_module' => 'Payment Methods',
+            'categories_module' => 'Custom Categories',
+            'transfers_module' => 'Account Transfers',
+            'profit_loss_report' => 'Profit & Loss Report',
+            'trial_balance_report' => 'Trial Balance Report',
         ];
 
         $result = [];

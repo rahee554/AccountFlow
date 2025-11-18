@@ -11,12 +11,13 @@
 1. [Features](#-features)
 2. [Installation](#-installation)
 3. [Quick Start](#-quick-start)
-4. [Feature Management](#-feature-management)
-5. [Blade Directives](#-blade-directives)
-6. [Middleware](#-middleware)
-7. [Commands](#-commands)
-8. [Services](#-services)
-9. [Testing](#-testing)
+4. [Admin Management](#-admin-management)
+5. [Feature Management](#-feature-management)
+6. [Blade Directives](#-blade-directives)
+7. [Middleware](#-middleware)
+8. [Commands](#-commands)
+9. [Services](#-services)
+10. [Testing](#-testing)
 
 ---
 
@@ -30,21 +31,25 @@
 - ✅ Real-time Balance Tracking
 
 ### Advanced Features
-- 📊 Financial Reports (P&L, Cash Flow, Balance Sheet)
+- 📊 Financial Reports (P&L, Trial Balance, Cashbook)
 - 💰 Budgets & Variance Analysis
 - 🏦 Assets Management
 - 💸 Loans Management
 - 👥 Equity Partners
 - 📅 Planned Payments
 - 💼 Transaction Templates
-- 🔍 Audit Trail (FIXED!)
+- 🔍 Audit Trail
 - 👛 User Wallets
+- 💳 Payment Methods Management
+- 🏷️ Categories Management
+- 🔄 Account Transfers
 
-### Feature Control (NEW!)
-- 🔧 Enable/Disable Features
-- 🛡️ Middleware Protection
-- 🎨 Blade Directives
-- ⚙️ Granular Control
+### Feature Control
+- 🔧 Enable/Disable 20+ Features
+- 🛡️ Middleware Protection for Routes
+- 🎨 Blade Directives (@featureEnabled/@featureDisabled)
+- ⚙️ Granular Permission Control
+- 🎯 Feature-based Navigation Hiding
 
 ---
 
@@ -97,6 +102,8 @@ if (Accountflow::features()->isEnabled('audit')) {
 # Via command
 php artisan accountflow:feature audit enable
 php artisan accountflow:feature budgets disable
+php artisan accountflow:feature categories enable
+php artisan accountflow:feature payment_methods enable
 ```
 
 ```php
@@ -104,19 +111,40 @@ php artisan accountflow:feature budgets disable
 Accountflow::features()->enable('audit');
 Accountflow::features()->disable('budgets');
 Accountflow::features()->isEnabled('audit'); // true/false
+Accountflow::features()->toggle('categories');
 ```
 
 ### Available Features
 
-- `audit_trail` - Audit logging
-- `budgets` - Budget management
-- `planned_payments` - Recurring payments
-- `reports` - Financial reports
-- `assets` - Assets management
-- `loans` - Loans management
-- `wallets` - User wallets
-- `equity` - Equity partners
-- `templates` - Transaction templates
+**Core Modules:**
+- `multi_accounts_module` - Multi-account support
+- `custom_category` - Custom categories
+- `assets_module` - Assets management
+- `purchase_module` - Purchase management
+- `multi_payment_methods` - Multiple payment methods
+
+**Financial Management:**
+- `budgets_module` - Budget tracking & management
+- `planned_payments_module` - Recurring planned payments
+- `loan_module` - Loans management
+- `equity_module` - Equity partners management
+- `user_wallet_module` - User wallets
+- `income_form` - Income form module
+
+**Transaction Features:**
+- `transaction_templates` - Reusable transaction templates
+- `payment_methods_module` - Payment methods management
+- `categories_module` - Categories management
+- `transfers_module` - Account transfers
+
+**Reports:**
+- `cashbook_module` - Cashbook report
+- `trial_balance_module` - Trial balance report
+- `profit_loss_report` - Profit & Loss report
+- `trial_balance_report` - Trial balance report
+
+**System:**
+- `audit_trail` - Complete audit logging
 
 ---
 
@@ -129,8 +157,12 @@ Accountflow::features()->isEnabled('audit'); // true/false
 @endFeatureEnabled
 
 @featureDisabled('budgets')
-    <div>Budgets are disabled</div>
+    <div>Budgets module is currently disabled</div>
 @endFeatureDisabled
+
+@featureEnabled('categories')
+    <a href="/categories">Manage Categories</a>
+@endFeatureEnabled
 
 {{-- In navigation --}}
 <nav>
@@ -140,6 +172,14 @@ Accountflow::features()->isEnabled('audit'); // true/false
     
     @featureEnabled('budgets')
         <li><a href="/budgets">Budgets</a></li>
+    @endFeatureEnabled
+    
+    @featureEnabled('categories')
+        <li><a href="/categories">Categories</a></li>
+    @endFeatureEnabled
+    
+    @featureEnabled('payment_methods')
+        <li><a href="/payment-methods">Payment Methods</a></li>
     @endFeatureEnabled
 </nav>
 ```
@@ -153,9 +193,16 @@ Accountflow::features()->isEnabled('audit'); // true/false
 Route::get('/audit-trail', Controller::class)
     ->middleware('accountflow.feature:audit');
 
+Route::get('/budgets', Controller::class)
+    ->middleware('accountflow.feature:budgets');
+
+Route::get('/categories', Controller::class)
+    ->middleware('accountflow.feature:categories');
+
 // Group protection
-Route::middleware(['auth', 'accountflow.feature:budgets'])->group(function () {
-    Route::get('/budgets', [BudgetController::class, 'index']);
+Route::middleware(['auth', 'accountflow.feature:payment_methods'])->group(function () {
+    Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
+    Route::get('/payment-methods/create', [PaymentMethodController::class, 'create']);
 });
 ```
 
