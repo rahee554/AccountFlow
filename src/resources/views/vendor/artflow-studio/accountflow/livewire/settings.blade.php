@@ -214,6 +214,16 @@
                                 </select>
                             </div>
 
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Currency</label>
+                                <select class="form-select form-select-sm" wire:model="settings.currency" {{ !$isAdmin && $isAdminManagementEnabled ? 'disabled' : '' }}>
+                                    @foreach(config('accountflow.currencies', ['PKR' => 'PKR — Pakistani Rupee']) as $code => $label)
+                                        <option value="{{ $code }}" @selected(($settings['currency'] ?? 'PKR') === $code)>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="form-text">Sets the currency symbol used across the accounting module.</div>
+                            </div>
+
                             <div class="mt-4 text-end">
                                 <button type="submit" class="btn btn-primary" {{ !$isAdmin && $isAdminManagementEnabled ? 'disabled' : '' }}>
                                     <i class="fas fa-save me-2"></i>Update Settings

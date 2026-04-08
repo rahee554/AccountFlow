@@ -6,13 +6,20 @@ use Livewire\Component;
 
 class AssetsList extends Component
 {
-    public function render()
+    /** When true renders only the table (no layout/header). */
+    public bool $standalone = false;
+
+    public function render(): \Illuminate\View\View
     {
-        $viewpath = config('accountflow.view_path').'livewire.assets.assets-list';
-        $layout = config('accountflow.layout');
-        $title = 'Assets List | '.config('accountflow.business_name');
+        $viewpath = config('accountflow.view_path') . 'livewire.assets.assets-list';
+        $layout   = config('accountflow.layout');
+        $title    = 'Assets List | ' . config('accountflow.business_name');
+        $view     = view($viewpath);
 
-        return view($viewpath)->extends($layout)->section('content')->title($title);
+        if (! $this->standalone) {
+            return $view->extends($layout)->section('content')->title($title);
+        }
 
+        return $view;
     }
 }

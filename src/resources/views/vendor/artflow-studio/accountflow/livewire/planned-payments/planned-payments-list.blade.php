@@ -1,6 +1,7 @@
 <div>
-    {{-- Success is as dangerous as failure. --}}
+    @if(!$standalone)
         @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @endif
 
 
         @livewire('aftable', [
@@ -15,26 +16,25 @@
                 'label' => 'Description',
             ],
             [
-                'key' => 'value',
-                'label' => 'Value',
-                'raw' => '<span class="fw-bold">Rs: {{ $row->amount }}</span>'
+                'key'   => 'amount',
+                'label' => 'Amount',
+                'raw'   => '<span class="fw-bold">{{ config(\'accountflow.currency_symbols.\' . config(\'accountflow.currency\', \'PKR\'), config(\'accountflow.currency\', \'PKR\') . \' \') }}{{ number_format($row->amount, 2) }}</span>',
             ],
             [
-                'key' => 'category_id',
+                'key'      => 'category_id',
                 'relation' => 'category:name',
-                'label' => 'Category',
-                'raw' => '<span><img src="{{ asset(config(\'accountflow.asset_path\') . "icons/accounts_icons/" . $row->category->icon) }}" alt="{{ $row->category->name }}" class="h-30px me-2">{{ $row->category->name }}</span>'
-            ],
-
-            [   
-                'key' => 'due_date',
-                'label' => 'Date',
-                'raw' => '{{ \Carbon\Carbon::parse($row->due_date)->format("d M Y") }}'
+                'label'    => 'Category',
+                'raw'      => '<span><img src="{{ asset(config(\'accountflow.asset_path\') . \'icons/accounts_icons/\' . $row->category->icon) }}" alt="{{ $row->category->name }}" class="h-30px me-2">{{ $row->category->name }}</span>',
             ],
             [
-                'key' => 'transactions',
-                'label' => 'Transactions',
-                'raw' => '{{ \App\Models\AccountFlow\AssetTransaction::where("asset_id", $row->id)->sum("asset_id") }}'
+                'key'   => 'due_date',
+                'label' => 'Due Date',
+                'raw'   => '{{ \Carbon\Carbon::parse($row->due_date)->format("d M Y") }}',
+            ],
+            [
+                'key'   => 'trx_id',
+                'label' => 'Status',
+                'raw'   => '{!! $row->trx_id ? "<span class=\"badge badge-light-success\">Posted</span>" : "<span class=\"badge badge-light-warning\">Pending</span>" !!}',
             ],
         ],
         'actions' => [

@@ -1,12 +1,12 @@
-
 <?php
 
 namespace App\Models\AccountFlow;
-use Illuminate\Database\Eloquent\Model;
+
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use HasFactory;
 
 /**
  * App\Models\AccountFlow\EquityPartner
@@ -22,20 +22,19 @@ use HasFactory;
  */
 class EquityPartner extends Model
 {
+    use HasFactory;
 
     /**
      * The table associated with the model.
      */
-    protected string $table = 'ac_equity_partners';
+    protected $table = 'ac_equity_partners';
 
     /**
      * The attributes that aren't mass assignable.
      *
-     * Using guarded to protect the primary key by default.
-     *
      * @var array<int,string>
      */
-    protected array $guarded = ['id'];
+    protected $guarded = ['id'];
 
     /**
      * Return the attribute casts for the model.
@@ -45,29 +44,23 @@ class EquityPartner extends Model
     protected function casts(): array
     {
         return [
-            'id' => 'integer',
-            'percentage' => 'decimal:4',
-            'invested_at' => 'datetime',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-            'deleted_at' => 'datetime',
+            'id'                   => 'integer',
+            'ownership_percentage' => 'decimal:4',
+            'current_equity'       => 'decimal:2',
+            'is_active'            => 'boolean',
+            'joined_at'            => 'date',
+            'left_at'              => 'date',
+            'created_at'           => 'datetime',
+            'updated_at'           => 'datetime',
         ];
     }
 
     /**
-     * Scope a query to only include partners with a non-zero percentage.
+     * Scope a query to only include active partners.
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('percentage', '>', 0);
-    }
-
-    /**
-     * A convenience method to determine whether the partner is active.
-     */
-    public function isActive(): bool
-    {
-        return (float) $this->percentage > 0.0;
+        return $query->where('is_active', true);
     }
 
     /**

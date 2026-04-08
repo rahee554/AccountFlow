@@ -28,6 +28,7 @@ class AccountFlowManager
         $this->services['reports'] = ReportService::class;
         $this->services['settings'] = SettingsService::class;
         $this->services['audit'] = AuditService::class;
+        $this->services['features'] = FeatureService::class;
     }
 
     /**
@@ -71,6 +72,11 @@ class AccountFlowManager
     public function audit(): AuditService
     {
         return app()->make(AuditService::class);
+    }
+
+    public function features(): FeatureService
+    {
+        return app()->make(FeatureService::class);
     }
 
     /**

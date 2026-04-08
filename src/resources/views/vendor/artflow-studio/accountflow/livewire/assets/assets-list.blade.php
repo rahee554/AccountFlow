@@ -1,7 +1,8 @@
 <div>
-    @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @if(!$standalone)
+        @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @endif
 
-    
     @livewire('aftable', [
         'model' => 'App\Models\AccountFlow\Asset',
         'columns' => [
@@ -14,9 +15,9 @@
                 'label' => 'Description',
             ],
             [
-                'key' => 'value',
+                'key'   => 'value',
                 'label' => 'Value',
-                'raw' => '<span class="fw-bold">Rs: {{ $row->value }}</span>'
+                'raw'   => '<span class="fw-bold">{{ config(\'accountflow.currency_symbols.\' . config(\'accountflow.currency\', \'PKR\'), config(\'accountflow.currency\', \'PKR\') . \' \') }}{{ number_format($row->value, 2) }}</span>',
             ],
             [
                 'key' => 'category_id',
@@ -34,9 +35,9 @@
                 'raw' => '{{ \Carbon\Carbon::parse($row->acquisition_date)->format("d M Y") }}'
             ],
             [
-                'key' => 'transactions',
+                'key'   => 'transactions',
                 'label' => 'Transactions',
-                'raw' => '{{ \App\Models\AccountFlow\AssetTransaction::where("asset_id", $row->id)->sum("asset_id") }}'
+                'raw'   => '{{ \\App\\Models\\AccountFlow\\AssetTransaction::where("asset_id", $row->id)->count() }}',
             ],
         ],
         'actions' => [

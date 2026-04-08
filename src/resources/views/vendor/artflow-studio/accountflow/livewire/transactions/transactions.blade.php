@@ -1,7 +1,10 @@
 <div>
-    @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @if(!$standalone)
+        @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @endif
 
-    <div class="px-2 px-md-5 px-lg-10">
+    <div class="px-2 px-md-5 px-lg-10"
+         style="@if($standalone) padding: 0 !important; @endif">
 
         <div class="d-flex flex-stack my-2">
             <h1>Transactions</h1>
@@ -12,17 +15,17 @@
                     Multiple Records</a>
             </div>
         </div>
+
+        {{-- Primary Transactions Table --}}
         @livewire('aftable', [
             'model' => 'App\Models\AccountFlow\Transaction',
             'columns' => [
-                [
-                    'key' => 'amount',
+                ['key' => 'amount',
                     'label' => 'Amount',
-                    'raw' => '<span class="fw-bold {{ $row->type == 1 ? "text-success" : "text-danger" }}">Rs: {{ $row->amount }}</span>'
+                    'raw' => '<span class="fw-bold {{ $row->type == 1 ? "text-success" : "text-danger" }}">{{ config(\'accountflow.currency_symbols.\' . config(\'accountflow.currency\', \'PKR\'), config(\'accountflow.currency\', \'PKR\') . \' \') }}{{ number_format($row->amount, 2) }}</span>'
                 ],
                 ['key' => 'date', 'label' => 'Date', 'raw' => '{{ \Carbon\Carbon::parse($row->date)->format("d M Y") }}'],
                 ['key' => 'description', 'label' => 'Description'],
-
                 [
                     'key' => 'category_id',
                     'relation' => 'category:name',
@@ -33,7 +36,9 @@
             ],
             'actions' => [
                 'raw' => '<a href="{{ route(\'accountflow::transactions.edit\', [\'id\' => base64_encode($row->id)]) }}" class="btn btn-sm btn-light-info">Edit</a>'
-            ]
+            ],
+            'sortBy' => 'date',
+            'sortDirection' => 'desc',
         ])
     </div>
 </div>

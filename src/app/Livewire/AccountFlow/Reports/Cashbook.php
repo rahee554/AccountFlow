@@ -12,23 +12,24 @@ class Cashbook extends Component
 {
     use WithPagination;
 
-    protected $paginationTheme = 'bootstrap';
+    protected string $paginationTheme = 'bootstrap';
 
-    public $accountId = '';
+    public string $accountId = '';
 
-    public $period = 'month'; // today, month, year, custom
+    public string $period = 'month'; // today, month, year, custom
 
-    public $dateFrom;
+    public string $dateFrom = '';
 
-    public $dateTo;
+    public string $dateTo = '';
 
-    public $perPage = 25;
+    public int $perPage = 25;
 
-    public $accounts = [];
+    /** @var array<int, \App\Models\AccountFlow\Account> */
+    public array $accounts = [];
 
-    public function mount()
+    public function mount(): void
     {
-        $this->accounts = Account::orderBy('name')->get();
+        $this->accounts = Account::orderBy('name')->get()->toArray();
 
         $now = Carbon::now();
         $this->setPeriodDates($this->period, $now);
@@ -94,9 +95,9 @@ class Cashbook extends Component
             $query->whereDate('date', '<=', $this->dateTo);
         }
 
-        // totals (type codes: 1 = income/credit, 2 = expense/debit)
-        $totalDebit = (clone $query)->where('type', 2)->sum('amount');
-        $totalCredit = (clone $query)->where('type', 1)->sum('amount');
+        // totals — use whereIn to handle both integer and string type values
+        $totalDebit = (clone $query)->whereIn('type', ['expense', '2', 2])->sum('amount');
+        $totalCredit = (clone $query)->whereIn('type', ['income', '1', 1])->sum('amount');
 
         $transactions = (clone $query)->with(['account', 'category', 'paymentMethod'])->orderBy('date', 'desc')->paginate($this->perPage);
 

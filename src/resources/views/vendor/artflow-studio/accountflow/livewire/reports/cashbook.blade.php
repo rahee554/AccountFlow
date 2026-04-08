@@ -23,17 +23,17 @@
                     <select wire:model="accountId" class="form-select form-select-sm">
                         <option value="">All Accounts</option>
                         @foreach($accounts as $acct)
-                            <option value="{{ $acct->id }}">{{ $acct->name }}</option>
+                            <option value="{{ $acct['id'] }}">{{ $acct['name'] }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">From</label>
-                    <input wire:model.defer="dateFrom" type="date" class="form-control form-control-sm" />
+                    <input wire:model="dateFrom" type="date" class="form-control form-control-sm" />
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">To</label>
-                    <input wire:model.defer="dateTo" type="date" class="form-control form-control-sm" />
+                    <input wire:model="dateTo" type="date" class="form-control form-control-sm" />
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
                     <button wire:click="$refresh" class="btn btn-sm btn-primary w-100">Apply</button>

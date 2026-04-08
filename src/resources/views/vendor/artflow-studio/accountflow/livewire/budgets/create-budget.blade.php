@@ -27,7 +27,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Account <span class="text-danger">*</span></label>
-                                <select class="form-select form-select-sm" wire:model.defer="account_id">
+                                <select class="form-select form-select-sm" wire:model="account_id">
                                     <option value="">-- select account --</option>
                                     @foreach($accountOptions as $id => $label)
                                         <option value="{{ $id }}">{{ $label }}</option>
@@ -38,7 +38,7 @@
 
                             <div class="col-md-6">
                                 <label class="form-label">Category <span class="text-danger">*</span></label>
-                                <select class="form-select form-select-sm" wire:model.defer="category_id">
+                                <select class="form-select form-select-sm" wire:model="category_id">
                                     <option value="">-- select category --</option>
                                     @foreach($categoryOptions as $id => $label)
                                         <option value="{{ $id }}">{{ $label }}</option>
@@ -49,13 +49,13 @@
 
                             <div class="col-md-4">
                                 <label class="form-label">Amount (USD) <span class="text-danger">*</span></label>
-                                <input type="number" step="0.01" class="form-control form-control-sm" wire:model.defer="amount" />
+                                <input type="number" step="0.01" class="form-control form-control-sm" wire:model="amount" />
                                 @error('amount') <div class="text-danger small">{{ $message }}</div> @enderror
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Period</label>
-                                <select class="form-select form-select-sm" wire:model.defer="period">
+                                <select class="form-select form-select-sm" wire:model="period">
                                     <option value="monthly">Monthly</option>
                                     <option value="quarterly">Quarterly</option>
                                     <option value="yearly">Yearly</option>
@@ -64,17 +64,17 @@
 
                             <div class="col-md-2">
                                 <label class="form-label">Year</label>
-                                <input type="number" class="form-control form-control-sm" wire:model.defer="year" />
+                                <input type="number" class="form-control form-control-sm" wire:model="year" />
                             </div>
 
                             <div class="col-md-2">
                                 <label class="form-label">Month</label>
-                                <input type="number" min="1" max="12" class="form-control form-control-sm" wire:model.defer="month" />
+                                <input type="number" min="1" max="12" class="form-control form-control-sm" wire:model="month" />
                             </div>
 
                             <div class="col-12">
                                 <label class="form-label">Description</label>
-                                <textarea class="form-control form-control-sm" rows="3" wire:model.defer="description"></textarea>
+                                <textarea class="form-control form-control-sm" rows="3" wire:model="description"></textarea>
                             </div>
                         </div>
 

@@ -1,7 +1,9 @@
 <div>
-       @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @if(!$standalone)
+        @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @endif
 
-        @livewire('aftable', [
+    @livewire('aftable', [
         'model' => 'App\Models\AccountFlow\AssetTransaction',
         'columns' => [
 
@@ -16,9 +18,9 @@
                 'relation' => 'asset:description',
             ],
             [
-                'key' => 'value',
+                'key'   => 'value',
                 'label' => 'Total Value',
-                'raw' => '<span class="fw-bold">Rs: {{ $row->value }}</span>'
+                'raw'   => '<span class="fw-bold">{{ config(\'accountflow.currency_symbols.\' . config(\'accountflow.currency\', \'PKR\'), config(\'accountflow.currency\', \'PKR\') . \' \') }}{{ number_format($row->value, 2) }}</span>',
             ],
 
             [
@@ -28,9 +30,9 @@
             ],
 
             [
-                'key' => 'amount',
+                'key'   => 'amount',
                 'label' => 'Amount',
-                'raw' => '<span class="fw-bold {{ $row->type == 1 ? "text-success" : "text-danger" }}">Rs: {{ $row->amount }}</span>'
+                'raw'   => '<span class="fw-bold {{ $row->type == 1 ? \"text-success\" : \"text-danger\" }}">{{ config(\'accountflow.currency_symbols.\' . config(\'accountflow.currency\', \'PKR\'), config(\'accountflow.currency\', \'PKR\') . \' \') }}{{ number_format($row->amount, 2) }}</span>',
             ],
             ['key' => 'date', 'label' => 'Date', 'raw' => '{{ \Carbon\Carbon::parse($row->date)->format("d M Y") }}'],
 

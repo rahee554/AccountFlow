@@ -1,228 +1,165 @@
-{{-- filepath: d:\Repositories\Al-Emaan_Travels\resources\views\vendor\artflow-studio\accountflow\livewire\budgets\budgets-list.blade.php --}}
 <div>
-    @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @if(!$standalone)
+        @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @endif
 
-    <div class="mb-4 d-flex justify-content-between align-items-center">
-        <div>
-            <h3 class="mb-0">Budgets Overview</h3>
-            <div class="small text-muted">High-level KPIs and recent budget activity</div>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('accountflow::budgets.create') ?? '#' }}" class="btn btn-primary btn-sm">Create Budget</a>
-            <button class="btn btn-outline-secondary btn-sm">Export</button>
-        </div>
-    </div>
+    <div class="d-flex flex-column flex-column-fluid">
+        <div id="kt_app_content" class="app-content flex-column-fluid">
+            <div id="kt_app_content_container" class="app-container container-xxl">
 
-    @php
-        $totalBudget = collect($budgets ?? [])->sum(fn($b) => data_get($b, 'amount', 0));
-        $spent = collect($budgets ?? [])->sum(fn($b) => data_get($b, 'spent', 0));
-        $remaining = $totalBudget - $spent;
-        $activeCount = collect($budgets ?? [])->filter(fn($b) => data_get($b, 'is_active', true) || data_get($b, 'active', true))->count();
-        $totalCount = collect($budgets ?? [])->count();
-        $avg = $totalCount ? ($totalBudget / $totalCount) : 0;
-    @endphp
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show mb-5" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
 
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="small text-muted">Total Budget</div>
-                    <div class="h4 fw-bold mt-2">{{ number_format($totalBudget,2) }} <small class="text-muted">USD</small></div>
-                    <div class="progress mt-3" style="height:6px">
-                        <div class="progress-bar bg-primary" role="progressbar" style="width:100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                {{-- KPI Cards --}}
+                <div class="row g-5 g-xl-8 mb-5">
+                    <div class="col-xl-3">
+                        <div class="card card-flush" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <div class="card-body p-6">
+                                <div class="symbol symbol-50px mb-3" style="opacity:.8"><div class="symbol-label" style="background:rgba(255,255,255,.2)"><i class="fas fa-bullseye text-white fs-2"></i></div></div>
+                                <span class="text-white opacity-75 fw-semibold fs-7 d-block mb-1">Total Budgets</span>
+                                <span class="text-white fs-2hx fw-bolder">{{ $stats['count'] }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3">
+                        <div class="card card-flush" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <div class="card-body p-6">
+                                <div class="symbol symbol-50px mb-3" style="opacity:.8"><div class="symbol-label" style="background:rgba(255,255,255,.2)"><i class="fas fa-dollar-sign text-white fs-2"></i></div></div>
+                                <span class="text-white opacity-75 fw-semibold fs-7 d-block mb-1">Total Allocated</span>
+                                <span class="text-white fs-2hx fw-bolder">{{ $currency }} {{ number_format($stats['total'], 2) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3">
+                        <div class="card card-flush" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                            <div class="card-body p-6">
+                                <div class="symbol symbol-50px mb-3" style="opacity:.8"><div class="symbol-label" style="background:rgba(255,255,255,.2)"><i class="fas fa-calendar-day text-white fs-2"></i></div></div>
+                                <span class="text-white opacity-75 fw-semibold fs-7 d-block mb-1">Monthly Budget</span>
+                                <span class="text-white fs-2hx fw-bolder">{{ $currency }} {{ number_format($stats['monthly'], 2) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3">
+                        <div class="card card-flush h-100">
+                            <div class="card-body p-6 d-flex flex-column justify-content-center">
+                                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                                    <a href="{{ route('accountflow::budgets.create') }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-plus me-1"></i>Create Budget
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="small text-muted">Spent</div>
-                    <div class="h4 text-danger fw-bold mt-2">{{ number_format($spent,2) }}</div>
-                    <div class="small text-muted">{{ $totalCount }} budgets • {{ $activeCount }} active</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="small text-muted">Remaining</div>
-                    <div class="h4 text-success fw-bold mt-2">{{ number_format($remaining,2) }}</div>
-                    <div class="small text-muted">Avg: {{ number_format($avg,2) }}</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card shadow-sm">
-                <div class="card-body d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="small text-muted">Active Budgets</div>
-                        <div class="h5 fw-bold mt-1">{{ $activeCount }} / {{ $totalCount }}</div>
+                {{-- Table --}}
+                <div class="card card-flush">
+                    <div class="card-header pt-5 pb-3">
+                        <h3 class="card-title align-items-start flex-column">
+                            <span class="card-label fw-bold text-dark fs-3">
+                                <i class="fas fa-chart-bar me-2 text-primary"></i>Budget Overview
+                            </span>
+                            <span class="text-muted fw-semibold fs-7">Allocations by category and account</span>
+                        </h3>
+                        <div class="card-toolbar gap-2">
+                            <input wire:model.live.debounce.300ms="search"
+                                   type="text"
+                                   class="form-control form-control-sm w-200px"
+                                   placeholder="Search budgets...">
+                            <select wire:model.live="periodFilter" class="form-select form-select-sm w-150px">
+                                <option value="">All Periods</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="yearly">Yearly</option>
+                            </select>
+                            <a href="{{ route('accountflow::budgets.create') }}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-plus me-1"></i>Create
+                            </a>
+                        </div>
                     </div>
-                    <div class="text-end">
-                        <div class="badge bg-info">Overview</div>
+                    <div class="card-body pt-0">
+                        <div class="table-responsive">
+                            <table class="table table-row-dashed align-middle gs-0 gy-4">
+                                <thead>
+                                    <tr class="fw-bold text-muted fs-7 border-bottom-2 border-gray-200">
+                                        <th class="min-w-200px">Category</th>
+                                        <th class="min-w-150px">Account</th>
+                                        <th class="min-w-100px text-center">Period</th>
+                                        <th class="min-w-80px text-center">Month / Year</th>
+                                        <th class="min-w-150px text-end">Allocated Amount</th>
+                                        <th class="min-w-200px">Description</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($budgets as $budget)
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="symbol symbol-35px">
+                                                        <div class="symbol-label bg-light-primary">
+                                                            <i class="fas fa-tag text-primary fs-7"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="fw-bold text-gray-900 fs-7">
+                                                        {{ $budget->category->name ?? '—' }}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-gray-800 fs-7">{{ $budget->account->name ?? '—' }}</td>
+                                            <td class="text-center">
+                                                @if($budget->period === 'monthly')
+                                                    <span class="badge badge-light-primary">Monthly</span>
+                                                @elseif($budget->period === 'yearly')
+                                                    <span class="badge badge-light-success">Yearly</span>
+                                                @else
+                                                    <span class="badge badge-light-secondary">{{ $budget->period }}</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-center text-muted fs-8">
+                                                @if($budget->month)
+                                                    {{ \Carbon\Carbon::create()->month($budget->month)->format('M') }}
+                                                @else — @endif
+                                                {{ $budget->year ? '/ ' . $budget->year : '' }}
+                                            </td>
+                                            <td class="text-end fw-bold text-gray-900">
+                                                {{ $currency }} {{ number_format($budget->amount, 2) }}
+                                            </td>
+                                            <td class="text-muted fs-8">{{ Str::limit($budget->description ?? '—', 50) }}</td>
+                                            <td class="text-end">
+                                                <div class="d-flex gap-1 justify-content-end">
+                                                    <a href="{{ route('accountflow::budgets') }}" class="btn btn-sm btn-light-warning">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button wire:click="deleteBudget({{ $budget->id }})"
+                                                            wire:confirm="Delete this budget?"
+                                                            class="btn btn-sm btn-light-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="7" class="text-center py-10">
+                                                <div class="text-muted">
+                                                    <i class="fas fa-chart-bar fs-2x mb-3 d-block"></i>
+                                                    No budgets found. <a href="{{ route('accountflow::budgets.create') }}">Create your first budget</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4">{{ $budgets->links() }}</div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="mb-0">Budget Trends</h6>
-                        <div class="small text-muted">Last 30 days</div>
-                    </div>
-                    <div>
-                        <button class="btn btn-sm btn-outline-secondary">Range</button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <canvas id="budgetsTrendChart" style="height:260px;"></canvas>
-                </div>
             </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <h6 class="mb-0">Top Budgets</h6>
-                </div>
-                <div class="card-body">
-                    @php $top = collect($budgets ?? [])->sortByDesc(fn($b) => data_get($b,'amount',0))->take(5); @endphp
-                    @if($top->isEmpty())
-                        <div class="small text-muted">No budgets available.</div>
-                    @else
-                        <ul class="list-group list-group-flush">
-                            @foreach($top as $t)
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <div class="fw-semibold">{{ data_get($t,'title', data_get($t,'category.name','Budget')) }}</div>
-                                        <div class="small text-muted">{{ data_get($t,'account.name') ?? '—' }}</div>
-                                    </div>
-                                    <div class="text-end">
-                                        <div class="fw-bold">{{ number_format(data_get($t,'amount',0),2) }}</div>
-                                        <div class="small text-muted">{{ number_format(data_get($t,'spent',0),2) }} spent</div>
-                                    </div>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Budgets table --}}
-    <div class="card mt-3 shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <div>
-                <h6 class="mb-0">Budgets</h6>
-                <div class="small text-muted">Overview of budgets and progress</div>
-            </div>
-            <div class="d-flex gap-2 align-items-center">
-                <input type="text" class="form-control form-control-sm" placeholder="Search budgets..." />
-                <select class="form-select form-select-sm w-auto">
-                    <option>10</option>
-                    <option>25</option>
-                    <option>50</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Budget</th>
-                            <th>Account</th>
-                            <th class="text-end">Amount</th>
-                            <th class="text-end">Spent</th>
-                            <th class="text-end">Remaining</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($budgets ?? [] as $b)
-                            @php
-                                $amount = data_get($b,'amount',0);
-                                $spentItem = data_get($b,'spent',0);
-                                $rem = $amount - $spentItem;
-                            @endphp
-                            <tr>
-                                <td>
-                                    <div class="fw-semibold">{{ data_get($b,'title', data_get($b,'category.name','Budget')) }}</div>
-                                    <div class="small text-muted">{{ data_get($b,'description') }}</div>
-                                </td>
-                                <td>{{ data_get($b,'account.name') ?? '—' }}</td>
-                                <td class="text-end">{{ number_format($amount,2) }}</td>
-                                <td class="text-end text-danger">{{ number_format($spentItem,2) }}</td>
-                                <td class="text-end text-success">{{ number_format($rem,2) }}</td>
-                                <td class="text-center">
-                                    @if(data_get($b,'is_active', data_get($b,'active', true)))
-                                        <span class="badge bg-success">Active</span>
-                                    @else
-                                        <span class="badge bg-secondary">Inactive</span>
-                                    @endif
-                                </td>
-                                <td class="text-end">
-                                    <button wire:click="edit({{ data_get($b,'id') }})" class="btn btn-sm btn-outline-primary">Edit</button>
-                                    <button wire:click="delete({{ data_get($b,'id') }})" class="btn btn-sm btn-outline-danger">Delete</button>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="text-center small text-muted py-3">No budgets yet.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="card-footer d-flex justify-content-between align-items-center small text-muted">
-            <div>Showing {{ collect($budgets ?? [])->count() }} budgets</div>
-            <div>Last updated: {{ optional(collect($budgets ?? [])->sortByDesc('updated_at')->first()?->updated_at)?->format('M d, Y') ?? '—' }}</div>
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-    (function () {
-        const ctx = document.getElementById('budgetsTrendChart');
-        if (!ctx) return;
-
-        const labels = @json($trends['labels'] ?? []);
-        const values = @json($trends['values'] ?? []);
-
-        const demoLabels = labels.length ? labels : Array.from({length:7}).map((_,i) => {
-            const d = new Date(); d.setDate(d.getDate() - (6 - i)); return d.toLocaleDateString();
-        });
-        const demoValues = values.length ? values : [200,350,400,300,450,600,700];
-
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: demoLabels,
-                datasets: [{
-                    label: 'Budget trend',
-                    data: demoValues,
-                    borderColor: '#0d6efd',
-                    backgroundColor: 'rgba(13,110,253,0.08)',
-                    fill: true,
-                    tension: 0.3
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-        });
-    })();
-</script>
-@endpush

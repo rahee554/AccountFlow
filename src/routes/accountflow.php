@@ -25,6 +25,7 @@ use App\Livewire\AccountFlow\PaymentMethod\PaymentMethods;
 use App\Livewire\AccountFlow\PlannedPayments\CreatePlannedPayment;
 use App\Livewire\AccountFlow\PlannedPayments\PlannedPaymentsList;
 use App\Livewire\AccountFlow\Reports\Cashbook;
+use App\Livewire\AccountFlow\Reports\BalanceSheet;
 use App\Livewire\AccountFlow\Reports\ProfitLoss;
 use App\Livewire\AccountFlow\Reports\TrialBalance;
 use App\Livewire\AccountFlow\Settings as AccountsSettings;
@@ -49,7 +50,7 @@ Route::group(['middleware' => Config::get('accountflow.middlewares')], function 
         Route::get('/dashboard', AccountsDashboard::class)->name('dashboard');
 
         // ** ::::::::::::::::::::::: Settings ::::::::::::::::::::::: **/
-        Route::middleware(['accountflow.admin'])->group(function () {
+        Route::middleware(['role:business'])->group(function () {
             Route::get('/settings', AccountsSettings::class)->name('settings');
         });
 
@@ -157,6 +158,8 @@ Route::group(['middleware' => Config::get('accountflow.middlewares')], function 
         Route::middleware(['accountflow.feature:cashbook'])->group(function () {
             Route::get('/report/cashbook', Cashbook::class)->name('report.cashbook');
         });
+
+        Route::get('/report/balance-sheet', BalanceSheet::class)->name('report.balance-sheet');
 
     });
 });

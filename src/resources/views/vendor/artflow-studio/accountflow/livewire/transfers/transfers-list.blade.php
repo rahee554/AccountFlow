@@ -1,6 +1,9 @@
 <div>
-    @include(config('accountflow.view_path') . '.blades.dashboard-header')
-    <div class="px-2 px-md-5 px-lg-10">
+    @if(!$standalone)
+        @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @endif
+    <div class="px-2 px-md-5 px-lg-10"
+         style="@if($standalone) padding: 0 !important; @endif">
 
         <div class="d-flex flex-stack my-2">
             <h1>Account Transfers</h1>
@@ -15,9 +18,9 @@
             'columns' => [
                 ['key' => 'unique_id', 'label' => 'Transfer ID'],
                 [
-                    'key' => 'amount',
+                    'key'   => 'amount',
                     'label' => 'Amount',
-                    'raw' => '<span class="text-primary fw-bold">PKR {{ number_format($row->amount, 2) }}</span>'
+                    'raw'   => '<span class="text-primary fw-bold">{{ config(\'accountflow.currency_symbols.\' . config(\'accountflow.currency\', \'PKR\'), config(\'accountflow.currency\', \'PKR\') . \' \') }}{{ number_format($row->amount, 2) }}</span>',
                 ],
                 ['key' => 'from_account', 'label' => 'From Account', 'relation' => 'fromAccount:name'],
                 ['key' => 'to_account', 'label' => 'To Account', 'relation' => 'toAccount:name'],

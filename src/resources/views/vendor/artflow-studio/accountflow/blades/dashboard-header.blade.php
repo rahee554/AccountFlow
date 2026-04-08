@@ -123,12 +123,20 @@
                         <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
                             <li><a class="dropdown-item" href="{{ route('accountflow::report') }}" wire:navigate.hover>
                                 <i class="fas fa-chart-line me-2"></i>Financial Summary</a></li>
+                            @featureEnabled('profit_loss')
+                            <li><a class="dropdown-item" href="{{ route('accountflow::report.profitLoss') }}" wire:navigate.hover>
+                                <i class="fas fa-chart-area me-2"></i>Profit &amp; Loss</a></li>
+                            @endFeatureEnabled
                             @featureEnabled('cashbook')
                             <li><a class="dropdown-item" href="{{ route('accountflow::report.cashbook') }}" wire:navigate.hover>
                                 <i class="fas fa-book-open me-2"></i>Cashbook</a></li>
                             @endFeatureEnabled
+                            @featureEnabled('trial_balance')
                             <li><a class="dropdown-item" href="{{ route('accountflow::report.trial-balance') }}" wire:navigate.hover>
                                 <i class="fas fa-balance-scale me-2"></i>Trial Balance</a></li>
+                            @endFeatureEnabled
+                            <li><a class="dropdown-item" href="{{ route('accountflow::report.balance-sheet') }}" wire:navigate.hover>
+                                <i class="fas fa-file-invoice me-2"></i>Balance Sheet</a></li>
                         </ul>
                     </li>
                     @endFeatureEnabled
@@ -306,10 +314,16 @@
                     <div class="collapse" id="reportsCollapse">
                         <ul class="navbar-nav ps-3">
                             <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::report') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-chart-line me-2"></i>Financial Summary</a></li>
+                            @featureEnabled('profit_loss')
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::report.profitLoss') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-chart-area me-2"></i>Profit &amp; Loss</a></li>
+                            @endFeatureEnabled
                             @featureEnabled('cashbook')
                             <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::report.cashbook') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-book-open me-2"></i>Cashbook</a></li>
                             @endFeatureEnabled
+                            @featureEnabled('trial_balance')
                             <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::report.trial-balance') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-balance-scale me-2"></i>Trial Balance</a></li>
+                            @endFeatureEnabled
+                            <li class="nav-item"><a class="nav-link" href="{{ route('accountflow::report.balance-sheet') }}" wire:navigate.hover data-bs-dismiss="offcanvas"><i class="fas fa-file-invoice me-2"></i>Balance Sheet</a></li>
                         </ul>
                     </div>
                 </li>

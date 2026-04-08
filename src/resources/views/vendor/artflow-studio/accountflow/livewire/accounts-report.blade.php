@@ -4,8 +4,22 @@
     <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3>Financial Summary</h3>
-        <div class="w-200px">
-            <input type="text" class="form-control form-control-sm" id="datarange" wire:model="dateRange">
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <a href="{{ route('accountflow::report.profitLoss') }}" class="btn btn-sm btn-light-success">
+                <i class="fas fa-chart-line me-1"></i>P&amp;L Report
+            </a>
+            <a href="{{ route('accountflow::report.trial-balance') }}" class="btn btn-sm btn-light-primary">
+                <i class="fas fa-balance-scale me-1"></i>Trial Balance
+            </a>
+            <a href="{{ route('accountflow::report.cashbook') }}" class="btn btn-sm btn-light">
+                <i class="fas fa-book me-1"></i>Cashbook
+            </a>
+            <a href="{{ route('accountflow::report.balance-sheet') }}" class="btn btn-sm btn-light-dark">
+                <i class="fas fa-file-invoice me-1"></i>Balance Sheet
+            </a>
+            <div class="w-200px">
+                <input type="text" class="form-control form-control-sm" id="datarange" wire:model="dateRange">
+            </div>
         </div>
     </div>
 

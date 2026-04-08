@@ -106,4 +106,31 @@ return [
     'default_account_id' => 1,
     'default_expense_category_id' => 1,
     'route_prefix' => 'accounts',
+
+    // Currency symbol/code used across all views and reports
+    'currency' => 'PKR',
+
+    // Display symbols for supported currencies (used in views and reports)
+    'currency_symbols' => [
+        'PKR' => 'Rs. ',
+        'USD' => '$',
+        'EUR' => '€',
+        'GBP' => '£',
+        'AED' => 'AED ',
+        'SAR' => 'SAR ',
+        'INR' => '₹',
+        'BDT' => '৳',
+    ],
+
+    // Supported currencies list (used in settings dropdown)
+    'currencies' => [
+        'PKR' => 'PKR — Pakistani Rupee',
+        'USD' => 'USD — US Dollar',
+        'EUR' => 'EUR — Euro',
+        'GBP' => 'GBP — British Pound',
+        'AED' => 'AED — UAE Dirham',
+        'SAR' => 'SAR — Saudi Riyal',
+        'INR' => 'INR — Indian Rupee',
+        'BDT' => 'BDT — Bangladeshi Taka',
+    ],
 ];

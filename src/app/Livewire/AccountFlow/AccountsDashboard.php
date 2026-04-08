@@ -11,38 +11,59 @@ use Livewire\Component;
 
 class AccountsDashboard extends Component
 {
-    public $fluid;
+    public bool $fluid = true;
 
-    public $selectedPeriod = 'this_month';
+    public string $selectedPeriod = 'this_month';
 
-    public $customStartDate = null;
+    public ?string $customStartDate = null;
 
-    public $customEndDate = null;
+    public ?string $customEndDate = null;
 
-    public $recentTransactions;
+    public array $recentTransactions = [];
 
-    public $topCategories;
+    public array $topCategories = [];
 
-    public $cashflowMonths;
+    public array $cashflowMonths = [];
 
-    public $metrics;
+    public array $metrics = [];
 
-    public $accounts;
+    public array $accounts = [];
 
-    public $budgets;
+    public array $previousMetrics = [];
 
-    public $plannedPayments;
+    /** Currency resolved from DB setting or config fallback. */
+    public string $currency = 'PKR';
 
-    public $paymentMethods;
+    /** Currency display symbol (e.g. 'Rs. ', '$', '€'). */
+    public string $currencySymbol = 'Rs. ';
 
-    public $previousMetrics = [];
-
-    public function mount()
+    public function mount(): void
     {
-        $this->fluid = true;
-
-        // initial load using selected period
+        $this->currency       = $this->resolveCurrency();
+        $this->currencySymbol = $this->resolveCurrencySymbol();
         $this->loadForPeriod($this->selectedPeriod);
+    }
+
+    /** Resolve currency symbol from config currency_symbols map. */
+    protected function resolveCurrencySymbol(): string
+    {
+        $symbols = config('accountflow.currency_symbols', []);
+
+        return $symbols[$this->currency] ?? ($this->currency . ' ');
+    }
+
+    /** Resolve currency: DB setting first, config fallback. */
+    protected function resolveCurrency(): string
+    {
+        try {
+            $dbVal = \App\Models\AccountFlow\Setting::where('key', 'currency')
+                ->where('type', 2)
+                ->value('value');
+
+            return $dbVal ?: config('accountflow.currency', 'PKR');
+        } catch (\Throwable $e) {
+            return config('accountflow.currency', 'PKR');
+        }
     }
 
     /**
@@ -68,131 +89,133 @@ class AccountsDashboard extends Component
     }
 
     /**
-     * Load all data for a given period key
+     * Resolve the start/end date bounds for a given period key.
+     *
+     * @return array{start: string|null, end: string}
+     */
+    protected function resolvePeriodDates(string $period): array
+    {
+        $now = Carbon::now();
+
+        return match ($period) {
+            'all_time'   => ['start' => null,                                                      'end' => $now->toDateString()],
+            'this_year'  => ['start' => $now->copy()->startOfYear()->toDateString(),               'end' => $now->toDateString()],
+            'last_year'  => ['start' => $now->copy()->subYear()->startOfYear()->toDateString(),    'end' => $now->copy()->subYear()->endOfYear()->toDateString()],
+            'last_month' => ['start' => $now->copy()->subMonth()->startOfMonth()->toDateString(),  'end' => $now->copy()->subMonth()->endOfMonth()->toDateString()],
+            'custom'     => $this->customStartDate && $this->customEndDate
+                                ? ['start' => $this->customStartDate, 'end' => $this->customEndDate]
+                                : ['start' => $now->copy()->startOfMonth()->toDateString(),        'end' => $now->toDateString()],
+            default      => ['start' => $now->copy()->startOfMonth()->toDateString(),              'end' => $now->toDateString()], // this_month
+        };
+    }
+
+    /**
+     * Load all dashboard data for a given period key.
+     * Minimised to 6 queries total: period aggregates, all-time aggregates,
+     * accounts, top-categories, cashflow, and recent transactions.
      */
     protected function loadForPeriod(string $period): void
     {
-        // Recent transactions: latest 10 (for context)
-        $this->recentTransactions = Transaction::with(['account', 'category', 'paymentMethod'])
-            ->orderByDesc('date')
-            ->limit(10)
-            ->get();
+        ['start' => $start, 'end' => $end] = $this->resolvePeriodDates($period);
 
-        // Compute date bounds based on period
-        $now = Carbon::now();
-        $start = null;
-        $end = $now->toDateString();
-
-        switch ($period) {
-            case 'all_time':
-                $start = null;
-                break;
-            case 'this_year':
-                $start = $now->copy()->startOfYear()->toDateString();
-                break;
-            case 'last_year':
-                $start = $now->copy()->subYear()->startOfYear()->toDateString();
-                $end = $now->copy()->subYear()->endOfYear()->toDateString();
-                break;
-            case 'last_month':
-                $start = $now->copy()->subMonth()->startOfMonth()->toDateString();
-                $end = $now->copy()->subMonth()->endOfMonth()->toDateString();
-                break;
-            case 'custom':
-                if ($this->customStartDate && $this->customEndDate) {
-                    $start = $this->customStartDate;
-                    $end = $this->customEndDate;
-                } else {
-                    $start = $now->copy()->startOfMonth()->toDateString();
-                }
-                break;
-            case 'this_month':
-            default:
-                $start = $now->copy()->startOfMonth()->toDateString();
-                break;
-        }
-
-        // Build queries with optional start date
-        $incomeQuery = Transaction::income();
-        $expenseQuery = Transaction::expense();
+        // ── 1. Period income/expense in a single conditional-aggregate query ──
+        $periodQuery = Transaction::query();
 
         if ($start) {
-            $incomeQuery = $incomeQuery->whereDate('date', '>=', $start);
-            $expenseQuery = $expenseQuery->whereDate('date', '>=', $start);
+            $periodQuery->whereDate('date', '>=', $start);
         }
 
-        if ($period === 'last_year' || $period === 'last_month' || $period === 'custom') {
-            $incomeQuery = $incomeQuery->whereDate('date', '<=', $end);
-            $expenseQuery = $expenseQuery->whereDate('date', '<=', $end);
-        }
+        // Always apply the upper bound so future-dated rows are excluded
+        $periodQuery->whereDate('date', '<=', $end);
 
-        $income = (float) $incomeQuery->sum('amount');
-        $expense = (float) $expenseQuery->sum('amount');
+        $periodTotals = $periodQuery->selectRaw(
+            'SUM(CASE WHEN type IN ("income","1",1) THEN amount ELSE 0 END) as income,
+             SUM(CASE WHEN type IN ("expense","2",2) THEN amount ELSE 0 END) as expense'
+        )->first();
 
-        // Calculate previous period metrics for comparison
+        $income  = (float) ($periodTotals->income ?? 0);
+        $expense = (float) ($periodTotals->expense ?? 0);
+
+        // ── 2. All-time + rolling window aggregates in one query ──
+        $totals = Transaction::selectRaw(
+            'SUM(CASE WHEN type IN ("income","1",1) THEN amount ELSE 0 END) as all_income,
+             SUM(CASE WHEN type IN ("expense","2",2) THEN amount ELSE 0 END) as all_expense,
+             SUM(CASE WHEN type IN ("income","1",1) AND date >= ? THEN amount ELSE 0 END) as income_6m,
+             SUM(CASE WHEN type IN ("expense","2",2) AND date >= ? THEN amount ELSE 0 END) as expense_6m,
+             SUM(CASE WHEN type IN ("income","1",1) AND date >= ? THEN amount ELSE 0 END) as income_1y,
+             SUM(CASE WHEN type IN ("expense","2",2) AND date >= ? THEN amount ELSE 0 END) as expense_1y',
+            [
+                Carbon::now()->subMonths(6)->toDateString(),
+                Carbon::now()->subMonths(6)->toDateString(),
+                Carbon::now()->subYear()->toDateString(),
+                Carbon::now()->subYear()->toDateString(),
+            ]
+        )->first();
+
+        // ── 3. Previous-period comparison ──
         $this->calculatePreviousMetrics($period, $start, $end);
 
-        // 6-month and 1-year aggregates (kept for additional cards)
-        $since6m = Carbon::now()->subMonths(6)->toDateString();
-        $income6 = (float) Transaction::income()->since($since6m)->sum('amount');
-        $expense6 = (float) Transaction::expense()->since($since6m)->sum('amount');
+        // ── 4. Account balances ──
+        $this->accounts = Account::orderByDesc('balance')
+            ->get(['id', 'name', 'balance'])
+            ->map(fn ($a) => ['name' => $a->name, 'balance' => (float) $a->balance])
+            ->toArray();
 
-        $since1y = Carbon::now()->subYear()->toDateString();
-        $income1y = (float) Transaction::income()->since($since1y)->sum('amount');
-        $expense1y = (float) Transaction::expense()->since($since1y)->sum('amount');
-
-        $incomeAll = (float) Transaction::income()->sum('amount');
-        $expenseAll = (float) Transaction::expense()->sum('amount');
-
-        // total balance across accounts
-        $totalBalance = (float) Account::sum('balance');
-
-        $accountHealth = 0;
+        $totalBalance = array_sum(array_column($this->accounts, 'balance'));
         $totalActivity = max(1, $income + $expense);
-        if ($totalActivity > 0) {
-            $accountHealth = (int) round(100 * ($income / $totalActivity));
-        }
+        $accountHealth = (int) round(100 * ($income / $totalActivity));
 
         $this->metrics = [
-            'total_balance' => $totalBalance,
-            'period_income' => $income,
-            'period_expenses' => $expense,
-            'six_month_income' => $income6,
-            'six_month_expenses' => $expense6,
-            'one_year_income' => $income1y,
-            'one_year_expenses' => $expense1y,
-            'all_time_income' => $incomeAll,
-            'all_time_expenses' => $expenseAll,
-            'account_health' => $accountHealth,
-            'last_updated' => Transaction::orderByDesc('updated_at')->value('updated_at') ?? Carbon::now(),
+            'total_balance'      => $totalBalance,
+            'period_income'      => $income,
+            'period_expenses'    => $expense,
+            'six_month_income'   => (float) ($totals->income_6m ?? 0),
+            'six_month_expenses' => (float) ($totals->expense_6m ?? 0),
+            'one_year_income'    => (float) ($totals->income_1y ?? 0),
+            'one_year_expenses'  => (float) ($totals->expense_1y ?? 0),
+            'all_time_income'    => (float) ($totals->all_income ?? 0),
+            'all_time_expenses'  => (float) ($totals->all_expense ?? 0),
+            'account_health'     => $accountHealth,
+            'last_updated'       => Transaction::orderByDesc('updated_at')->value('updated_at') ?? Carbon::now(),
         ];
 
-        // Accounts list
-        $this->accounts = Account::orderByDesc('balance')->get(['name', 'balance'])->map(fn ($a) => ['name' => $a->name, 'balance' => $a->balance])->toArray();
+        // ── 5. Top expense categories (with income) ──
+        $topQuery = Transaction::select(
+            'category_id',
+            DB::raw('SUM(CASE WHEN type IN ("expense","2",2) THEN amount ELSE 0 END) as total_expense'),
+            DB::raw('SUM(CASE WHEN type IN ("income","1",1) THEN amount ELSE 0 END) as total_income')
+        );
 
-        // Top expense categories for the same period
-        $topQuery = Transaction::select('category_id', DB::raw('SUM(CASE WHEN type IN ("expense","2",2) THEN amount ELSE 0 END) as total_expense'), DB::raw('SUM(CASE WHEN type IN ("income","1",1) THEN amount ELSE 0 END) as total_income'));
         if ($start) {
             $topQuery->whereDate('date', '>=', $start);
         }
-        $top = $topQuery->groupBy('category_id')->orderByDesc('total_expense')->limit(5)->get();
+        $topQuery->whereDate('date', '<=', $end);
+
+        $top = $topQuery->groupBy('category_id')
+            ->orderByDesc('total_expense')
+            ->limit(5)
+            ->get();
 
         $catIds = $top->pluck('category_id')->filter()->unique()->values()->all();
-        $catMap = [];
-        if (! empty($catIds)) {
-            $catMap = Category::whereIn('id', $catIds)->pluck('name', 'id')->toArray();
-        }
+        $catMap = empty($catIds) ? [] : Category::whereIn('id', $catIds)->pluck('name', 'id')->toArray();
+
+        $totalCatExpense = $top->sum('total_expense') ?: 1;
 
         $this->topCategories = $top->map(fn ($r) => [
-            'id' => $r->category_id,
-            'name' => $catMap[$r->category_id] ?? ('#'.$r->category_id),
+            'id'      => $r->category_id,
+            'name'    => $catMap[$r->category_id] ?? ('#' . $r->category_id),
             'expense' => (float) $r->total_expense,
-            'income' => (float) $r->total_income,
-        ]);
+            'income'  => (float) $r->total_income,
+            'pct'     => round(100 * ($r->total_expense / $totalCatExpense), 1),
+        ])->values()->toArray();
 
-        // cashflow: last 6 months (used for trends)
+        // ── 6. Cashflow: last 6 calendar months ──
         $startFlows = Carbon::now()->startOfMonth()->subMonths(5)->toDateString();
-        $flows = Transaction::select(DB::raw("DATE_FORMAT(date, '%Y-%m') as ym"), DB::raw('SUM(CASE WHEN type IN ("income","1",1) THEN amount ELSE 0 END) as income'), DB::raw('SUM(CASE WHEN type IN ("expense","2",2) THEN amount ELSE 0 END) as expense'))
+        $flows = Transaction::select(
+            DB::raw("DATE_FORMAT(date, '%Y-%m') as ym"),
+            DB::raw('SUM(CASE WHEN type IN ("income","1",1) THEN amount ELSE 0 END) as income'),
+            DB::raw('SUM(CASE WHEN type IN ("expense","2",2) THEN amount ELSE 0 END) as expense')
+        )
             ->whereDate('date', '>=', $startFlows)
             ->groupBy('ym')
             ->orderBy('ym')
@@ -201,139 +224,97 @@ class AccountsDashboard extends Component
 
         $months = [];
         for ($i = 5; $i >= 0; $i--) {
-            $m = Carbon::now()->startOfMonth()->subMonths($i);
-            $ym = $m->format('Y-m');
-            $row = $flows->get($ym);
-            $incomeM = $row ? (float) $row->income : 0.0;
+            $m      = Carbon::now()->startOfMonth()->subMonths($i);
+            $ym     = $m->format('Y-m');
+            $row    = $flows->get($ym);
+            $incomeM  = $row ? (float) $row->income  : 0.0;
             $expenseM = $row ? (float) $row->expense : 0.0;
             $months[] = [
-                'label' => $m->format('M Y'),
-                'income' => $incomeM,
+                'label'   => $m->format('M Y'),
+                'income'  => $incomeM,
                 'expense' => $expenseM,
-                'net' => $incomeM - $expenseM,
+                'net'     => $incomeM - $expenseM,
             ];
         }
         $this->cashflowMonths = $months;
 
-        // Budgets and planned payments (keep lightweight and safe if models exist)
-        if (class_exists('\App\\Models\\AccountFlow\\Budget')) {
-            try {
-                $budgetModel = \App\Models\AccountFlow\Budget::class;
-                $this->budgets = $budgetModel::orderBy('end_date')->limit(6)->get()->map(fn ($b) => [
-                    'title' => $b->name ?? ($b->title ?? 'Budget'),
-                    'allocated' => $b->amount ?? 0,
-                    'spent' => $b->spent ?? 0,
-                    'ends_at' => $b->end_date ?? null,
-                ])->toArray();
-            } catch (\Throwable $e) {
-                $this->budgets = [];
-            }
-        } else {
-            $this->budgets = [];
-        }
-
-        if (class_exists('\App\\Models\\AccountFlow\\PlannedPayment')) {
-            try {
-                $ppModel = \App\Models\AccountFlow\PlannedPayment::class;
-                $this->plannedPayments = $ppModel::whereDate('due_date', '>=', Carbon::now()->toDateString())->orderBy('due_date')->limit(6)->get()->map(fn ($p) => [
-                    'title' => $p->title ?? $p->description ?? 'Planned',
-                    'amount' => $p->amount ?? 0,
-                    'due_date' => $p->due_date ?? null,
-                ])->toArray();
-            } catch (\Throwable $e) {
-                $this->plannedPayments = [];
-            }
-        } else {
-            $this->plannedPayments = [];
-        }
+        // ── 7. Recent transactions (eager-loaded, limit 10) ──
+        $this->recentTransactions = Transaction::with(['account', 'category', 'paymentMethod'])
+            ->orderByDesc('date')
+            ->orderByDesc('id')
+            ->limit(10)
+            ->get()
+            ->toArray();
 
     }
 
     /**
-     * Calculate previous period metrics for comparison
+     * Calculate previous-period metrics for percentage comparisons.
      */
     protected function calculatePreviousMetrics(string $period, ?string $currentStart, string $currentEnd): void
     {
-        $now = Carbon::now();
-        $prevStart = null;
-        $prevEnd = null;
-
-        switch ($period) {
-            case 'this_month':
-                // Compare with last month
-                $prevStart = $now->copy()->subMonth()->startOfMonth()->toDateString();
-                $prevEnd = $now->copy()->subMonth()->endOfMonth()->toDateString();
-                break;
-            case 'last_month':
-                // Compare with the month before last month
-                $prevStart = $now->copy()->subMonths(2)->startOfMonth()->toDateString();
-                $prevEnd = $now->copy()->subMonths(2)->endOfMonth()->toDateString();
-                break;
-            case 'this_year':
-                // Compare with last year
-                $prevStart = $now->copy()->subYear()->startOfYear()->toDateString();
-                $prevEnd = $now->copy()->subYear()->endOfYear()->toDateString();
-                break;
-            case 'last_year':
-                // Compare with the year before last year
-                $prevStart = $now->copy()->subYears(2)->startOfYear()->toDateString();
-                $prevEnd = $now->copy()->subYears(2)->endOfYear()->toDateString();
-                break;
-            case 'custom':
-                if ($currentStart && $currentEnd) {
-                    // Calculate the duration and go back by the same duration
-                    $startDate = Carbon::parse($currentStart);
-                    $endDate = Carbon::parse($currentEnd);
-                    $diffDays = $startDate->diffInDays($endDate) + 1;
-                    $prevEnd = $startDate->copy()->subDay()->toDateString();
-                    $prevStart = $startDate->copy()->subDays($diffDays)->toDateString();
-                }
-                break;
-            case 'all_time':
-            default:
-                // No comparison for all_time
-                $this->previousMetrics = [];
-
-                return;
-        }
-
-        if ($prevStart && $prevEnd) {
-            $prevIncome = (float) Transaction::income()
-                ->whereDate('date', '>=', $prevStart)
-                ->whereDate('date', '<=', $prevEnd)
-                ->sum('amount');
-
-            $prevExpense = (float) Transaction::expense()
-                ->whereDate('date', '>=', $prevStart)
-                ->whereDate('date', '<=', $prevEnd)
-                ->sum('amount');
-
-            $this->previousMetrics = [
-                'income' => $prevIncome,
-                'expenses' => $prevExpense,
-            ];
-        } else {
+        if ($period === 'all_time') {
             $this->previousMetrics = [];
+
+            return;
         }
+
+        $now = Carbon::now();
+
+        [$prevStart, $prevEnd] = match ($period) {
+            'this_month'  => [$now->copy()->subMonth()->startOfMonth()->toDateString(),   $now->copy()->subMonth()->endOfMonth()->toDateString()],
+            'last_month'  => [$now->copy()->subMonths(2)->startOfMonth()->toDateString(), $now->copy()->subMonths(2)->endOfMonth()->toDateString()],
+            'this_year'   => [$now->copy()->subYear()->startOfYear()->toDateString(),     $now->copy()->subYear()->endOfYear()->toDateString()],
+            'last_year'   => [$now->copy()->subYears(2)->startOfYear()->toDateString(),   $now->copy()->subYears(2)->endOfYear()->toDateString()],
+            'custom'      => $currentStart && $currentEnd
+                                ? (function () use ($currentStart) {
+                                    $startDate = Carbon::parse($currentStart);
+                                    $prevEnd    = $startDate->copy()->subDay()->toDateString();
+                                    $prevStart  = $startDate->copy()->subDays($startDate->diffInDays(Carbon::parse($currentStart)) + 1)->toDateString();
+
+                                    return [$prevStart, $prevEnd];
+                                })()
+                                : [null, null],
+            default       => [null, null],
+        };
+
+        if (! $prevStart || ! $prevEnd) {
+            $this->previousMetrics = [];
+
+            return;
+        }
+
+        $prev = Transaction::selectRaw(
+            'SUM(CASE WHEN type IN ("income","1",1) THEN amount ELSE 0 END) as income,
+             SUM(CASE WHEN type IN ("expense","2",2) THEN amount ELSE 0 END) as expense'
+        )
+            ->whereDate('date', '>=', $prevStart)
+            ->whereDate('date', '<=', $prevEnd)
+            ->first();
+
+        $this->previousMetrics = [
+            'income'   => (float) ($prev->income ?? 0),
+            'expenses' => (float) ($prev->expense ?? 0),
+        ];
     }
 
-    public function render()
+    public function render(): \Illuminate\View\View
     {
-        $viewpath = config('accountflow.view_path').'livewire.accounts-dashboard';
-        $layout = config('accountflow.layout');
-        $title = 'Accounts Dashboard | '.config('accountflow.business_name');
+        $viewpath = config('accountflow.view_path') . 'livewire.accounts-dashboard';
+        $layout   = config('accountflow.layout');
+        $title    = 'Accounts Dashboard | ' . config('accountflow.business_name');
 
         return view($viewpath, [
-            'fluid' => $this->fluid,
-            'selectedPeriod' => $this->selectedPeriod,
+            'fluid'              => $this->fluid,
+            'selectedPeriod'     => $this->selectedPeriod,
+            'currency'           => $this->currency,
+            'currencySymbol'     => $this->currencySymbol,
             'recentTransactions' => $this->recentTransactions,
-            'topCategories' => $this->topCategories,
-            'cashflowMonths' => $this->cashflowMonths,
-            'metrics' => $this->metrics,
-            'accounts' => $this->accounts,
-            'budgets' => $this->budgets ?? [],
-            'plannedPayments' => $this->plannedPayments ?? [],
-            'previousMetrics' => $this->previousMetrics,
+            'topCategories'      => $this->topCategories,
+            'cashflowMonths'     => $this->cashflowMonths,
+            'metrics'            => $this->metrics,
+            'accounts'           => $this->accounts,
+            'previousMetrics'    => $this->previousMetrics,
         ])->extends($layout)->section('content')->title($title);
     }
 }

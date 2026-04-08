@@ -62,6 +62,10 @@ class Settings extends Component
         if (! isset($this->settings['default_transaction_type'])) {
             $this->settings['default_transaction_type'] = 1;
         }
+
+        if (! isset($this->settings['currency'])) {
+            $this->settings['currency'] = config('accountflow.currency', 'PKR');
+        }
     }
 
     public function saveSettings()

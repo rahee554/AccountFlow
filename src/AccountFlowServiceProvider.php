@@ -64,6 +64,8 @@ class AccountFlowServiceProvider extends ServiceProvider
                 \ArtflowStudio\AccountFlow\App\Console\Commands\AnalyzeLivewireComponents::class,
                 \ArtflowStudio\AccountFlow\App\Console\Commands\TestFeatureService::class,
                 \ArtflowStudio\AccountFlow\App\Console\Commands\RunAllTests::class,
+                // Skill install
+                \ArtflowStudio\AccountFlow\App\Console\Commands\SkillInstallCommand::class,
             ]);
         }
 
@@ -101,7 +103,10 @@ class AccountFlowServiceProvider extends ServiceProvider
         Blade::directive('endFeatureDisabled', function () {
             return "<?php endif; ?>";
         });
-    }
+        // @accountflow(['table' => 'transactions']) — render a standalone table with no layout/header
+        Blade::directive('accountflow', function ($expression) {
+            return "<?php echo \$__env->make('accountflow::components.table', {$expression}, \\Illuminate\\Support\\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>";
+        });    }
 
     /**
      * Register any application services.

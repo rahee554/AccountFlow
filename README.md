@@ -1,375 +1,613 @@
-# 🎉 AccountFlow Package - Complete Documentation
+﻿# AccountFlow
 
-**Version:** 3.0.0  
-**Date:** November 18, 2025  
-**Status:** ✅ Production Ready & Fully Tested
+**Version:** 3.1.0 — Laravel 12+ · Livewire 4 · PHP 8.4
 
----
-
-## 📋 Table of Contents
-
-1. [Features](#-features)
-2. [Installation](#-installation)
-3. [Quick Start](#-quick-start)
-4. [Admin Management](#-admin-management)
-5. [Feature Management](#-feature-management)
-6. [Blade Directives](#-blade-directives)
-7. [Middleware](#-middleware)
-8. [Commands](#-commands)
-9. [Services](#-services)
-10. [Testing](#-testing)
+A full-featured accounting module for Laravel. Drop it in as a package and get accounts, transactions, budgets, reports, assets, loans, equity, and more — all behind a feature-flag system you control.
 
 ---
 
-## ✨ Features
+## Table of Contents
 
-### Core Accounting
-- ✅ Multi-Account Management
-- ✅ Transactions (Income/Expense/Transfer)
-- ✅ Categories (Hierarchical)
-- ✅ Payment Methods
-- ✅ Real-time Balance Tracking
-
-### Advanced Features
-- 📊 Financial Reports (P&L, Trial Balance, Cashbook)
-- 💰 Budgets & Variance Analysis
-- 🏦 Assets Management
-- 💸 Loans Management
-- 👥 Equity Partners
-- 📅 Planned Payments
-- 💼 Transaction Templates
-- 🔍 Audit Trail
-- 👛 User Wallets
-- 💳 Payment Methods Management
-- 🏷️ Categories Management
-- 🔄 Account Transfers
-
-### Feature Control
-- 🔧 Enable/Disable 20+ Features
-- 🛡️ Middleware Protection for Routes
-- 🎨 Blade Directives (@featureEnabled/@featureDisabled)
-- ⚙️ Granular Permission Control
-- 🎯 Feature-based Navigation Hiding
+1. [Features](#features)
+2. [Installation](#installation)
+3. [Quick Start](#quick-start)
+4. [Facades](#facades)
+5. [Services](#services)
+6. [Feature Management](#feature-management)
+7. [Blade Directives](#blade-directives)
+8. [Middleware](#middleware)
+9. [Named Routes](#named-routes)
+10. [Embed API](#embed-api)
+11. [Configuration](#configuration)
+12. [Database Tables](#database-tables)
+13. [Artisan Commands](#artisan-commands)
+14. [Changelog](#changelog)
 
 ---
 
-## 🚀 Installation
+## Features
+
+**Core Accounting**
+- Multi-account management with real-time balance tracking
+- Transactions (income / expense) with auto-balance updates
+- Account-to-account transfers
+- Hierarchical categories (income & expense)
+- Payment methods linked to accounts
+
+**Advanced Modules** (each independently enable/disable-able)
+- Financial Reports — P&L, Trial Balance, Cashbook, Balance Sheet
+- Budgets with variance analysis and threshold alerts
+- Assets management with transaction history
+- Loans management with partners
+- Equity partners and distributions
+- Planned / recurring payments
+- Transaction templates
+- User wallets
+- Audit trail
+
+---
+
+## Installation
+
+### Local Development (path symlink)
+
+```json
+{
+    "repositories": [
+        { "type": "path", "url": "../accountflow", "options": { "symlink": true } }
+    ],
+    "require": {
+        "artflow-studio/accountflow": "*"
+    }
+}
+```
 
 ```bash
-# Install
+composer update artflow-studio/accountflow
+```
+
+### Production (Packagist / VCS)
+
+```bash
 composer require artflow-studio/accountflow
+```
 
-# Migrate
+### After Installing (both options)
+
+```bash
 php artisan migrate
-
-# Seed
 php artisan accountflow:seed
-
-# Check status
-php artisan accountflow:status
+php artisan vendor:publish --tag=accountflow-config   # optional
+php artisan accountflow:status                         # verify everything is working
 ```
 
 ---
 
-## 🎯 Quick Start
+## Quick Start
 
 ```php
 use ArtflowStudio\AccountFlow\Facades\Accountflow;
 
-// Create transaction
+// Record a sale
 $transaction = Accountflow::transactions()->createIncome([
-    'amount' => 1000,
-    'category_id' => 2,
-    'account_id' => 1,
+    'amount'      => 2500.00,
+    'description' => 'Invoice #1042',
+    'category_id' => Accountflow::settings()->defaultSalesCategoryId(),
+    'account_id'  => 1,
 ]);
 
-// Get balance
-$balance = Accountflow::accounts()->getBalance($accountId);
+// Record an expense
+$expense = Accountflow::transactions()->createExpense([
+    'amount'         => 350.00,
+    'description'    => 'AWS hosting',
+    'payment_method' => 2,     // account_id auto-resolved from this payment method
+]);
 
-// Log audit (if enabled)
+// Get account balance
+$balance = Accountflow::accounts()->getBalance(accountId: 1);
+
+// Get P&L for the current month
+$pl = Accountflow::reports()->profitAndLoss(
+    startDate: now()->startOfMonth()->toDateString(),
+    endDate:   now()->endOfMonth()->toDateString()
+);
+```
+
+---
+
+## Facades
+
+The package registers **two facade aliases** that both resolve to `AccountFlowManager`:
+
+```php
+// Primary — verbose and self-documenting
+use ArtflowStudio\AccountFlow\Facades\Accountflow;
+Accountflow::transactions()->createIncome([...]);
+
+// Short alias — convenient for dense code
+use ArtflowStudio\AccountFlow\Facades\AC;
+AC::transactions()->createIncome([...]);
+```
+
+Both are bound to the container key `accountflow`.
+
+---
+
+## Services
+
+### TransactionService
+
+All `TransactionService` methods are static. Call them through the facade:
+
+```php
+Accountflow::transactions()->create(array $data): Transaction
+Accountflow::transactions()->createIncome(array $data): Transaction
+Accountflow::transactions()->createExpense(array $data): Transaction
+Accountflow::transactions()->createBatch(array $transactions): Collection
+Accountflow::transactions()->update(Transaction $tx, array $data): Transaction
+```
+
+**`create()` — field reference**
+
+| Field | Required | Notes |
+|---|---|---|
+| `amount` | Yes | Float, must be > 0 |
+| `type` | Yes | `1` = income, `2` = expense (or `'income'` / `'expense'`) |
+| `payment_method` | — | If set, `account_id` is auto-resolved from it |
+| `account_id` | — | Defaults via payment method or the Settings default |
+| `category_id` | — | Defaults to type-based default category from Settings |
+| `date` | — | Any Carbon-parseable string. Defaults to `now()` |
+| `description` | — | Free text |
+| `reference` | — | External reference (invoice number etc.) |
+| `user_id` | — | Defaults to `auth()->id()` |
+
+> **Balance is managed automatically.** `TransactionService` calls `AccountService::addToBalance()` / `subtractFromBalance()` after every create and reverses it on update. Never update `account->balance` manually.
+
+**Examples**
+
+```php
+// Full options
+$tx = Accountflow::transactions()->create([
+    'amount'         => 1500.00,
+    'type'           => 1,
+    'payment_method' => 3,
+    'category_id'    => 5,
+    'date'           => '2026-04-09',
+    'description'    => 'April consulting',
+    'reference'      => 'INV-2026-042',
+]);
+
+// Convenience methods (type is set automatically)
+$income  = Accountflow::transactions()->createIncome(['amount' => 5000, 'description' => 'Sale']);
+$expense = Accountflow::transactions()->createExpense(['amount' => 200, 'description' => 'Supplies']);
+
+// Batch (single DB transaction — all or nothing)
+$batch = Accountflow::transactions()->createBatch([
+    ['amount' => 1000, 'type' => 1, 'description' => 'Sale A'],
+    ['amount' =>  200, 'type' => 2, 'description' => 'Rent'],
+]);
+
+// Update — balance reversal + reapplication is automatic
+$updated = Accountflow::transactions()->update($tx, ['amount' => 1800]);
+
+// Short alias
+use ArtflowStudio\AccountFlow\Facades\AC;
+$tx = AC::transactions()->createExpense(['amount' => 75, 'description' => 'Coffee']);
+```
+
+---
+
+### AccountService
+
+```php
+Accountflow::accounts()->create([
+    'name'            => 'Main Account',
+    'opening_balance' => 10000.00,
+    'active'          => true,
+]): Account
+
+Accountflow::accounts()->update($account, ['name' => 'Petty Cash']): Account
+
+// Read current stored balance
+Accountflow::accounts()->getBalance(int $accountId): float
+
+// Recompute balance from all transactions
+Accountflow::accounts()->recalculateBalance(int $accountId): float
+
+// Query account transactions
+Accountflow::accounts()->getTransactions(
+    accountId: 1,
+    startDate: '2026-01-01',
+    endDate:   '2026-12-31',
+    limit:     50
+): Collection
+```
+
+---
+
+### ReportService
+
+```php
+// Income + expense totals with category breakdown
+Accountflow::reports()->incomeExpenseReport(
+    startDate: '2026-01-01',
+    endDate:   '2026-12-31',
+    accountId: null             // null = all accounts
+): array
+
+// P&L
+Accountflow::reports()->profitAndLoss('2026-01-01', '2026-12-31'): array
+// Returns: revenue, expenses, profit, profit_margin, revenue_breakdown, expense_breakdown
+
+// Monthly cash flow
+Accountflow::reports()->cashFlowReport('2026-01-01', '2026-12-31'): array
+// Returns: by_month[{month, inflows, outflows, net_cash_flow}], total_inflows, total_outflows
+
+// Per-account balance snapshot
+Accountflow::reports()->balanceReport(): array
+// Returns: accounts[{account_id, account_name, balance, opening_balance}], total_balance
+
+// Grouped by payment method
+Accountflow::reports()->byPaymentMethod('2026-01-01', '2026-12-31'): array
+```
+
+---
+
+### SettingsService
+
+```php
+Accountflow::settings()->get(string $key, mixed $default = null): mixed
+Accountflow::settings()->set(string $key, mixed $value, int $type = 1): Setting
+Accountflow::settings()->getAll(): array
+
+// Convenience
+Accountflow::settings()->defaultPaymentMethodId(): int
+Accountflow::settings()->defaultSalesCategoryId(): int
+Accountflow::settings()->defaultExpenseCategoryId(): int
+```
+
+---
+
+### FeatureService
+
+```php
+Accountflow::features()->isEnabled(string $feature): bool
+Accountflow::features()->isDisabled(string $feature): bool
+Accountflow::features()->enable(string $feature): bool
+Accountflow::features()->disable(string $feature): bool
+Accountflow::features()->getAllFeatures(): array
+
+// Example
 if (Accountflow::features()->isEnabled('audit')) {
-    Accountflow::audit()->logTransactionCreated($transaction->id, $transaction->toArray());
+    Accountflow::audit()->log('invoice_paid', 'Transaction', $tx->id, null, $tx->toArray());
 }
 ```
 
 ---
 
-## 🔧 Feature Management
-
-### Enable/Disable Features
-
-```bash
-# Via command
-php artisan accountflow:feature audit enable
-php artisan accountflow:feature budgets disable
-php artisan accountflow:feature categories enable
-php artisan accountflow:feature payment_methods enable
-```
+### CategoryService
 
 ```php
-// Via code
-Accountflow::features()->enable('audit');
-Accountflow::features()->disable('budgets');
-Accountflow::features()->isEnabled('audit'); // true/false
-Accountflow::features()->toggle('categories');
+Accountflow::categories()->create([
+    'name'      => 'Product Sales',
+    'type'      => 1,           // 1 = income, 2 = expense
+    'parent_id' => null,
+]): Category
+
+Accountflow::categories()->update($category, ['name' => 'Services']): Category
+Accountflow::categories()->getByType(int $type): Collection
 ```
-
-### Available Features
-
-**Core Modules:**
-- `multi_accounts_module` - Multi-account support
-- `custom_category` - Custom categories
-- `assets_module` - Assets management
-- `purchase_module` - Purchase management
-- `multi_payment_methods` - Multiple payment methods
-
-**Financial Management:**
-- `budgets_module` - Budget tracking & management
-- `planned_payments_module` - Recurring planned payments
-- `loan_module` - Loans management
-- `equity_module` - Equity partners management
-- `user_wallet_module` - User wallets
-- `income_form` - Income form module
-
-**Transaction Features:**
-- `transaction_templates` - Reusable transaction templates
-- `payment_methods_module` - Payment methods management
-- `categories_module` - Categories management
-- `transfers_module` - Account transfers
-
-**Reports:**
-- `cashbook_module` - Cashbook report
-- `trial_balance_module` - Trial balance report
-- `profit_loss_report` - Profit & Loss report
-- `trial_balance_report` - Trial balance report
-
-**System:**
-- `audit_trail` - Complete audit logging
 
 ---
 
-## 🎨 Blade Directives
+### PaymentMethodService
+
+```php
+Accountflow::paymentMethods()->create([
+    'name'       => 'Stripe',
+    'account_id' => 1,
+    'status'     => 1,
+]): PaymentMethod
+
+Accountflow::paymentMethods()->update($method, ['name' => 'Stripe Gateway']): PaymentMethod
+Accountflow::paymentMethods()->getActive(): Collection
+```
+
+---
+
+### BudgetService
+
+```php
+Accountflow::budgets()->create([
+    'account_id'      => 1,
+    'category_id'     => 5,
+    'amount'          => 5000.00,
+    'period'          => 'monthly',  // daily | weekly | monthly | yearly
+    'alert_threshold' => 80,         // alert at 80%
+    'start_date'      => '2026-01-01',
+    'end_date'        => '2026-12-31',
+]): Budget
+
+Accountflow::budgets()->update($budget, ['amount' => 6000]): Budget
+```
+
+---
+
+### AuditService
+
+Auto-checks the `audit_trail` feature flag — nothing is written when audit is disabled.
+
+```php
+Accountflow::audit()->log(
+    action:    'transaction_created',
+    modelType: 'Transaction',
+    modelId:   $transaction->id,
+    before:    null,
+    after:     $transaction->toArray()
+): ?AuditTrail
+
+Accountflow::audit()->getRecent(int $limit = 50): Collection
+```
+
+---
+
+## Feature Management
+
+### Via Artisan
+
+```bash
+php artisan accountflow:feature audit enable
+php artisan accountflow:feature budgets disable
+```
+
+### Via Code
+
+```php
+Accountflow::features()->enable('audit');
+Accountflow::features()->disable('budgets');
+```
+
+### Feature Keys
+
+| Short key | Description |
+|---|---|
+| `audit` | Audit trail |
+| `budgets` | Budgets module |
+| `planned_payments` | Planned / recurring payments |
+| `assets` | Assets management |
+| `loans` | Loans management |
+| `wallets` | User wallets |
+| `equity` | Equity partners |
+| `cashbook` | Cashbook report |
+| `multi_accounts` | Multiple account support |
+| `templates` | Transaction templates |
+| `payment_methods` | Payment methods management |
+| `categories` | Custom categories |
+| `transfers` | Account transfers |
+| `profit_loss` | P&L report |
+| `trial_balance` | Trial balance report |
+
+---
+
+## Blade Directives
 
 ```blade
-{{-- Show/hide based on feature --}}
 @featureEnabled('audit')
-    <a href="/audit-trail">View Audit Trail</a>
+    <a href="{{ route('accountflow::audittrail') }}">Audit Trail</a>
 @endFeatureEnabled
 
 @featureDisabled('budgets')
-    <div>Budgets module is currently disabled</div>
+    <p>Budgets module is disabled.</p>
 @endFeatureDisabled
 
-@featureEnabled('categories')
-    <a href="/categories">Manage Categories</a>
-@endFeatureEnabled
-
-{{-- In navigation --}}
-<nav>
-    @featureEnabled('audit')
-        <li><a href="/audit">Audit</a></li>
-    @endFeatureEnabled
-    
-    @featureEnabled('budgets')
-        <li><a href="/budgets">Budgets</a></li>
-    @endFeatureEnabled
-    
-    @featureEnabled('categories')
-        <li><a href="/categories">Categories</a></li>
-    @endFeatureEnabled
-    
-    @featureEnabled('payment_methods')
-        <li><a href="/payment-methods">Payment Methods</a></li>
-    @endFeatureEnabled
-</nav>
+@accountflowFeature('loans')
+    <a href="{{ route('accountflow::loans') }}">Loans</a>
+@endaccountflowFeature
 ```
 
 ---
 
-## 🛡️ Middleware
+## Middleware
 
 ```php
-// Protect routes
-Route::get('/audit-trail', Controller::class)
-    ->middleware('accountflow.feature:audit');
-
-Route::get('/budgets', Controller::class)
+// Single route
+Route::get('/budgets', BudgetsList::class)
     ->middleware('accountflow.feature:budgets');
 
-Route::get('/categories', Controller::class)
-    ->middleware('accountflow.feature:categories');
-
-// Group protection
-Route::middleware(['auth', 'accountflow.feature:payment_methods'])->group(function () {
-    Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
-    Route::get('/payment-methods/create', [PaymentMethodController::class, 'create']);
+// Group
+Route::middleware(['auth', 'accountflow.feature:equity'])->group(function () {
+    Route::get('/equity/partners', EquityPartnersList::class);
 });
+
+// Admin only
+Route::get('/settings', AccountsSettings::class)
+    ->middleware('accountflow.admin');
 ```
 
 ---
 
-## 🎮 Commands
+## Named Routes
 
-### Testing
-```bash
-php artisan accountflow:test-complete    # Run all tests
-php artisan accountflow:test-facade      # Test facade
-php artisan accountflow:test-features    # Test features
+All routes are prefixed with `accountflow::`. URL prefix defaults to `accounts` (configurable).
+
+```php
+route('accountflow::dashboard')
+route('accountflow::settings')
+route('accountflow::accounts')
+route('accountflow::accounts.create')
+route('accountflow::transactions')
+route('accountflow::transaction.create')
+route('accountflow::transactions.edit', ['id' => $id])
+route('accountflow::transfers.list')
+route('accountflow::transfers.create')
+route('accountflow::categories')
+route('accountflow::categories.create')
+route('accountflow::payment-methods')
+route('accountflow::payment-methods.create')
+route('accountflow::planned-payments')
+route('accountflow::planned-payments.create')
+route('accountflow::planned-payments.edit', ['id' => $id])
+route('accountflow::budgets')
+route('accountflow::budgets.create')
+route('accountflow::assets')
+route('accountflow::assets.create')
+route('accountflow::assets.transactions')
+route('accountflow::loans')
+route('accountflow::loans.create')
+route('accountflow::loans.partners')
+route('accountflow::equity.partners')
+route('accountflow::equity.transactions')
+route('accountflow::users.wallets')
+route('accountflow::audittrail')
+route('accountflow::report')
+route('accountflow::report.profitLoss')
+route('accountflow::report.trial-balance')
+route('accountflow::report.cashbook')
+route('accountflow::report.balance-sheet')
+route('accountflow::transactions.templates')
 ```
 
-### Management
+---
+
+## Embed API
+
+Render any AccountFlow list table in standalone mode (no nav, no layout wrapper).
+
+### Blade directive
+
+```blade
+@accountflow(['table' => 'transactions'])
+@accountflow(['table' => 'accounts'])
+@accountflow(['table' => 'budgets'])
+@accountflow(['table' => 'assets'])
+@accountflow(['table' => 'loans'])
+@accountflow(['table' => 'equity-partners'])
+@accountflow(['table' => 'transfers'])
+@accountflow(['table' => 'categories'])
+@accountflow(['table' => 'payment-methods'])
+@accountflow(['table' => 'planned-payments'])
+@accountflow(['table' => 'wallets'])
+@accountflow(['table' => 'audit-trail'])
+```
+
+### Livewire inline with standalone mode
+
+```blade
+@livewire('account-flow.transactions.transactions', ['standalone' => true])
+@livewire('account-flow.accounts.accounts-list', ['standalone' => true])
+```
+
+---
+
+## Configuration
+
 ```bash
-php artisan accountflow:status           # System status
-php artisan accountflow:seed             # Seed data
+php artisan vendor:publish --tag=accountflow-config
+```
+
+```php
+// config/accountflow.php
+return [
+    'route_prefix' => 'accounts',
+    'middlewares'  => ['web', 'auth'],
+    'currency'     => 'USD',
+
+    'currencies' => [
+        'PKR' => 'PKR — Pakistani Rupee',
+        'USD' => 'USD — US Dollar',
+        'EUR' => 'EUR — Euro',
+        'GBP' => 'GBP — British Pound',
+        'AED' => 'AED — UAE Dirham',
+        'SAR' => 'SAR — Saudi Riyal',
+        'INR' => 'INR — Indian Rupee',
+        'BDT' => 'BDT — Bangladeshi Taka',
+    ],
+
+    'currency_symbols' => [
+        'PKR' => 'Rs. ',
+        'USD' => '$',
+        'EUR' => '€',
+        'GBP' => '£',
+        'AED' => 'AED ',
+        'SAR' => 'SAR ',
+        'INR' => '₹',
+        'BDT' => '৳',
+    ],
+];
+```
+
+---
+
+## Database Tables
+
+| Table | Purpose |
+|---|---|
+| `ac_accounts` | Accounts with running balance |
+| `ac_transactions` | Income & expense records |
+| `ac_transfers` | Account-to-account transfers |
+| `ac_categories` | Hierarchical categories |
+| `ac_payment_methods` | Payment methods |
+| `ac_budgets` | Budget definitions |
+| `ac_planned_payments` | Recurring/scheduled payments |
+| `ac_assets` | Business assets |
+| `ac_asset_transactions` | Asset transactions |
+| `ac_loans` | Loan records |
+| `ac_loan_transactions` | Loan repayment records |
+| `ac_loan_users` | Loan partners |
+| `ac_equity_partners` | Equity partners |
+| `ac_equity_transactions` | Equity transactions |
+| `ac_purchases` | Purchase records |
+| `ac_purchase_transactions` | Purchase line items |
+| `ac_user_wallets` | Per-user wallets |
+| `ac_audit_trail` | Change history |
+| `ac_settings` | Feature flags & config |
+| `ac_transaction_templates` | Saved templates |
+
+---
+
+## Artisan Commands
+
+```bash
+# Setup
+php artisan accountflow:install
+php artisan accountflow:link
+php artisan accountflow:seed
+
+# Feature flags
 php artisan accountflow:feature {name} {enable|disable}
-php artisan accountflow:analyze-livewire # Analyze components
-```
 
----
-
-## 📦 Services (9 Total)
-
-### 1. TransactionService
-```php
-Accountflow::transactions()->createIncome($data);
-Accountflow::transactions()->createExpense($data);
-Accountflow::transactions()->update($id, $data);
-Accountflow::transactions()->delete($id);
-Accountflow::transactions()->getSummary($start, $end);
-```
-
-### 2. AccountService
-```php
-Accountflow::accounts()->create($data);
-Accountflow::accounts()->getAll();
-Accountflow::accounts()->getBalance($id);
-Accountflow::accounts()->addToBalance($id, $amount);
-Accountflow::accounts()->subtractFromBalance($id, $amount);
-```
-
-### 3. SettingsService
-```php
-Accountflow::settings()->defaultSalesCategoryId();
-Accountflow::settings()->defaultExpenseCategoryId();
-Accountflow::settings()->get('key', 'default');
-Accountflow::settings()->set('key', 'value');
-```
-
-### 4. FeatureService (NEW!)
-```php
-Accountflow::features()->isEnabled('audit');
-Accountflow::features()->enable('audit');
-Accountflow::features()->disable('budgets');
-Accountflow::features()->getAllFeatures();
-```
-
-### 5. AuditService (FIXED!)
-```php
-Accountflow::audit()->log('created', 'Transaction', $id, null, $data);
-Accountflow::audit()->logTransactionCreated($id, $data);
-Accountflow::audit()->getRecent(50);
-Accountflow::audit()->getByUser($userId);
-```
-
-### 6-9. Other Services
-- CategoryService, PaymentMethodService, BudgetService, ReportService
-
-See `docs/SERVICES_INDEX.md` for complete API documentation.
-
----
-
-## 🧪 Testing
-
-```bash
-php artisan accountflow:test-complete
-```
-
-**Results:**
-```
-✅ 9/9 tests PASSED
-- Status Check
-- Facade Resolution
-- All Services
-- Feature Management
-- Real Usage
-```
-
----
-
-## 🔧 What's New in v3.0.0
-
-### ✅ Fixed
-- **Audit Trail SQL Error** - Fixed `model_type` field issue
-- **Container Resolution** - Proper namespace structure
-- **Service Binding** - All services registered correctly
-
-### ✨ New
-- **Feature Management** - Complete feature control system
-- **Blade Directives** - `@featureEnabled`, `@featureDisabled`
-- **Middleware** - Route protection
-- **14 Commands** - Complete test suite
-- **FeatureService** - 9th service added
-
----
-
-## 📚 Documentation
-
-- `README.md` - This file
-- `docs/QUICK_REFERENCE.md` - API cheat sheet
-- `docs/SERVICES_INDEX.md` - Complete API
-- `ISSUE_RESOLVED.md` - Recent fixes
-
----
-
-## 🚨 Common Issues
-
-### Audit Trail Error (FIXED!)
-```
-Error: Field 'model_type' doesn't have a default value
-Solution: Updated in v3.0.0
-```
-
-### Feature Not Working
-```bash
+# Status
 php artisan accountflow:status
-php artisan accountflow:feature audit enable
+
+# AI Agent skill — copies SKILL.md to .github/skills/accountflow-development/
+php artisan accountflow:skill-install
+
+# Diagnostics
+php artisan accountflow:test-complete
+php artisan accountflow:test-facade
+php artisan accountflow:analyze-livewire
 ```
 
 ---
 
-## 💡 Complete Example
+## Changelog
 
-```php
-use ArtflowStudio\AccountFlow\Facades\Accountflow;
+### v3.1.0
+- Dynamic per-tenant currency via Settings page
+- `currency_symbols` config key for display formatting
+- KPI dashboard with period-over-period % comparisons
+- `accountflow:skill-install` command
+- All list components support `$standalone = true` for embed mode
+- Typed Livewire 4 properties throughout
 
-// Enable audit if needed
-if (!Accountflow::features()->isEnabled('audit')) {
-    Accountflow::features()->enable('audit');
-}
-
-// Create transaction
-$transaction = Accountflow::transactions()->createIncome([
-    'amount' => 2500,
-    'description' => 'Client Payment',
-    'category_id' => Accountflow::settings()->defaultSalesCategoryId(),
-    'account_id' => 1,
-    'date' => now(),
-]);
-
-// Log audit
-Accountflow::audit()->logTransactionCreated($transaction->id, $transaction->toArray());
-
-// Update balance
-Accountflow::accounts()->addToBalance($transaction->account_id, $transaction->amount);
-
-// Get report
-$report = Accountflow::reports()->profitAndLoss(now()->startOfMonth(), now()->endOfMonth());
-```
+### v3.0.0
+- `FeatureService` — 9 total services
+- `@featureEnabled` / `@featureDisabled` Blade directives
+- `accountflow.feature` middleware
+- Embed API (`@accountflow` directive)
+- Fixed audit trail SQL error
+- Fixed container resolution
 
 ---
 
-**Version:** 3.0.0  
-**Status:** ✅ Production Ready  
-**Last Updated:** November 18, 2025  
-**License:** MIT
-
+**License:** MIT — artflow-studio

@@ -1,4 +1,4 @@
-<div>
+﻿<div>
     @include(config('accountflow.view_path') . '.blades.dashboard-header')
 
     <div class="container">
@@ -18,7 +18,7 @@
         <input
             type="text"
             class="form-control form-control-sm @error('form.name') is-invalid @enderror"
-            wire:model.defer="form.name"
+            wire:model="form.name"
             placeholder="Enter payment method name"
         />
         @error('form.name') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
@@ -28,7 +28,7 @@
         <label class="form-label small">Info</label>
         <textarea
             class="form-control form-control-sm @error('form.info') is-invalid @enderror"
-            wire:model.defer="form.info"
+            wire:model="form.info"
             rows="3"
             placeholder="Optional description or notes"
         ></textarea>
@@ -55,7 +55,7 @@
             <label class="form-label small">Account</label>
             <select
                 class="form-select form-select-sm @error('form.account_id') is-invalid @enderror"
-                wire:model.defer="form.account_id"
+                wire:model="form.account_id"
             >
                 <option value="">Select account</option>
                 @foreach($accounts ?? [] as $account)
@@ -69,7 +69,7 @@
             <label class="form-label small">Status</label>
             <select
                 class="form-select form-select-sm @error('form.status') is-invalid @enderror"
-                wire:model.defer="form.status"
+                wire:model="form.status"
             >
                 <option value="1">Active</option>
                 <option value="0">Inactive</option>

@@ -1,7 +1,10 @@
 <div>
-    @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @if(!$standalone)
+        @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @endif
 
-   <div class="px-2 px-md-5 px-lg-10">
+   <div class="px-2 px-md-5 px-lg-10"
+        style="@if($standalone) padding: 0 !important; @endif">
     <div class="d-flex flex-stack my-2">
         <h1>Accounts Categories</h1>
         <div>

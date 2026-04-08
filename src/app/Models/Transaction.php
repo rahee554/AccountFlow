@@ -20,7 +20,7 @@ class Transaction extends Model
         'category_id',
         'date',
         'description',
-        'user_id',
+        'added_by',
         'created_at',
         'updated_at',
     ];
@@ -37,7 +37,12 @@ class Transaction extends Model
 
     public function paymentMethod()
     {
-        return $this->belongsTo(PaymentMethod::class);
+        return $this->belongsTo(PaymentMethod::class, 'payment_method');
+    }
+
+    public function invoicePayment()
+    {
+        return $this->hasOne(\App\Models\InvoicePayment::class);
     }
 
 

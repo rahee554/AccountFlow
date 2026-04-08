@@ -32,14 +32,14 @@ class EquityTransaction extends Model
     /**
      * The table associated with the model.
      */
-    protected string $table = 'ac_equity_trx';
+    protected $table = 'ac_equity_trx';
 
     /**
      * Mass assignable attributes.
      *
      * @var array<int,string>
      */
-    protected array $fillable = [
+    protected $fillable = [
         'equity_account_id',
         'amount',
         'type',
@@ -47,19 +47,6 @@ class EquityTransaction extends Model
         'processed_at',
         'meta',
     ];
-
-    /**
-     * Create a new EquityTransaction instance.
-     *
-     * Use constructor property promotion to satisfy project PHP conventions
-     * while forwarding attributes to the parent Eloquent constructor.
-     *
-     * @param  array<string,mixed>  $attributes
-     */
-    public function __construct(public array $attributes = [])
-    {
-        parent::__construct($attributes);
-    }
 
     /**
      * Attribute casting definitions.

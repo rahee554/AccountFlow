@@ -10,4 +10,6 @@ class LoanUser extends Model
     use HasFactory;
 
     protected $table = 'ac_loan_partners';
+
+    protected $guarded = ['id'];
 }
