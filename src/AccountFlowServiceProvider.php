@@ -32,10 +32,28 @@ class AccountFlowServiceProvider extends ServiceProvider
             __DIR__ . '/resources/views/vendor/artflow-studio/accountflow' => resource_path('views/vendor/accountflow'),
         ], 'accountflow-views');
 
+        // Publish models — run via accountflow:install or vendor:publish --tag=accountflow-models
+        $this->publishes([
+            __DIR__ . '/app/Models' => app_path('Models/AccountFlow'),
+        ], 'accountflow-models');
+
+        // Publish Livewire components — run via accountflow:install or vendor:publish --tag=accountflow-livewire
+        $this->publishes([
+            __DIR__ . '/app/Livewire/AccountFlow' => app_path('Livewire/AccountFlow'),
+        ], 'accountflow-livewire');
+
+        // Publish controllers — run via accountflow:install or vendor:publish --tag=accountflow-controllers
+        $this->publishes([
+            __DIR__ . '/app/Http/Controllers/AccountFlow' => app_path('Http/Controllers/AccountFlow'),
+        ], 'accountflow-controllers');
+
         // ============================================
         // Load Views from package
         // ============================================
         $this->loadViewsFrom(__DIR__ . '/resources/views/vendor/artflow-studio/accountflow', 'accountflow');
+
+        // Auto-discover migrations — php artisan migrate picks these up automatically
+        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
 
         // ============================================
         // Load Routes from package

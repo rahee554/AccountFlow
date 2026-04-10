@@ -79,20 +79,19 @@ class DelinkCommand extends Command
     {
         $removals = [];
 
-        // --- symlink / junction targets ---
+        // --- symlink / junction targets (created by accountflow:link) ---
         $symlinkTargets = [
             'app/Models/AccountFlow',
             'app/Http/Controllers/AccountFlow',
             'app/Livewire/AccountFlow',
-            'resources/views/vendor/artflow-studio/accountflow',
-            'public/vendor/artflow-studio/accountflow',
         ];
 
         foreach ($symlinkTargets as $relative) {
             $target = $this->projectRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relative);
 
-            // is_link() misses Windows NTFS junctions; readlink() works for both symlinks and junctions.
-            if (is_link($target) || readlink($target) !== false) {
+            // is_link() misses Windows NTFS junctions; @readlink() works for both symlinks and junctions.
+            // The @ suppresses the warning when the path doesn't exist.
+            if (is_link($target) || @readlink($target) !== false) {
                 $removals[] = ['type' => 'symlink/junction', 'path' => $target, 'removal' => 'junction'];
             }
         }
