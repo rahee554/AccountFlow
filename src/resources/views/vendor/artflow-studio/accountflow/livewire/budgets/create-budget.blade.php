@@ -13,7 +13,7 @@
 @endphp
 
 <div class="">
-    @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @include(config('accountflow.view_path') . 'blades.dashboard-header')
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card shadow-sm">

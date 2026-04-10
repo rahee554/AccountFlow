@@ -1,6 +1,4 @@
-﻿# AccountFlow
-
-**Version:** 3.1.0 — Laravel 12+ · Livewire 4 · PHP 8.4
+﻿# AccountFlow — Laravel Accounting Package
 
 A full-featured accounting module for Laravel. Drop it in as a package and get accounts, transactions, budgets, reports, assets, loans, equity, and more — all behind a feature-flag system you control.
 
@@ -590,23 +588,17 @@ php artisan accountflow:analyze-livewire
 
 ---
 
-## Changelog
+## What's Included
 
-### v3.1.0
-- Dynamic per-tenant currency via Settings page
-- `currency_symbols` config key for display formatting
-- KPI dashboard with period-over-period % comparisons
-- `accountflow:skill-install` command
-- All list components support `$standalone = true` for embed mode
-- Typed Livewire 4 properties throughout
-
-### v3.0.0
-- `FeatureService` — 9 total services
+- Dynamic per-tenant currency via Settings page with `currency_symbols` config
+- KPI dashboard with period-over-period comparisons
+- All list components support `$standalone = true` for embed mode (see [Embed API](#embed-api))
+- 9 services behind a unified `AccountFlowManager` façade
+- 15 independently toggleable feature flags
 - `@featureEnabled` / `@featureDisabled` Blade directives
-- `accountflow.feature` middleware
-- Embed API (`@accountflow` directive)
-- Fixed audit trail SQL error
-- Fixed container resolution
+- `accountflow.feature` and `accountflow.admin` middleware
+- SPL autoloader — no symlinks or junctions required in production
+- `accountflow:skill-install` command for AI agent context
 
 ---
 

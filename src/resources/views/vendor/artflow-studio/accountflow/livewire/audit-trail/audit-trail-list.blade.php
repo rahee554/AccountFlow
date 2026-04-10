@@ -1,5 +1,5 @@
-ï»¿<div>
-    @include(config('accountflow.view_path') . '.blades.dashboard-header')
+<div>
+    @include(config('accountflow.view_path') . 'blades.dashboard-header')
 
     <div class="d-flex flex-column flex-column-fluid">
         <div id="kt_app_content" class="app-content flex-column-fluid">
@@ -114,7 +114,7 @@
                                                 @elseif($log->action === 'deleted')
                                                     <span class="text-danger fs-8">Record removed</span>
                                                 @else
-                                                    <span class="text-muted fs-8">â€”</span>
+                                                    <span class="text-muted fs-8">—</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -132,7 +132,7 @@
                                                 @endif
                                             </td>
                                             <td class="text-muted fs-8">
-                                                {{ $log->created_at ? \Carbon\Carbon::parse($log->created_at)->format('M d, Y H:i') : 'â€”' }}
+                                                {{ $log->created_at ? \Carbon\Carbon::parse($log->created_at)->format('M d, Y H:i') : '—' }}
                                             </td>
                                         </tr>
                                     @empty

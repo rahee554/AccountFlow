@@ -1,5 +1,5 @@
 <div>
-    @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @include(config('accountflow.view_path') . 'blades.dashboard-header')
 
     <div class="d-flex flex-column flex-column-fluid">
         <div id="kt_app_content" class="app-content flex-column-fluid">

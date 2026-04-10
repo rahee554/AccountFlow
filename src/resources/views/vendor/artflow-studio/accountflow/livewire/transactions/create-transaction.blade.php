@@ -1,5 +1,5 @@
 <div>
-    @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @include(config('accountflow.view_path') . 'blades.dashboard-header')
 
     <!-- Success/Error Messages -->
     @if (session('success'))

@@ -2,6 +2,7 @@
 
 namespace ArtflowStudio\AccountFlow;
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
 
@@ -19,11 +20,17 @@ class AccountFlowServiceProvider extends ServiceProvider
         $this->app['router']->aliasMiddleware('accountflow.admin', \ArtflowStudio\AccountFlow\App\Http\Middleware\CheckAdminAccess::class);
 
         // ============================================
-        // Publish Configuration (only config is published)
+        // Publish Configuration (only config is published by default)
         // ============================================
         $this->publishes([
             __DIR__ . '/config/accountflow.php' => config_path('accountflow.php'),
         ], 'accountflow-config');
+
+        // Optionally publish views to allow host-app overrides:
+        // php artisan vendor:publish --tag=accountflow-views
+        $this->publishes([
+            __DIR__ . '/resources/views/vendor/artflow-studio/accountflow' => resource_path('views/vendor/accountflow'),
+        ], 'accountflow-views');
 
         // ============================================
         // Load Views from package
@@ -33,11 +40,10 @@ class AccountFlowServiceProvider extends ServiceProvider
         // ============================================
         // Load Routes from package
         // ============================================
-        // Only load routes if the classes are already published/available
-        try {
-            $this->loadRoutesFrom(__DIR__ . '/routes/accountflow.php');
-        } catch (\Exception $e) {
-            // Routes will fail until symlinks are created, that's ok
+        $routesPath = __DIR__ . '/routes/accountflow.php';
+
+        if (File::exists($routesPath)) {
+            $this->loadRoutesFrom($routesPath);
         }
 
         // ============================================
@@ -66,6 +72,8 @@ class AccountFlowServiceProvider extends ServiceProvider
                 \ArtflowStudio\AccountFlow\App\Console\Commands\RunAllTests::class,
                 // Skill install
                 \ArtflowStudio\AccountFlow\App\Console\Commands\SkillInstallCommand::class,
+                // Delink
+                \ArtflowStudio\AccountFlow\App\Console\Commands\DelinkCommand::class,
             ]);
         }
 
@@ -113,6 +121,35 @@ class AccountFlowServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        // ============================================
+        // Package Class Autoloader
+        // ============================================
+        // Load App\Livewire\AccountFlow\*, App\Models\AccountFlow\*, and
+        // App\Http\Controllers\AccountFlow\* from the package src directory.
+        // This allows all classes to be resolved without requiring symlinks.
+        $srcDir = __DIR__;
+
+        spl_autoload_register(function (string $class) use ($srcDir): void {
+            $map = [
+                'App\\Livewire\\AccountFlow\\'         => $srcDir . '/app/Livewire/AccountFlow/',
+                'App\\Models\\AccountFlow\\'           => $srcDir . '/app/Models/',
+                'App\\Http\\Controllers\\AccountFlow\\' => $srcDir . '/app/Http/Controllers/AccountFlow/',
+            ];
+
+            foreach ($map as $prefix => $baseDir) {
+                if (str_starts_with($class, $prefix)) {
+                    $relative = substr($class, strlen($prefix));
+                    $file     = $baseDir . str_replace('\\', '/', $relative) . '.php';
+
+                    if (is_file($file)) {
+                        require_once $file;
+                    }
+
+                    return;
+                }
+            }
+        });
+
         // Register the AccountFlow manager into the container
         $this->app->singleton('accountflow', function () {
             return new \ArtflowStudio\AccountFlow\Services\AccountFlowManager();

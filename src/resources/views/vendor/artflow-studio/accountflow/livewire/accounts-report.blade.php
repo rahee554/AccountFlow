@@ -1,5 +1,5 @@
 <div>
-    @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @include(config('accountflow.view_path') . 'blades.dashboard-header')
 
     <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-3">

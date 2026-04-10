@@ -1,5 +1,5 @@
 <div class="">
-    @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @include(config('accountflow.view_path') . 'blades.dashboard-header')
 
     <div class="card mt-4 shadow-sm">
         <div class="card-body">

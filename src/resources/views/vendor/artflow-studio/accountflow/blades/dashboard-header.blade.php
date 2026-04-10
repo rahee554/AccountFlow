@@ -4,11 +4,12 @@
     $route = request()->route();
     $prefix = $route ? $route->getPrefix() : null;
     $path = '/'.ltrim(request()->path(), '/');
+    $routePrefix = trim((string) config('accountflow.route_prefix', 'accounts'), '/');
 
-    // Show when route prefix or URL path contains "accounts"
-    $isActualRoute = ($prefix && Str::contains($prefix, 'accounts')) 
-                     || Str::contains($path, '/accounts') 
-                     || Str::startsWith($path, 'accounts');
+    // Show only for AccountFlow routes, using the configured package prefix.
+    $isActualRoute = ($prefix && Str::contains($prefix, $routePrefix))
+                     || Str::contains($path, '/' . $routePrefix)
+                     || Str::startsWith($path, $routePrefix);
 @endphp
 
 @if($isActualRoute)

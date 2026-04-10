@@ -1,5 +1,5 @@
 <div>
-      @include(config('accountflow.view_path') . '.blades.dashboard-header')
+      @include(config('accountflow.view_path') . 'blades.dashboard-header')
 
     <form wire:submit.prevent="save" class="card p-4 shadow-sm container mt-4">
         <div class="mb-3">

@@ -1,5 +1,5 @@
    <div>
-          @include(config('accountflow.view_path') . '.blades.dashboard-header')
+          @include(config('accountflow.view_path') . 'blades.dashboard-header')
 
         {{-- Print Controls --}}
         <div class="print-controls d-print-none mb-3">

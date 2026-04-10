@@ -4,7 +4,6 @@ description: "Use for ANY task involving the AccountFlow package (artflow-studio
 license: MIT
 metadata:
   author: artflow-studio
-  version: 3.1.0
 ---
 
 # AccountFlow Development Skill
@@ -18,18 +17,72 @@ metadata:
 
 ---
 
-## Architecture & Symlink Workflow
+## Architecture
 
-The package is **symlinked** into the app. Always edit the **package source** — changes reflect instantly in the app with no build step.
+### Class Loading — SPL Autoloader (no symlinks required)
 
-| Package Source | App Location (symlinked / resolved) |
+`AccountFlowServiceProvider::register()` registers an SPL autoloader that maps three namespaces directly from the package `src/` directory:
+
+| App Namespace | Package Source |
 |---|---|
-| `src/app/Livewire/AccountFlow/` | `app/Livewire/AccountFlow/` |
-| `src/resources/views/vendor/artflow-studio/accountflow/` | `resources/views/vendor/artflow-studio/accountflow/` |
-| `src/config/accountflow.php` | `config/accountflow.php` (after `vendor:publish`) |
-| `src/routes/accountflow.php` | Auto-loaded by the ServiceProvider |
-| `src/app/Models/` | `app/Models/AccountFlow/` (published) |
-| `src/app/Services/` | Package-internal; accessed via facades |
+| `App\Livewire\AccountFlow\*` | `vendor/artflow-studio/accountflow/src/app/Livewire/AccountFlow/` |
+| `App\Models\AccountFlow\*` | `vendor/artflow-studio/accountflow/src/app/Models/` |
+| `App\Http\Controllers\AccountFlow\*` | `vendor/artflow-studio/accountflow/src/app/Http/Controllers/AccountFlow/` |
+
+This means classes are discovered at runtime from the package source — **no symlinks or junctions are needed** in production or after a fresh `composer install`.
+
+### Development Linking (optional)
+
+For active development where you want your IDE to index files under `app/`, you can create junctions:
+
+```bash
+php artisan accountflow:link     # Creates junctions from app/ → package src/
+php artisan accountflow:delink   # Removes junctions (uses rmdir on Windows, unlink on Unix)
+```
+
+With or without junctions, **always edit the package source** — `vendor/artflow-studio/accountflow/src/`.
+
+### View Resolution
+
+Views are registered under the `accountflow::` namespace via `loadViewsFrom()`. The ServiceProvider also publishes them:
+
+```
+accountflow::layout.app          → src/resources/views/.../layout/app.blade.php
+accountflow::livewire.transactions → src/resources/views/.../livewire/transactions.blade.php
+accountflow::components.table    → src/resources/views/.../components/table.blade.php
+```
+
+To override a view in the host app:
+```bash
+php artisan vendor:publish --tag=accountflow-views
+# Views published to: resources/views/vendor/accountflow/
+```
+
+### Package Structure
+
+```
+src/
+├── AccountFlowServiceProvider.php   # Boots: views, routes, middleware, commands, Blade directives, SPL autoloader
+├── Facades/
+│   ├── Accountflow.php              # Primary facade → AccountFlowManager
+│   └── AC.php                       # Short alias → same binding
+├── Services/
+│   └── AccountFlowManager.php       # Gateway: 9 service accessors
+├── config/
+│   └── accountflow.php              # Package default config
+├── routes/
+│   └── accountflow.php              # All named routes
+├── app/
+│   ├── Services/                    # TransactionService, AccountService, ... (9 services)
+│   ├── Livewire/AccountFlow/        # ~42 Livewire components
+│   ├── Models/                      # 20 Eloquent models (ac_* tables)
+│   ├── Http/Controllers/AccountFlow/ # Thin controllers
+│   └── Console/Commands/            # All artisan commands
+└── resources/views/vendor/artflow-studio/accountflow/
+    ├── layout/                      # app.blade.php, print.blade.php
+    ├── livewire/                    # One view per Livewire component
+    └── components/                  # table.blade.php (embed component)
+```
 
 ---
 
@@ -624,10 +677,14 @@ TransactionTemplate —
 ```bash
 # Installation
 php artisan accountflow:install         # Publish config, views, models, run migrations
-php artisan accountflow:link            # Create symlinks between package source and app
-php artisan accountflow:sync            # Sync package files
-php artisan accountflow:db              # Database-related setup
 php artisan accountflow:seed            # Seed default categories, settings, payment methods
+php artisan accountflow:db              # Database-related setup
+
+# Development linking
+php artisan accountflow:link            # Create junctions/symlinks from app/ to package src/
+php artisan accountflow:delink          # Remove all junctions/symlinks (safe on Windows + Unix)
+php artisan accountflow:delink --dry-run # Preview what would be removed without removing
+php artisan accountflow:sync            # Sync package files
 
 # Feature management
 php artisan accountflow:feature {name} {enable|disable}
@@ -802,11 +859,12 @@ $budget = Accountflow::budgets()->create([
 ## Common Mistakes to Avoid
 
 1. **Wrong namespace for models** — use `App\Models\AccountFlow\Transaction`, not `App\Models\Transaction`.
-2. **Editing published files instead of source** — always edit in `vendor/artflow-studio/accountflow/src/`.
+2. **Editing published files instead of package source** — always edit in `vendor/artflow-studio/accountflow/src/`. The SPL autoloader loads straight from that path; published files under `app/` are only relevant if junctions are active.
 3. **Manual balance updates** — never update `account->balance` directly; `TransactionService` handles it.
 4. **Using `DB::` in queries** — prefer `Model::query()` for all AccountFlow models.
-5. **Ignoring the `$standalone` flag** — when embedding a component, always pass `standalone: true` to suppress the header.
-6. **Feature key vs. DB key mismatch** — use the short alias (`audit`, `budgets`) not the DB key (`audit_trail`), the service normalises it.
+5. **Ignoring the `$standalone` flag** — when embedding a component, always pass `standalone: true` to suppress the layout header.
+6. **Feature key vs. DB key mismatch** — use the short alias (`audit`, `budgets`) not the DB key (`audit_trail`); the service normalises it.
+7. **Calling `accountflow:delink` with `--force` without checking** — use `--dry-run` first to preview what will be removed.
 
 ---
 

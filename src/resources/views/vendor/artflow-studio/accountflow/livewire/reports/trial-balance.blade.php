@@ -1,5 +1,5 @@
-ï»¿<div>
-    @include(config('accountflow.view_path') . '.blades.dashboard-header')
+<div>
+    @include(config('accountflow.view_path') . 'blades.dashboard-header')
 
     <div class="d-flex flex-column flex-column-fluid">
         <div id="kt_app_content" class="app-content flex-column-fluid">
@@ -146,7 +146,7 @@
                                                         <i class="fas fa-chevron-down fs-9"></i>
                                                     </button>
                                                 @else
-                                                    <span class="text-muted fs-8">â€”</span>
+                                                    <span class="text-muted fs-8">—</span>
                                                 @endif
                                             </td>
                                         </tr>
@@ -157,7 +157,7 @@
                                                     <div class="collapse" id="{{ $collapseId }}">
                                                         <div class="bg-light-primary rounded mx-4 mb-3 p-4">
                                                             <div class="fs-7 fw-bold text-primary mb-3">
-                                                                <i class="fas fa-tags me-1"></i>Category Breakdown â€” {{ $acct->name }}
+                                                                <i class="fas fa-tags me-1"></i>Category Breakdown — {{ $acct->name }}
                                                             </div>
                                                             <table class="table table-sm table-row-bordered mb-0">
                                                                 <thead>
@@ -208,7 +208,7 @@
                                     <tr class="fw-bold text-dark fs-7 border-top-2 border-gray-300">
                                         <td class="pt-4">
                                             <span class="badge badge-light-dark">
-                                                Totals â€” {{ $accounts->firstItem() ?? 0 }}â€“{{ $accounts->lastItem() ?? 0 }} of {{ $accounts->total() ?? 0 }} accounts
+                                                Totals — {{ $accounts->firstItem() ?? 0 }}–{{ $accounts->lastItem() ?? 0 }} of {{ $accounts->total() ?? 0 }} accounts
                                             </span>
                                         </td>
                                         <td class="text-end text-danger fw-bolder pt-4">{{ number_format($totalDebit, 2) }}</td>

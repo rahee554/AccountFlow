@@ -1,6 +1,6 @@
 <div
     x-data="{ recurring: @entangle('recurring'), autoPost: @entangle('auto_post'), scheduleType: @entangle('schedule_type') }">
-    @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @include(config('accountflow.view_path') . 'blades.dashboard-header')
 
     <form wire:submit.prevent="save" class="card card-flush shadow-sm p-4" autocomplete="off">
         <h3 class="mb-4"><i class="fas fa-calendar-check me-2"></i>Create Planned Payment</h3>

@@ -1,5 +1,5 @@
 <div>
-        @include(config('accountflow.view_path') . '.blades.dashboard-header')
+        @include(config('accountflow.view_path') . 'blades.dashboard-header')
 
     @if (session()->has('success'))
         <div class="alert alert-success">

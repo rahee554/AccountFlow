@@ -51,7 +51,7 @@
 @endphp
 
 <div>
-    @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @include(config('accountflow.view_path') . 'blades.dashboard-header')
 
     <div class="app-content flex-column-fluid py-6">
         <div class="app-container container-xxl">

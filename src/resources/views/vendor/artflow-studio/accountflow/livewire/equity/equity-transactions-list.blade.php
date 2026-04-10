@@ -1,6 +1,6 @@
 <div>
     @if(!$standalone)
-        @include(config('accountflow.view_path') . '.blades.dashboard-header')
+        @include(config('accountflow.view_path') . 'blades.dashboard-header')
     @endif
 
     <div class="d-flex flex-column flex-column-fluid">

@@ -1,5 +1,5 @@
 <div>
-    @include(config('accountflow.view_path') . '.blades.dashboard-header')
+    @include(config('accountflow.view_path') . 'blades.dashboard-header')
 
     <div class="container-fluid py-4">
         @if (session('success'))

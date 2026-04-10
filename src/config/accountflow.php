@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'view_path' => 'vendor.artflow-studio.accountflow.',
+    'view_path' => 'accountflow::',
     //'layout' => 'layouts.branch.app-fluid',
-    'layout' => 'vendor.artflow-studio.accountflow.layout.app',
-    'print_layout' => 'vendor.artflow-studio.accountflow.layouts.print',
+    'layout' => 'accountflow::layout.app',
+    'print_layout' => 'accountflow::layouts.print',
     'asset_path' => 'vendor/artflow-studio/accountflow/assets/',
     'business_name' => 'Artflow ERP',
 
