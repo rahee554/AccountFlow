@@ -3,46 +3,32 @@
 namespace ArtflowStudio\AccountFlow\App\Console;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 
 class AccountFlowMigrateCommand extends Command
 {
-    protected $signature = 'accountflow:migrate';
-    protected $description = 'Run specific migrations for the AccountFlow package';
+    protected $signature = 'accountflow:migrate
+                            {--force : Run migrations without confirmation (use in production)}';
 
-    public function handle()
+    protected $description = 'Run AccountFlow database migrations';
+
+    public function handle(): int
     {
-        $migrations = [
-            'database/migrations/9900_create_accounts_tables.php',
-            'database/migrations/9901_add_columns_to_account.php',
-        ];
+        $this->newLine();
+        $this->components->info('Running AccountFlow migrations...');
+        $this->newLine();
 
-        foreach ($migrations as $migration) {
-            $this->info("Running migration: {$migration}");
+        $params = ['--force' => (bool) $this->option('force')];
 
-            try {
-                // Require the migration file and run the `up` method
-                require_once base_path($migration);
-                $migrationClass = $this->getMigrationClass($migration);
-                (new $migrationClass)->up();
+        $exitCode = $this->call('migrate', $params);
 
-                $this->info("Migration {$migration} completed successfully.");
-            } catch (\Exception $e) {
-                $this->error("Migration {$migration} failed: " . $e->getMessage());
-            }
+        if ($exitCode === 0) {
+            $this->newLine();
+            $this->components->info('Migrations completed. Run <comment>php artisan accountflow:seed</comment> to seed defaults.');
+            $this->newLine();
         }
-    }
 
-    protected function getMigrationClass($migrationFile)
-    {
-        // Get the class name from the migration file name
-        $className = ucfirst(str_replace('.php', '', basename($migrationFile)));
-        // Convert file name to a class name, e.g., "9900_create_accounts_tables" => "CreateAccountsTables"
-        return collect(explode('_', $className))
-            ->map(function ($part) {
-                return ucfirst($part);
-            })
-            ->implode('');
+        return $exitCode;
     }
 }
+
 

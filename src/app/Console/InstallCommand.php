@@ -3,15 +3,14 @@
 namespace ArtflowStudio\AccountFlow\App\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
 
 class InstallCommand extends Command
 {
     protected $signature = 'accountflow:install
-                            {--force : Overwrite existing published files}
-                            {--skip-migrate : Skip running database migrations}
-                            {--skip-seed : Skip seeding default data}';
+                            {--force : Overwrite existing published files}';
 
-    protected $description = 'Install AccountFlow — publish all files, run migrations, and seed defaults';
+    protected $description = 'Install AccountFlow — publish config, views, models, Livewire components, migrations, and seeders';
 
     public function handle(): int
     {
@@ -19,77 +18,110 @@ class InstallCommand extends Command
         $this->components->info('Installing AccountFlow...');
         $this->newLine();
 
-        $forcePublish = ['--force' => true];
+        $force = (bool) $this->option('force');
 
         // 1. Config
-        $this->components->task('Publishing configuration', function () use ($forcePublish) {
-            $this->callSilently('vendor:publish', array_merge(['--tag' => 'accountflow-config'], $forcePublish));
+        $this->components->task('Publishing configuration', function () use ($force) {
+            $this->callSilently('vendor:publish', [
+                '--tag'   => 'accountflow-config',
+                '--force' => true,
+            ]);
         });
 
         // 2. Views
-        $this->components->task('Publishing views', function () use ($forcePublish) {
-            $this->callSilently('vendor:publish', array_merge(['--tag' => 'accountflow-views'], $forcePublish));
+        $this->components->task('Publishing views', function () use ($force) {
+            $this->callSilently('vendor:publish', [
+                '--tag'   => 'accountflow-views',
+                '--force' => true,
+            ]);
         });
 
         // 3. Models
-        $this->components->task('Publishing models', function () use ($forcePublish) {
-            $this->callSilently('vendor:publish', array_merge(['--tag' => 'accountflow-models'], $forcePublish));
+        $this->components->task('Publishing models', function () use ($force) {
+            $this->callSilently('vendor:publish', [
+                '--tag'   => 'accountflow-models',
+                '--force' => true,
+            ]);
         });
 
         // 4. Livewire components
-        $this->components->task('Publishing Livewire components', function () use ($forcePublish) {
-            $this->callSilently('vendor:publish', array_merge(['--tag' => 'accountflow-livewire'], $forcePublish));
+        $this->components->task('Publishing Livewire components', function () use ($force) {
+            $this->callSilently('vendor:publish', [
+                '--tag'   => 'accountflow-livewire',
+                '--force' => true,
+            ]);
         });
 
         // 5. Controllers
-        $this->components->task('Publishing controllers', function () use ($forcePublish) {
-            $this->callSilently('vendor:publish', array_merge(['--tag' => 'accountflow-controllers'], $forcePublish));
+        $this->components->task('Publishing controllers', function () use ($force) {
+            $this->callSilently('vendor:publish', [
+                '--tag'   => 'accountflow-controllers',
+                '--force' => true,
+            ]);
         });
 
-        // 6. Migrations
-        if (! $this->option('skip-migrate')) {
-            $this->components->task('Running migrations', function () {
-                $this->callSilently('migrate', ['--force' => true]);
-            });
-        }
+        // 6. Copy migrations
+        $this->components->task('Copying migrations', function () use ($force) {
+            $this->copyFiles(
+                __DIR__ . '/../../database/migrations',
+                database_path('migrations'),
+                $force
+            );
+        });
 
-        // 7. Seed default data
-        if (! $this->option('skip-seed')) {
-            $this->components->task('Seeding default data', function () {
-                $this->seedFromPackage();
-            });
-        }
+        // 7. Copy seeders
+        $this->components->task('Copying seeders', function () use ($force) {
+            $this->copyFiles(
+                __DIR__ . '/../../database/seeders',
+                database_path('seeders'),
+                $force
+            );
+        });
 
         $this->newLine();
         $this->components->info('AccountFlow installed successfully.');
         $this->newLine();
-        $prefix = config('accountflow.route_prefix', 'accounts');
-        $this->line("  ▸ Edit <comment>config/accountflow.php</comment> to set your <comment>layout</comment> and <comment>middlewares</comment>");
-        $this->line("  ▸ Visit <comment>/" . $prefix . "</comment> to access AccountFlow");
+        $this->line('  <fg=yellow>Next steps:</>  ');
+        $this->line('  <fg=cyan>1.</> Run <comment>php artisan accountflow:migrate</comment> to run the database migrations');
+        $this->line('  <fg=cyan>2.</> Run <comment>php artisan accountflow:seed</comment> to seed default categories and settings');
+        $this->line('  <fg=cyan>3.</> Edit <comment>config/accountflow.php</comment> to set your <comment>layout</comment> and <comment>middlewares</comment>');
+        $this->line('  <fg=cyan>4.</> Visit <comment>/' . config('accountflow.route_prefix', 'accounts') . '</comment> to open AccountFlow');
         $this->newLine();
 
         return self::SUCCESS;
     }
 
     /**
-     * Run the package seeder directly from source.
-     * Does not require composer dump-autoload after publishing.
+     * Copy all files from $sourceDir to $targetDir.
+     * Skips existing files unless $force is true.
+     *
+     * @return array{copied: int, skipped: int}
      */
-    private function seedFromPackage(): void
+    private function copyFiles(string $sourceDir, string $targetDir, bool $force): array
     {
-        $seederFile = realpath(__DIR__ . '/../../database/seeders/AccountsTableSeeder.php');
-
-        if (! $seederFile || ! file_exists($seederFile)) {
-            $this->warn('Seeder file not found — skipping.');
-
-            return;
+        if (! File::isDirectory($sourceDir)) {
+            return ['copied' => 0, 'skipped' => 0];
         }
 
-        require_once $seederFile;
+        if (! File::isDirectory($targetDir)) {
+            File::makeDirectory($targetDir, 0755, true);
+        }
 
-        $seeder = new \Database\Seeders\AccountsTableSeeder();
-        $seeder->setContainer(app());
-        $seeder->run();
+        $copied  = 0;
+        $skipped = 0;
+
+        foreach (File::files($sourceDir) as $file) {
+            $dest = $targetDir . DIRECTORY_SEPARATOR . $file->getFilename();
+
+            if (File::exists($dest) && ! $force) {
+                $skipped++;
+                continue;
+            }
+
+            File::copy($file->getPathname(), $dest);
+            $copied++;
+        }
+
+        return ['copied' => $copied, 'skipped' => $skipped];
     }
 }
-

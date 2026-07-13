@@ -71,6 +71,7 @@ class AccountFlowServiceProvider extends ServiceProvider
             $this->commands([
                 \ArtflowStudio\AccountFlow\App\Console\InstallCommand::class,
                 \ArtflowStudio\AccountFlow\App\Console\AccountFlowLinkCommand::class,
+                \ArtflowStudio\AccountFlow\App\Console\AccountFlowMigrateCommand::class,
                 \ArtflowStudio\AccountFlow\App\Console\AccountFlowSyncCommand::class,
                 \ArtflowStudio\AccountFlow\App\Console\AccountFlowDbCommand::class,
                 // Test commands

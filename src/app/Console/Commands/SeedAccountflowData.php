@@ -3,75 +3,70 @@
 namespace ArtflowStudio\AccountFlow\App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class SeedAccountflowData extends Command
 {
-    protected $signature = 'accountflow:seed {--force : Force seeding even if data exists}';
-    protected $description = 'Seed AccountFlow tables with initial data';
+    protected $signature = 'accountflow:seed {--force : Skip confirmation when data already exists}';
 
-    public function handle()
+    protected $description = 'Seed AccountFlow tables with default categories, settings, and payment methods';
+
+    public function handle(): int
     {
-        $this->info('🌱 Seeding AccountFlow Data...');
+        $this->newLine();
+        $this->components->info('Seeding AccountFlow data...');
         $this->newLine();
 
-        // Check if tables exist
-        if (!\Schema::hasTable('accounts')) {
-            $this->error('❌ Accounts table not found!');
-            $this->warn('Run migrations first: php artisan migrate');
-            return 1;
+        if (! Schema::hasTable('ac_accounts')) {
+            $this->components->error('AccountFlow tables not found. Run migrations first: php artisan accountflow:migrate');
+
+            return self::FAILURE;
         }
 
-        // Check if data already exists
-        $accountCount = \DB::table('accounts')->count();
-        $categoryCount = \DB::table('ac_categories')->count();
+        $categoryCount = DB::table('ac_categories')->count();
 
-        if ($accountCount > 0 || $categoryCount > 0) {
-            if (!$this->option('force')) {
-                $this->warn('⚠️  Data already exists!');
-                $this->line("  Accounts: {$accountCount}");
-                $this->line("  Categories: {$categoryCount}");
+        if ($categoryCount > 0 && ! $this->option('force')) {
+            $this->components->warn('AccountFlow data already exists (' . $categoryCount . ' categories found).');
+            $this->newLine();
+
+            if (! $this->confirm('Re-seed? This will delete and re-create default categories, settings, and payment methods.', false)) {
+                $this->line('  Seeding cancelled.');
                 $this->newLine();
-                
-                if (!$this->confirm('Do you want to re-seed? This will delete existing data!', false)) {
-                    $this->info('Seeding cancelled.');
-                    return 0;
-                }
+
+                return self::SUCCESS;
             }
         }
 
         try {
-            $this->info('Running AccountsTableSeeder...');
-            Artisan::call('db:seed', [
-                '--class' => 'Database\\Seeders\\AccountsTableSeeder'
-            ]);
+            $seederFile = realpath(__DIR__ . '/../../../database/seeders/AccountsTableSeeder.php');
 
-            $this->newLine();
-            $this->info('✅ Seeding completed successfully!');
-            $this->newLine();
+            if (! $seederFile || ! file_exists($seederFile)) {
+                $this->components->error('Seeder file not found in package source.');
 
-            // Show summary
-            $this->info('📊 SEEDED DATA SUMMARY');
-            $this->line('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            $this->line('  Accounts: ' . \DB::table('accounts')->count());
-            $this->line('  Categories: ' . \DB::table('ac_categories')->count());
-            $this->line('  Payment Methods: ' . \DB::table('ac_payment_methods')->count());
-            $this->line('  Settings: ' . \DB::table('ac_settings')->count());
-            
-            if (config('accountflow.dummy_data_seed') === true) {
-                $this->line('  Transactions (dummy): ' . \DB::table('ac_transactions')->count());
-                $this->line('  Assets (dummy): ' . \DB::table('ac_assets')->count());
-                $this->line('  Budgets (dummy): ' . \DB::table('ac_budgets')->count());
-                $this->line('  Audit Trail (dummy): ' . \DB::table('ac_audit_trail')->count());
+                return self::FAILURE;
             }
 
-            $this->newLine();
-            return 0;
+            require_once $seederFile;
 
-        } catch (\Exception $e) {
-            $this->error('❌ Seeding failed!');
-            $this->error($e->getMessage());
-            return 1;
+            $seeder = new \Database\Seeders\AccountsTableSeeder();
+            $seeder->setContainer(app());
+            $seeder->run();
+
+            $this->newLine();
+            $this->components->info('Seeding completed.');
+            $this->newLine();
+            $this->line('  Categories:       ' . DB::table('ac_categories')->count());
+            $this->line('  Payment methods:  ' . DB::table('ac_payment_methods')->count());
+            $this->line('  Settings:         ' . DB::table('ac_settings')->count());
+            $this->newLine();
+
+            return self::SUCCESS;
+        } catch (\Throwable $e) {
+            $this->components->error('Seeding failed: ' . $e->getMessage());
+
+            return self::FAILURE;
         }
     }
 }
+
