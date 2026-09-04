@@ -1,33 +1,101 @@
 {
-  "name": "artflow-studio/accountflow",
-  "description": "A reusable dynamic accounts module for Laravel.",
-  "autoload": {
-    "psr-4": {
-      "ArtflowStudio\\AccountFlow\\": "src/",
-      "ArtflowStudio\\AccountFlow\\App\\": "src/app/"
+    "name": "artflow-studio/accountflow",
+    "description": "A complete, drop-in accounting module for Laravel — accounts, transactions, transfers, budgets, assets, loans, equity and financial reports, with Livewire 4 UI and AFTable listings.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "accounting",
+        "finance",
+        "ledger",
+        "bookkeeping",
+        "livewire",
+        "transactions",
+        "reports"
+    ],
+    "authors": [
+        {
+            "name": "Artflow Studio",
+            "email": "info@artflow.pk",
+            "homepage": "https://www.artflow.pk"
+        }
+    ],
+    "homepage": "https://github.com/artflow-studio/accountflow",
+    "support": {
+        "issues": "https://github.com/artflow-studio/accountflow/issues",
+        "source": "https://github.com/artflow-studio/accountflow",
+        "docs": "https://github.com/artflow-studio/accountflow/tree/main/docs"
     },
-    "files": [
-      "src/app/Helpers/AccountFlowHelper.php"
-    ]
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "ArtflowStudio\\AccountFlow\\Tests\\": "tests/"
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=8.2",
+        "artflow-studio/snippets": "^2.3",
+        "artflow-studio/table": "^1.5",
+        "laravel/framework": "^12.0|^13.0",
+        "livewire/livewire": "^4.0"
+    },
+    "suggest": {
+        "spatie/laravel-permission": "Needed only when accountflow.admin_management or the route middleware stack is pointed at role-based checks (^7.0)."
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.18",
+        "orchestra/testbench": "^9.0|^10.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "ArtflowStudio\\AccountFlow\\": "src/",
+            "ArtflowStudio\\AccountFlow\\Database\\Factories\\": "database/factories/",
+            "ArtflowStudio\\AccountFlow\\Database\\Seeders\\": "database/seeders/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ArtflowStudio\\AccountFlow\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "ArtflowStudio\\AccountFlow\\AccountFlowServiceProvider"
+            ]
+        },
+        "branch-alias": {
+            "dev-main": "0.3.x-dev"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "analyse": "vendor/bin/phpstan analyse",
+        "format": "vendor/bin/pint",
+        "lint": "vendor/bin/pint --test",
+        "check": [
+            "@lint",
+            "@analyse",
+            "@test"
+        ]
+    },
+    "scripts-descriptions": {
+        "test": "Run the Pest suite",
+        "analyse": "Run PHPStan static analysis",
+        "format": "Fix code style with Pint",
+        "lint": "Check code style without changing files",
+        "check": "Everything CI runs: style, static analysis, tests"
     }
-  },
-  "require": {
-    "laravel/framework": "*",
-    "artflow-studio/table": "*",
-    "artflow-studio/snippets": "*",
-    "livewire/livewire": "^4.0"
-  },
-  "extra": {
-    "laravel": {
-      "providers": [
-        "ArtflowStudio\\AccountFlow\\AccountFlowServiceProvider"
-      ]
-    }
-  },
-  "minimum-stability": "stable",
-  "prefer-stable": true
 }

@@ -25,9 +25,9 @@ metadata:
 
 | App Namespace | Package Source |
 |---|---|
-| `App\Livewire\AccountFlow\*` | `vendor/artflow-studio/accountflow/src/app/Livewire/AccountFlow/` |
-| `App\Models\AccountFlow\*` | `vendor/artflow-studio/accountflow/src/app/Models/` |
-| `App\Http\Controllers\AccountFlow\*` | `vendor/artflow-studio/accountflow/src/app/Http/Controllers/AccountFlow/` |
+| `ArtflowStudio\AccountFlow\Livewire\*` | `vendor/artflow-studio/accountflow/src/app/Livewire/AccountFlow/` |
+| `ArtflowStudio\AccountFlow\Models\*` | `vendor/artflow-studio/accountflow/src/app/Models/` |
+| `ArtflowStudio\AccountFlow\Http\Controllers\*` | `vendor/artflow-studio/accountflow/src/app/Http/Controllers/AccountFlow/` |
 
 This means classes are discovered at runtime from the package source — **no symlinks or junctions are needed** in production or after a fresh `composer install`.
 
@@ -83,6 +83,24 @@ src/
     ├── livewire/                    # One view per Livewire component
     └── components/                  # table.blade.php (embed component)
 ```
+
+---
+
+## Services are instance-based
+
+Every service is an ordinary instance resolved from the container — there are
+no static service methods. Reach them through the facade, the `accountflow()`
+helper, or constructor injection:
+
+```php
+Accountflow::transactions()->income(1500, 'Invoice #221');
+accountflow()->accounts()->getBalance($id);
+public function __construct(private TransactionService $transactions) {}
+```
+
+`TransactionService::create()` and friends no longer work — 0.2.x declared the
+services static while also binding them as container singletons, which made
+them impossible to mock or swap.
 
 ---
 
@@ -182,7 +200,7 @@ $tx = AC::transactions()->createExpense(['amount' => 100, 'description' => 'Coff
 ```
 
 ### Side Effects (automatic — no manual steps needed)
-- On **create**: `AccountService::addToBalance()` or `subtractFromBalance()` is called automatically.
+- On **create**: the balance is updated automatically through `Support\BalanceUpdater`, which holds a row lock (`lockForUpdate()`) so concurrent writes cannot lose an update.
 - On **update**: Previous balance change is reversed, new one is applied.
 - `unique_id` is auto-generated.
 - `category_id` falls back to the type-based default from `SettingsService`.
@@ -645,7 +663,7 @@ $symbol = config(
 
 ---
 
-## Models (all in `App\Models\AccountFlow\` namespace)
+## Models (all in `ArtflowStudio\AccountFlow\Models\` namespace)
 
 ```
 Account            HasMany: transactions, transfers, paymentMethods, budgets
@@ -699,11 +717,13 @@ php artisan accountflow:status          # Check all services, features, DB table
 # Skill install (copies SKILL.md to .github/skills/)
 php artisan accountflow:skill-install
 
-# Testing / diagnostics (development only)
-php artisan accountflow:test-complete   # Run all package tests
-php artisan accountflow:test-facade     # Test facade bindings
-php artisan accountflow:test-features   # Test feature service
+# Diagnostics
 php artisan accountflow:analyze-livewire # Analyze all Livewire components
+
+# The 0.2.x accountflow:test-* commands are gone. The package has a real
+# Pest suite now — run it from the package directory:
+#   composer test      # Pest, SQLite in memory
+#   composer check     # pint + larastan + pest
 ```
 
 ---
@@ -858,7 +878,7 @@ $budget = Accountflow::budgets()->create([
 
 ## Common Mistakes to Avoid
 
-1. **Wrong namespace for models** — use `App\Models\AccountFlow\Transaction`, not `App\Models\Transaction`.
+1. **Wrong namespace for models** — use `ArtflowStudio\AccountFlow\Models\Transaction`, not `App\Models\Transaction`.
 2. **Editing published files instead of package source** — always edit in `vendor/artflow-studio/accountflow/src/`. The SPL autoloader loads straight from that path; published files under `app/` are only relevant if junctions are active.
 3. **Manual balance updates** — never update `account->balance` directly; `TransactionService` handles it.
 4. **Using `DB::` in queries** — prefer `Model::query()` for all AccountFlow models.

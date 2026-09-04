@@ -2,16 +2,6 @@
 
 namespace ArtflowStudio\AccountFlow\Services;
 
-use ArtflowStudio\AccountFlow\App\Services\TransactionService;
-use ArtflowStudio\AccountFlow\App\Services\AccountService;
-use ArtflowStudio\AccountFlow\App\Services\CategoryService;
-use ArtflowStudio\AccountFlow\App\Services\PaymentMethodService;
-use ArtflowStudio\AccountFlow\App\Services\BudgetService;
-use ArtflowStudio\AccountFlow\App\Services\ReportService;
-use ArtflowStudio\AccountFlow\App\Services\SettingsService;
-use ArtflowStudio\AccountFlow\App\Services\AuditService;
-use ArtflowStudio\AccountFlow\App\Services\FeatureService;
-
 /**
  * AccountFlowManager - Service Container
  *
@@ -94,5 +84,43 @@ class AccountFlowManager
     public function features(): FeatureService
     {
         return app()->make(FeatureService::class);
+    }
+
+    public function transfers(): TransferService
+    {
+        return app()->make(TransferService::class);
+    }
+
+    public function plannedPayments(): PlannedPaymentService
+    {
+        return app()->make(PlannedPaymentService::class);
+    }
+
+    /**
+     * The plain-language front door: received / spent / moved / balance.
+     */
+    public function money(): MoneyService
+    {
+        return app()->make(MoneyService::class);
+    }
+
+    public function wallets(): WalletService
+    {
+        return app()->make(WalletService::class);
+    }
+
+    public function assets(): AssetService
+    {
+        return app()->make(AssetService::class);
+    }
+
+    public function loans(): LoanService
+    {
+        return app()->make(LoanService::class);
+    }
+
+    public function equity(): EquityService
+    {
+        return app()->make(EquityService::class);
     }
 }

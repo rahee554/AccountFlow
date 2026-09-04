@@ -2,191 +2,211 @@
 
 namespace ArtflowStudio\AccountFlow;
 
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\ServiceProvider;
+use ArtflowStudio\AccountFlow\Http\Middleware\Authorize;
+use ArtflowStudio\AccountFlow\Http\Middleware\CheckAccountflowFeature;
+use ArtflowStudio\AccountFlow\Http\Middleware\CheckAdminAccess;
+use ArtflowStudio\AccountFlow\Listeners\AuditSubscriber;
+use ArtflowStudio\AccountFlow\Models\Transaction;
+use ArtflowStudio\AccountFlow\Services\AccountFlowManager;
+use ArtflowStudio\AccountFlow\Support\ComponentResolver;
+use ArtflowStudio\AccountFlow\Support\LegacyAliases;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\ServiceProvider;
 
 class AccountFlowServiceProvider extends ServiceProvider
 {
     /**
-     * Bootstrap services.
+     * Console commands registered when running in the console.
+     *
+     * @var list<class-string>
      */
-    public function boot()
-    {
-        // ============================================
-        // Register Middleware Alias
-        // ============================================
-        $this->app['router']->aliasMiddleware('accountflow.feature', \ArtflowStudio\AccountFlow\App\Http\Middleware\CheckAccountflowFeature::class);
-        $this->app['router']->aliasMiddleware('accountflow.admin', \ArtflowStudio\AccountFlow\App\Http\Middleware\CheckAdminAccess::class);
-
-        // ============================================
-        // Publish Configuration (only config is published by default)
-        // ============================================
-        $this->publishes([
-            __DIR__ . '/config/accountflow.php' => config_path('accountflow.php'),
-        ], 'accountflow-config');
-
-        // Optionally publish views to allow host-app overrides:
-        // php artisan vendor:publish --tag=accountflow-views
-        $this->publishes([
-            __DIR__ . '/resources/views/vendor/artflow-studio/accountflow' => resource_path('views/vendor/accountflow'),
-        ], 'accountflow-views');
-
-        // Publish models — run via accountflow:install or vendor:publish --tag=accountflow-models
-        $this->publishes([
-            __DIR__ . '/app/Models' => app_path('Models/AccountFlow'),
-        ], 'accountflow-models');
-
-        // Publish Livewire components — run via accountflow:install or vendor:publish --tag=accountflow-livewire
-        $this->publishes([
-            __DIR__ . '/app/Livewire/AccountFlow' => app_path('Livewire/AccountFlow'),
-        ], 'accountflow-livewire');
-
-        // Publish controllers — run via accountflow:install or vendor:publish --tag=accountflow-controllers
-        $this->publishes([
-            __DIR__ . '/app/Http/Controllers/AccountFlow' => app_path('Http/Controllers/AccountFlow'),
-        ], 'accountflow-controllers');
-
-        // ============================================
-        // Load Views from package
-        // ============================================
-        $this->loadViewsFrom(__DIR__ . '/resources/views/vendor/artflow-studio/accountflow', 'accountflow');
-
-        // Auto-discover migrations — php artisan migrate picks these up automatically
-        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
-
-        // ============================================
-        // Load Routes from package
-        // ============================================
-        $routesPath = __DIR__ . '/routes/accountflow.php';
-
-        if (File::exists($routesPath)) {
-            $this->loadRoutesFrom($routesPath);
-        }
-
-        // ============================================
-        // Register Console Commands
-        // ============================================
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                \ArtflowStudio\AccountFlow\App\Console\InstallCommand::class,
-                \ArtflowStudio\AccountFlow\App\Console\AccountFlowLinkCommand::class,
-                \ArtflowStudio\AccountFlow\App\Console\AccountFlowMigrateCommand::class,
-                \ArtflowStudio\AccountFlow\App\Console\AccountFlowSyncCommand::class,
-                \ArtflowStudio\AccountFlow\App\Console\AccountFlowDbCommand::class,
-                // Test commands
-                \ArtflowStudio\AccountFlow\App\Console\Commands\TestAccountflowFacade::class,
-                \ArtflowStudio\AccountFlow\App\Console\Commands\TestTransactionService::class,
-                \ArtflowStudio\AccountFlow\App\Console\Commands\TestAccountService::class,
-                \ArtflowStudio\AccountFlow\App\Console\Commands\TestSettingsService::class,
-                \ArtflowStudio\AccountFlow\App\Console\Commands\TestContainerBindings::class,
-                \ArtflowStudio\AccountFlow\App\Console\Commands\TestAllServices::class,
-                \ArtflowStudio\AccountFlow\App\Console\Commands\TestRealUsage::class,
-                // Real-world commands
-                \ArtflowStudio\AccountFlow\App\Console\Commands\CheckAccountflowStatus::class,
-                \ArtflowStudio\AccountFlow\App\Console\Commands\SeedAccountflowData::class,
-                \ArtflowStudio\AccountFlow\App\Console\Commands\ToggleFeature::class,
-                \ArtflowStudio\AccountFlow\App\Console\Commands\AnalyzeLivewireComponents::class,
-                \ArtflowStudio\AccountFlow\App\Console\Commands\TestFeatureService::class,
-                \ArtflowStudio\AccountFlow\App\Console\Commands\RunAllTests::class,
-                // Skill install
-                \ArtflowStudio\AccountFlow\App\Console\Commands\SkillInstallCommand::class,
-                // Delink
-                \ArtflowStudio\AccountFlow\App\Console\Commands\DelinkCommand::class,
-            ]);
-        }
-
-        // ============================================
-        // Merge Default Config
-        // ============================================
-        $this->mergeConfigFrom(
-            __DIR__ . '/config/accountflow.php',
-            'accountflow'
-        );
-
-        // ============================================
-        // Register Blade Directives
-        // ============================================
-        Blade::directive('accountflowFeature', function ($expression) {
-            return "<?php if(app('accountflow')->features()->isEnabled({$expression})): ?>";
-        });
-
-        Blade::directive('endaccountflowFeature', function () {
-            return "<?php endif; ?>";
-        });
-
-        Blade::directive('featureEnabled', function ($expression) {
-            return "<?php if(\ArtflowStudio\AccountFlow\Facades\Accountflow::features()->isEnabled({$expression})): ?>";
-        });
-
-        Blade::directive('endFeatureEnabled', function () {
-            return "<?php endif; ?>";
-        });
-
-        Blade::directive('featureDisabled', function ($expression) {
-            return "<?php if(\ArtflowStudio\AccountFlow\Facades\Accountflow::features()->isDisabled({$expression})): ?>";
-        });
-
-        Blade::directive('endFeatureDisabled', function () {
-            return "<?php endif; ?>";
-        });
-        // @accountflow(['table' => 'transactions']) — render a standalone table with no layout/header
-        Blade::directive('accountflow', function ($expression) {
-            return "<?php echo \$__env->make('accountflow::components.table', {$expression}, \\Illuminate\\Support\\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>";
-        });    }
+    private const COMMANDS = [
+        Console\InstallCommand::class,
+        Console\AccountFlowMigrateCommand::class,
+        Console\AccountFlowMigrateFreshCommand::class,
+        Console\AccountFlowDbCommand::class,
+        Console\Commands\CheckAccountflowStatus::class,
+        Console\Commands\SeedAccountflowData::class,
+        Console\Commands\ToggleFeature::class,
+        Console\Commands\AnalyzeLivewireComponents::class,
+        Console\Commands\SkillInstallCommand::class,
+        Console\Commands\DelinkCommand::class,
+        Console\Commands\PostPlannedPayments::class,
+        Console\Commands\BackfillTransfers::class,
+        Console\Commands\RecalculateBalances::class,
+        Console\Commands\Diagnose::class,
+    ];
 
     /**
-     * Register any application services.
+     * Service classes bound as singletons and exposed through the manager.
+     *
+     * @var list<class-string>
      */
-    public function register()
+    private const SERVICES = [
+        Services\TransactionService::class,
+        Services\AccountService::class,
+        Services\CategoryService::class,
+        Services\PaymentMethodService::class,
+        Services\BudgetService::class,
+        Services\ReportService::class,
+        Services\SettingsService::class,
+        Services\AuditService::class,
+        Services\FeatureService::class,
+        Services\TransferService::class,
+        Services\PlannedPaymentService::class,
+        Services\AssetService::class,
+        Services\LoanService::class,
+        Services\EquityService::class,
+        Services\MoneyService::class,
+        Services\WalletService::class,
+    ];
+
+    public function register(): void
     {
-        // ============================================
-        // Package Class Autoloader
-        // ============================================
-        // Load App\Livewire\AccountFlow\*, App\Models\AccountFlow\*, and
-        // App\Http\Controllers\AccountFlow\* from the package src directory.
-        // This allows all classes to be resolved without requiring symlinks.
-        $srcDir = __DIR__;
+        $this->mergeConfigFrom(__DIR__.'/../config/accountflow.php', 'accountflow');
 
-        spl_autoload_register(function (string $class) use ($srcDir): void {
-            $map = [
-                'App\\Livewire\\AccountFlow\\'         => $srcDir . '/app/Livewire/AccountFlow/',
-                'App\\Models\\AccountFlow\\'           => $srcDir . '/app/Models/',
-                'App\\Http\\Controllers\\AccountFlow\\' => $srcDir . '/app/Http/Controllers/AccountFlow/',
-            ];
+        $this->app->singleton('accountflow', fn (): AccountFlowManager => new AccountFlowManager);
+        $this->app->alias('accountflow', AccountFlowManager::class);
 
-            foreach ($map as $prefix => $baseDir) {
-                if (str_starts_with($class, $prefix)) {
-                    $relative = substr($class, strlen($prefix));
-                    $file     = $baseDir . str_replace('\\', '/', $relative) . '.php';
+        foreach (self::SERVICES as $service) {
+            $this->app->singleton($service);
+        }
+    }
 
-                    if (is_file($file)) {
-                        require_once $file;
-                    }
+    public function boot(): void
+    {
+        $this->registerLegacyAliases();
+        $this->registerMiddleware();
+        $this->registerLivewireComponents();
+        $this->registerHostRelations();
+        $this->registerEventSubscribers();
+        $this->registerPublishing();
+        $this->registerBladeDirectives();
 
-                    return;
-                }
-            }
-        });
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'accountflow');
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadRoutesFrom(__DIR__.'/../routes/accountflow.php');
 
-        // Register the AccountFlow manager into the container
-        $this->app->singleton('accountflow', function () {
-            return new \ArtflowStudio\AccountFlow\Services\AccountFlowManager();
-        });
+        if ($this->app->runningInConsole()) {
+            $this->commands(self::COMMANDS);
+        }
+    }
 
-        // Register all services as singletons for easy access
-        $this->app->singleton(\ArtflowStudio\AccountFlow\App\Services\TransactionService::class);
-        $this->app->singleton(\ArtflowStudio\AccountFlow\App\Services\AccountService::class);
-        $this->app->singleton(\ArtflowStudio\AccountFlow\App\Services\CategoryService::class);
-        $this->app->singleton(\ArtflowStudio\AccountFlow\App\Services\PaymentMethodService::class);
-        $this->app->singleton(\ArtflowStudio\AccountFlow\App\Services\BudgetService::class);
-        $this->app->singleton(\ArtflowStudio\AccountFlow\App\Services\ReportService::class);
-        $this->app->singleton(\ArtflowStudio\AccountFlow\App\Services\SettingsService::class);
-        $this->app->singleton(\ArtflowStudio\AccountFlow\App\Services\AuditService::class);
-        $this->app->singleton(\ArtflowStudio\AccountFlow\App\Services\FeatureService::class);
+    /**
+     * Alias the pre-0.3.0 `App\…\AccountFlow\*` class names to their current
+     * equivalents so existing host applications keep working.
+     */
+    private function registerLegacyAliases(): void
+    {
+        if (config('accountflow.legacy_aliases', true)) {
+            LegacyAliases::register();
+        }
+    }
 
-        // Register aliases for the facade
-        $this->app->alias('accountflow', \ArtflowStudio\AccountFlow\Services\AccountFlowManager::class);
+    private function registerMiddleware(): void
+    {
+        $router = $this->app['router'];
+
+        $router->aliasMiddleware('accountflow.feature', CheckAccountflowFeature::class);
+        $router->aliasMiddleware('accountflow.admin', CheckAdminAccess::class);
+        $router->aliasMiddleware('accountflow.can', Authorize::class);
+    }
+
+    /**
+     * Teach Livewire how to find components that live in this package.
+     */
+    private function registerLivewireComponents(): void
+    {
+        ComponentResolver::register();
+    }
+
+    /**
+     * Attach optional relations to host-application models.
+     *
+     * 0.2.x hardcoded `\App\Models\InvoicePayment` inside the Transaction
+     * model, which made the package depend on one specific CRM. The relation
+     * now exists only when the host application asks for it.
+     */
+    private function registerHostRelations(): void
+    {
+        $invoicePayment = config('accountflow.models.invoice_payment');
+
+        if (is_string($invoicePayment) && class_exists($invoicePayment)) {
+            Transaction::resolveRelationUsing(
+                'invoicePayment',
+                fn (Transaction $transaction) => $transaction->hasOne($invoicePayment),
+            );
+        }
+    }
+
+    /**
+     * Wire the audit trail to domain events.
+     *
+     * Auditing is a listener rather than calls scattered through the services,
+     * so a new write path cannot forget to log.
+     */
+    private function registerEventSubscribers(): void
+    {
+        Event::subscribe(AuditSubscriber::class);
+    }
+
+    /**
+     * Publishable assets.
+     *
+     * Models, Livewire components and controllers are deliberately NOT
+     * publishable. In 0.2.x they were, which meant the same fully-qualified
+     * class name existed both in the package and in `app/`, and which one
+     * loaded depended on autoloader ordering. Override behaviour through
+     * config, container bindings and published views instead.
+     */
+    private function registerPublishing(): void
+    {
+        if (! $this->app->runningInConsole()) {
+            return;
+        }
+
+        $this->publishes([
+            __DIR__.'/../config/accountflow.php' => config_path('accountflow.php'),
+        ], 'accountflow-config');
+
+        $this->publishes([
+            __DIR__.'/../resources/views' => resource_path('views/vendor/accountflow'),
+        ], 'accountflow-views');
+
+        $this->publishes([
+            __DIR__.'/../public/assets' => public_path('vendor/artflow-studio/accountflow/assets'),
+        ], 'accountflow-assets');
+
+        $this->publishes([
+            __DIR__.'/../database/seeders' => database_path('seeders'),
+        ], 'accountflow-seeders');
+    }
+
+    private function registerBladeDirectives(): void
+    {
+        Blade::directive(
+            'accountflowFeature',
+            fn (string $expression): string => "<?php if(app('accountflow')->features()->isEnabled({$expression})): ?>",
+        );
+        Blade::directive('endaccountflowFeature', fn (): string => '<?php endif; ?>');
+
+        Blade::directive(
+            'featureEnabled',
+            fn (string $expression): string => "<?php if(app('accountflow')->features()->isEnabled({$expression})): ?>",
+        );
+        Blade::directive('endFeatureEnabled', fn (): string => '<?php endif; ?>');
+
+        Blade::directive(
+            'featureDisabled',
+            fn (string $expression): string => "<?php if(app('accountflow')->features()->isDisabled({$expression})): ?>",
+        );
+        Blade::directive('endFeatureDisabled', fn (): string => '<?php endif; ?>');
+
+        // @accountflow(['table' => 'transactions']) — a standalone table, no layout or header.
+        Blade::directive(
+            'accountflow',
+            fn (string $expression): string => "<?php echo \$__env->make('accountflow::components.table', {$expression}, \\Illuminate\\Support\\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>",
+        );
     }
 }
-

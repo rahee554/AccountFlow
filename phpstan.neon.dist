@@ -1,0 +1,24 @@
+# Larastan teaches PHPStan about Eloquent's static magic (Model::find(),
+# ::create(), ::whereKey(), scopes, relations). Plain PHPStan reports hundreds
+# of false positives on any Laravel package without it.
+#
+# Level 1 is where this codebase passes cleanly today — the honest current
+# state, not an aspiration. Getting to level 2 needs `@property` docblocks on
+# the remaining models and named accessors for the raw SQL aggregate aliases
+# (`row_count`, `total_income`, …) that reports select. Raise a level at a time
+# and fix rather than ignore what surfaces; tracked in plan.md section 7.
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 3
+
+    paths:
+        - src
+
+    excludePaths:
+        analyseAndScan:
+            - src/helpers.php
+
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false
