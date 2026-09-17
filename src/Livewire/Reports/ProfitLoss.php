@@ -135,7 +135,7 @@ class ProfitLoss extends Component
     public function render()
     {
         $viewpath = config('accountflow.view_path', 'accountflow.');
-        $layout = config('accountflow.print_layout', 'layouts.app');
+        $layout = config('accountflow.layout');
 
         return view($viewpath.'livewire.reports.profit-loss', [
             'reportData' => $this->reportData,
@@ -143,7 +143,7 @@ class ProfitLoss extends Component
             'startDate' => $this->startDate,
             'endDate' => $this->endDate,
             'isLoading' => $this->isLoading,
-        ])->extends($layout)->section('content');
+        ])->extends($layout)->section('content')->title('Profit & Loss Report | '.config('accountflow.business_name'));
     }
 
     private function initializeDateRange()

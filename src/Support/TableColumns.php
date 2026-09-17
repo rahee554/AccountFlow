@@ -74,7 +74,11 @@ final class TableColumns
                 // Null-safe: category_id is nullable.
                 'raw' => '@if($row->category)'
                     .'<span class="d-inline-flex align-items-center">'
-                    .'@if($row->category->icon)<img src="{{ asset($iconBase . $row->category->icon) }}" alt="" class="h-25px me-2">@endif'
+                    // h-25px was a Metronic utility class; ui-flow has no
+                    // pixel-sized height utilities, so an unconstrained <img>
+                    // rendered at its natural (much larger) size and
+                    // overlapped the next column. Sized inline instead.
+                    .'@if($row->category->icon)<img src="{{ asset($iconBase . $row->category->icon) }}" alt="" class="me-2 flex-shrink-0" style="height:20px;width:20px;object-fit:contain">@endif'
                     .'{{ $row->category->name }}</span>'
                     .'@else<span class="text-muted">Uncategorised</span>@endif',
             ],
@@ -115,7 +119,7 @@ final class TableColumns
             [
                 'key' => 'active',
                 'label' => 'Status',
-                'raw' => '<span class="badge badge-light-{{ $row->active ? "success" : "secondary" }}">'
+                'raw' => '<span class="badge badge-soft-{{ $row->active ? "success" : "secondary" }}">'
                     .'{{ $row->active ? "Active" : "Inactive" }}</span>',
             ],
         ];
@@ -130,12 +134,12 @@ final class TableColumns
             [
                 'key' => 'name',
                 'label' => 'Category',
-                'raw' => '@if($row->icon)<img src="{{ asset($iconBase . $row->icon) }}" alt="" class="h-25px me-2">@endif{{ $row->name }}',
+                'raw' => '@if($row->icon)<img src="{{ asset($iconBase . $row->icon) }}" alt="" class="me-2" style="height:20px;width:20px;object-fit:contain">@endif{{ $row->name }}',
             ],
             [
                 'key' => 'type',
                 'label' => 'Type',
-                'raw' => '<span class="badge badge-light-{{ $row->type == 1 ? "success" : "danger" }}">'
+                'raw' => '<span class="badge badge-soft-{{ $row->type == 1 ? "success" : "danger" }}">'
                     .'{{ $row->type == 1 ? "Income" : "Expense" }}</span>',
             ],
             [
@@ -147,7 +151,7 @@ final class TableColumns
             [
                 'key' => 'status',
                 'label' => 'Status',
-                'raw' => '<span class="badge badge-light-{{ $row->status == 1 ? "success" : "secondary" }}">'
+                'raw' => '<span class="badge badge-soft-{{ $row->status == 1 ? "success" : "secondary" }}">'
                     .'{{ $row->status == 1 ? "Active" : "Inactive" }}</span>',
             ],
         ];
@@ -190,7 +194,7 @@ final class TableColumns
             [
                 'key' => 'action',
                 'label' => 'Action',
-                'raw' => '<span class="badge badge-light-primary">{{ ucfirst($row->action) }}</span>',
+                'raw' => '<span class="badge badge-soft-primary">{{ ucfirst($row->action) }}</span>',
             ],
             [
                 'key' => 'user_id',

@@ -77,6 +77,45 @@ Recognised keys: `transactions`, `accounts`, `transfers`, `categories`,
 `planned-payments`, `assets`, `asset-transactions`, `equity-transactions`,
 `equity-partners`, `loans`, `budgets`.
 
+The table is bare — no page title, no "Add Record" button, no nav header —
+so it drops cleanly into a `<div>` on any page you own, at any width.
+
+## Embedding a ready-made "add record" form
+
+The companion to `<x-accountflow::table>`. Same idea, but for creating (or
+editing) a record instead of listing them:
+
+```blade
+<x-accountflow::create table="transactions" />
+<x-accountflow::create table="accounts" />
+<x-accountflow::create table="categories" />
+<x-accountflow::create table="payment-methods" />
+```
+
+Pass an `id` to edit an existing record instead of creating a new one:
+
+```blade
+<x-accountflow::create table="accounts" :id="$account->id" />
+```
+
+A typical page combines both — a form to add a record, and the list right
+below it, updating live once the form saves:
+
+```blade
+<div>
+    <x-accountflow::create table="transactions" />
+    <x-accountflow::table table="transactions" />
+</div>
+```
+
+That works because every bundled "Create" component dispatches a
+`refreshTable` browser event on save, and every bundled list listens for it
+— no wiring required on your part.
+
+Recognised keys today: `transactions`, `accounts`, `categories`,
+`payment-methods`. (Fewer than the table map — only the forms that have been
+made embed-safe so far. Ask if you need another one added.)
+
 Or mount a component directly:
 
 ```blade

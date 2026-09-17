@@ -144,7 +144,7 @@ class TrialBalance extends Component
             'totalDebit' => $totalDebit,
             'totalCredit' => $totalCredit,
             'totalNet' => $totalNet,
-        ])->extends($layout)->section('content');
+        ])->extends($layout)->section('content')->title('Trial Balance | '.config('accountflow.business_name'));
     }
 
     protected function setPeriodDates($type, Carbon $now)

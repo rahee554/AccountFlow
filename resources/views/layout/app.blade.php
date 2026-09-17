@@ -1,89 +1,101 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+{{--
+    AccountFlow admin shell — ui-flow theme.
 
-    <title>@yield('title', config('app.name', 'Artflow ERP'))</title>
+    Mirrors the theme's own shell DOM order exactly: sidebar, topbar, main,
+    footer, all inside one `.app` wrapper. Don't reorder these — the theme's
+    layout SCSS depends on this exact structure.
 
-    {{-- Bootstrap CSS (CDN) --}}
-    <link href="{{ asset('assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
+    Every AccountFlow Livewire component already renders via
+    `->extends($layout)->section('content')`, which is the classic
+    @extends/@section idiom — this layout supports that directly via
+    @yield('content'). It also supports the component-slot idiom
+    (`<x-accountflow::layout.app>...</x-accountflow::layout.app>`) for any
+    future classic Blade view, so nothing already written needs to change.
 
-    {{-- Optional: FontAwesome for icons --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    @persist keeps the sidebar/topbar/footer DOM alive across a Livewire
+    wire:navigate between AccountFlow pages — without it every navigation
+    would tear down and rebuild the whole shell.
+--}}
+@php
+    $accent ??= null;
+    $lockAccent ??= false;
+    $theme ??= null;
+    $lockTheme ??= false;
+    $customizer ??= true;
+    $pageLoader ??= null;
+    $pageLoaderLabel ??= 'Loading';
 
-    {{-- Page specific styles --}}
-    @stack('styles')
+    $locked = array_keys(array_filter([
+        'accent' => $accent && $lockAccent,
+        'theme' => $theme && $lockTheme,
+    ]));
 
-    <style>
-        /* Small default helpers for the accounts layout */
-        .app-navbar-brand { font-weight: 600; }
-        main.content { flex: 1 0 auto; }
-    </style>
-</head>
-<body class="d-flex flex-column min-vh-100">
+    $viewPath = config('accountflow.view_path');
+@endphp
+<!doctype html>
+<html lang="en"
+    @if ($locked) data-lock="{{ implode(' ', $locked) }}" @endif
+    @if ($accent) data-accent="{{ $accent }}" @endif
+    @if ($theme) data-bs-theme="{{ $theme }}" @endif
+    @unless ($customizer) data-customizer="false" @endunless>
 
-    {{-- Top navigation --}}
-    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
-        <div class="container-fluid">
-            <a class="navbar-brand app-navbar-brand" href="{{ url('/') }}">
-                <i class="fa fa-chart-pie me-1"></i>
-                @yield('brand', config('app.name', 'Artflow ERP'))
-            </a>
+@include($viewPath . 'layout.head')
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#accountsNavbar" aria-controls="accountsNavbar" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+<body>
 
-            <div class="collapse navbar-collapse" id="accountsNavbar">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    {{-- Example nav items. Replace or @stack a nav if you need dynamic items. --}}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url('/accounts') }}">Accounts</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url('/accounts/transactions') }}">Transactions</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url('/accounts/reports') }}">Reports</a>
-                    </li>
-                </ul>
-            </div>
+    @if ($pageLoader)
+        <div class="page-loader @if ($pageLoader !== 'branded') page-loader-{{ $pageLoader }} @endif"
+            data-page-loader data-loader-min="250" role="status" aria-live="polite"
+            aria-label="{{ $pageLoaderLabel }}">
+            @if ($pageLoader === 'branded')
+                <div class="loader-logo">
+                    <span class="brand-mark" aria-hidden="true"><i data-lucide="zap"></i></span>
+                </div>
+            @else
+                <div class="loader loader-ring loader-lg" aria-hidden="true"></div>
+            @endif
+            <p class="page-loader-label mb-0">{{ $pageLoaderLabel }}<span class="loading-dots"></span></p>
         </div>
-    </nav>
+    @endif
 
-    {{-- Main content area --}}
-    <main class="content py-4 pt-0">
-        {{-- Session flash / status messages --}}
-        @if(session('status'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('status') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <div class="app">
+        @persist('accountflow-sidebar')
+            @include($viewPath . 'layout.menu')
+        @endpersist
+
+        @persist('accountflow-topbar')
+            @include($viewPath . 'layout.header')
+        @endpersist
+
+        <main class="app-main" id="main-content">
+            <div class="app-content">
+                <div class="app-container">
+                    @if (trim($slot ?? ''))
+                        {{ $slot }}
+                    @else
+                        @yield('content')
+                    @endif
+                </div>
             </div>
-        @endif
+        </main>
 
-        @yield('content')
-    </main>
+        @persist('accountflow-footer')
+            @include($viewPath . 'layout.footer')
+        @endpersist
+    </div>
 
-    {{-- Footer --}}
-    <footer class="mt-auto bg-light border-top">
-        <div class="container py-3 small text-muted d-flex justify-content-between">
-            <div>&copy; {{ date('Y') }} {{ config('app.name', 'Artflow ERP') }}</div>
-            <div>
-                <a href="#" class="text-decoration-none">Help</a>
-                <span class="mx-2">&middot;</span>
-                <a href="#" class="text-decoration-none">Contact</a>
-            </div>
-        </div>
-    </footer>
+    @if ($customizer)
+        @include($viewPath . 'layout.customizer')
+    @endif
+    @include($viewPath . 'layout.palette')
 
-    {{-- Bootstrap Bundle with Popper (CDN) --}}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-..." crossorigin="anonymous"></script>
+    <button type="button" class="scroll-top" aria-label="Back to top">
+        <i data-lucide="arrow-up"></i>
+    </button>
 
-    {{-- Page specific scripts --}}
-    @stack('scripts')
-
+    @include($viewPath . 'layout.scripts')
 </body>
+
 </html>

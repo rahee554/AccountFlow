@@ -38,6 +38,9 @@ class CreateCategory extends Component
 
     public $parentCategories = [];
 
+    /** When true renders only the form (no layout/header) — for embedding. */
+    public bool $standalone = false;
+
     protected $rules = [
         'name' => 'required|string|max:255',
         'type' => 'required|in:1,2',
@@ -150,6 +153,17 @@ class CreateCategory extends Component
 
                 session()->flash('success', 'Category updated successfully!');
 
+                if ($this->standalone) {
+                    $this->reset(['categoryId', 'name', 'parent_id', 'icon', 'iconFile', 'isEdit']);
+                    $this->type = 1;
+                    $this->privacy = 2;
+                    $this->status = 1;
+                    $this->loadParentCategories();
+                    $this->dispatch('refreshTable');
+
+                    return null;
+                }
+
                 return redirect()->route('accountflow::categories');
             } else {
                 // Create new category
@@ -173,6 +187,7 @@ class CreateCategory extends Component
 
                 // Reload parent categories
                 $this->loadParentCategories();
+                $this->dispatch('refreshTable');
             }
 
         } catch (Exception $e) {
@@ -184,9 +199,14 @@ class CreateCategory extends Component
     {
         $viewpath = config('accountflow.view_path').'livewire.categories.create-category';
         $layout = config('accountflow.layout');
-        $title = 'Create Category | '.config('accountflow.business_name');
+        $title = ($this->isEdit ? 'Edit' : 'Create').' Category | '.config('accountflow.business_name');
+        $view = view($viewpath);
 
-        return view($viewpath)->extends($layout)->section('content')->title($title);
+        if (! $this->standalone) {
+            return $view->extends($layout)->section('content')->title($title);
+        }
+
+        return $view;
     }
 
     private function loadParentCategories()

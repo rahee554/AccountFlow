@@ -56,6 +56,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware(config('accountflow.middlewares', ['web', 'auth']))->group(function () {
+
     Route::prefix(config('accountflow.route_prefix', 'accounts'))
         ->name('accountflow::')
         ->group(function () {
@@ -74,9 +75,10 @@ Route::middleware(config('accountflow.middlewares', ['web', 'auth']))->group(fun
             Route::get('/', AccountsList::class)
                 ->middleware('accountflow.can:view-accounts')
                 ->name('accounts');
-            Route::get('/create', CreateAccount::class)
-                ->middleware('accountflow.can:manage-accounts')
-                ->name('accounts.create');
+            Route::middleware('accountflow.can:manage-accounts')->group(function () {
+                Route::get('/create', CreateAccount::class)->name('accounts.create');
+                Route::get('/edit/{id}', CreateAccount::class)->name('accounts.edit');
+            });
 
             /* Transactions */
             Route::get('/transactions', Transactions::class)
@@ -183,9 +185,10 @@ Route::middleware(config('accountflow.middlewares', ['web', 'auth']))->group(fun
                 Route::get('/payment-methods', PaymentMethods::class)
                     ->middleware('accountflow.can:view-payment-methods')
                     ->name('payment-methods');
-                Route::get('/payment-methods/create', CreatePaymentMethod::class)
-                    ->middleware('accountflow.can:manage-payment-methods')
-                    ->name('payment-methods.create');
+                Route::middleware('accountflow.can:manage-payment-methods')->group(function () {
+                    Route::get('/payment-methods/create', CreatePaymentMethod::class)->name('payment-methods.create');
+                    Route::get('/payment-methods/edit/{id}', CreatePaymentMethod::class)->name('payment-methods.edit');
+                });
             });
 
             /* Planned payments */

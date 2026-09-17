@@ -75,8 +75,9 @@ class EquityTransactionsList extends Component
         $transactions = $query->latest()->paginate(20);
         $totalContributions = EquityTransaction::where('type', 1)->sum('amount');
         $totalWithdrawals = EquityTransaction::where('type', 2)->sum('amount');
+        $canManage = $this->canAccountFlow(Ability::ManageEquity);
 
-        $view = view($viewpath, compact('transactions', 'totalContributions', 'totalWithdrawals', 'currency', 'currencySymbol'));
+        $view = view($viewpath, compact('transactions', 'totalContributions', 'totalWithdrawals', 'currency', 'currencySymbol', 'canManage'));
 
         if (! $this->standalone) {
             return $view->extends($layout)->section('content')->title($title);

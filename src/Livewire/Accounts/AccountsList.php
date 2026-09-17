@@ -4,6 +4,7 @@ namespace ArtflowStudio\AccountFlow\Livewire\Accounts;
 
 use ArtflowStudio\AccountFlow\Concerns\AuthorizesAccountFlow;
 use ArtflowStudio\AccountFlow\Enums\Ability;
+use ArtflowStudio\AccountFlow\Models\Account;
 use Livewire\Component;
 
 class AccountsList extends Component
@@ -22,8 +23,15 @@ class AccountsList extends Component
     {
         $viewpath = config('accountflow.view_path').'livewire.accounts.accounts-list';
         $layout = config('accountflow.layout');
-        $title = 'Accounts List | '.config('accountflow.business_name');
-        $view = view($viewpath);
+        $title = 'Accounts | '.config('accountflow.business_name');
+
+        $view = view($viewpath, [
+            'canManage' => $this->canAccountFlow(Ability::ManageAccounts),
+            'canTransfer' => $this->canAccountFlow(Ability::ManageTransfers),
+            'totalAccounts' => Account::count(),
+            'activeAccounts' => Account::active()->count(),
+            'totalBalance' => (float) Account::sum('balance'),
+        ]);
 
         if (! $this->standalone) {
             return $view->extends($layout)->section('content')->title($title);

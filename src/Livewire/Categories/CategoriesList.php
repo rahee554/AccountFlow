@@ -4,6 +4,8 @@ namespace ArtflowStudio\AccountFlow\Livewire\Categories;
 
 use ArtflowStudio\AccountFlow\Concerns\AuthorizesAccountFlow;
 use ArtflowStudio\AccountFlow\Enums\Ability;
+use ArtflowStudio\AccountFlow\Enums\CategoryType;
+use ArtflowStudio\AccountFlow\Models\Category;
 use Livewire\Component;
 
 class CategoriesList extends Component
@@ -23,7 +25,14 @@ class CategoriesList extends Component
         $viewpath = config('accountflow.view_path').'livewire.categories.categories-list';
         $layout = config('accountflow.layout');
         $title = 'Categories | '.config('accountflow.business_name');
-        $view = view($viewpath);
+
+        $view = view($viewpath, [
+            'canManage' => $this->canAccountFlow(Ability::ManageCategories),
+            'totalCategories' => Category::count(),
+            'incomeCategories' => Category::where('type', CategoryType::Income->value)->count(),
+            'expenseCategories' => Category::where('type', CategoryType::Expense->value)->count(),
+            'activeCategories' => Category::active()->count(),
+        ]);
 
         if (! $this->standalone) {
             return $view->extends($layout)->section('content')->title($title);

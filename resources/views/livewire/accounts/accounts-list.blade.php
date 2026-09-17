@@ -1,105 +1,93 @@
 <div>
-  @if(!$standalone)
-      @include(config('accountflow.view_path') . 'blades.dashboard-header')
-  @endif
-
-      <div class="px-2 px-md-5 px-lg-10">
-        <!--begin::Toolbar container-->
-        <div id="kt_app_toolbar_container" class="app-container  container-fluid d-flex align-items-stretch ">
-            <!--begin::Toolbar wrapper-->
-            <div class="app-toolbar-wrapper d-flex flex-stack flex-wrap gap-4 w-100">
-                <!--begin::Page title-->
-                <div class="page-title d-flex flex-column justify-content-center gap-1 me-3">
-                    <!--begin::Title-->
-                    <h1 class="page-heading d-flex flex-column justify-content-center text-dark fw-bold fs-3 m-0" wire:navigate.hover>
-                        Accounts List
-                    </h1>
-                    <!--end::Title-->
-                </div>
-                <!--end::Page title-->
-                <!--begin::Actions-->
-                <div class="d-flex align-items-center gap-2 gap-lg-3">
-                    <a href="{{ route('accountflow::transfers.create') }}"
-                        class="btn btn-sm btn-flex btn-outline btn-color-gray-700 btn-active-color-primary bg-body fs-7 fw-bold" wire:navigate.hover>
-                        Create Trasfer
-                    </a>
-
-
-
-
-                    <a href="{{ route('accountflow::accounts.create') }}"
-                        class="btn btn-sm btn-flex btn-outline btn-color-gray-700 btn-active-color-primary bg-body fs-7 fw-bold">
-                        Create Account
-                    </a>
-                </div>
-                <!--end::Actions-->
+    @unless($standalone)
+        <div class="page-header">
+            <div class="page-header-body">
+                <nav class="page-breadcrumb" aria-label="Breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ route('accountflow::dashboard') }}" wire:navigate>Accounts</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Accounts</li>
+                    </ol>
+                </nav>
+                <div class="page-header-title"><h1>Accounts</h1></div>
+                <p class="page-header-subtitle">Cash, bank and wallet accounts you post transactions against.</p>
             </div>
-            <!--end::Toolbar wrapper-->
+            <div class="page-header-actions">
+                @if ($canTransfer)
+                    <a href="{{ route('accountflow::transfers.create') }}" class="btn btn-soft-secondary" wire:navigate>
+                        <i data-lucide="repeat"></i> Transfer Funds
+                    </a>
+                @endif
+                @if ($canManage)
+                    <a href="{{ route('accountflow::accounts.create') }}" class="btn btn-primary" wire:navigate>
+                        <i data-lucide="plus"></i> Add Account
+                    </a>
+                @endif
+            </div>
         </div>
-        <!--end::Toolbar container-->
-    </div>
-    <!--begin::Content container-->
-    <div id="kt_app_content_container" class="app-container container-fluid">
-        <!--begin::Content-->
 
-
-        <div class="container">
-
-            <ul class="nav nav-tabs nav-line-tabs nav-line-tabs-2x mb-5 fs-6">
-                <li class="nav-item">
-                    <a class="nav-link active" data-bs-toggle="tab" href="#accounts_list">Accounts List</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="tab" href="#transfers">Transfer Between Accounts</a>
-                </li>
-            </ul>
-            <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="accounts_list" role="tabpanel">
-
-
-
-                    @livewire('aftable', [
-                        'model' => 'ArtflowStudio\AccountFlow\Models\Account',
-                        'columns' => [
-                            ['key' => 'name', 'label' => 'Account Title'],
-                            ['key' => 'description', 'label' => 'Description'],
-                            ['key' => 'balance', 'label' => 'Account Balance'],
-                            ['key' => 'active', 'label' => 'Status', 'raw' => '{!! $row->active == true ? "<span class=\"badge bafge-sm badge-light-success\">Active</span>" : "<span class=\"badge badge-sm badge-light-warning\">Inactive</span>" !!}'],
-                        ]
-                    ])
-
-                </div>
-            </div>
-
-            <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade" id="transfers" role="tabpanel">
- @livewire('aftable', [
-    'model' => 'ArtflowStudio\AccountFlow\Models\Transfer',
-    'columns' => [
-        ['key' => 'unique_id', 'label' => 'Transfer ID'],
-        [
-            'key' => 'amount',
-            'label' => 'Amount',
-            'raw' => '<span class="text-primary fw-bold">PKR {{ number_format($row->amount, 2) }}</span>'
-        ],
-        ['key' => 'from_account', 'label' => 'From Account', 'relation' => 'fromAccount:name'],
-        ['key' => 'to_account', 'label' => 'To Account', 'relation' => 'toAccount:name'],
-        ['key' => 'description', 'label' => 'Description', 'raw' => '{{ $row->description ?: "-" }}'],
-        ['key' => 'date', 'label' => 'Date', 'raw' => '{{ \Carbon\Carbon::parse($row->date)->format("d M Y") }}'],
-        ['key' => 'created_by', 'label' => 'Created By', 'relation' => 'user:name'],
-    ],
-    'actions' => [
-        'raw' => "<a href='{{ route('accountflow::transfers.edit', \$row->id) }}' class='btn btn-sm btn-warning'>Edit</a>"
-    ]
-])
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-xl-4">
+                <div class="card stat-tile h-100"><div class="card-body">
+                    <div class="stat">
+                        <div class="stat-head">
+                            <div class="stat-label">Total Accounts</div>
+                            <span class="icon-box icon-box-primary"><i data-lucide="landmark"></i></span>
                         </div>
-                </div>
+                        <div class="stat-value">{{ number_format($totalAccounts) }}</div>
+                        <div class="stat-meta"><span>{{ $activeAccounts }} active</span></div>
+                    </div>
+                </div></div>
             </div>
-    
-            {{-- @include(config('accountflow.view_path') . 'modals.transfers') --}}
-            <!--end::Content-->
+            <div class="col-6 col-xl-4">
+                <div class="card stat-tile h-100"><div class="card-body">
+                    <div class="stat">
+                        <div class="stat-head">
+                            <div class="stat-label">Total Balance</div>
+                            <span class="icon-box icon-box-success"><i data-lucide="wallet"></i></span>
+                        </div>
+                        <div class="stat-value">{{ config('accountflow.currency_symbols.' . config('accountflow.currency', 'PKR'), config('accountflow.currency', 'PKR') . ' ') }}{{ number_format($totalBalance, 0) }}</div>
+                        <div class="stat-meta"><span>Across all accounts</span></div>
+                    </div>
+                </div></div>
+            </div>
+            <div class="col-12 col-xl-4">
+                <div class="card stat-tile h-100"><div class="card-body">
+                    <div class="stat">
+                        <div class="stat-head">
+                            <div class="stat-label">Need Attention</div>
+                            <span class="icon-box icon-box-warning"><i data-lucide="circle-alert"></i></span>
+                        </div>
+                        <div class="stat-value">{{ $totalAccounts - $activeAccounts }}</div>
+                        <div class="stat-meta"><span>Inactive accounts</span></div>
+                    </div>
+                </div></div>
+            </div>
         </div>
-        <!--end::Content container-->
-    
-    
+    @endunless
+
+    <div class="{{ $standalone ? '' : 'card' }}">
+        @unless($standalone)
+            <div class="card-header">
+                <h2 class="card-title">All Accounts</h2>
+            </div>
+            <div class="card-body">
+        @endunless
+
+        @livewire('aftable', [
+            'model' => 'ArtflowStudio\AccountFlow\Models\Account',
+            'columns' => [
+                ['key' => 'name', 'label' => 'Account Title'],
+                ['key' => 'description', 'label' => 'Description'],
+                ['key' => 'balance', 'label' => 'Balance', 'raw' => '<span class="font-mono cell-numeric">{{ config(\'accountflow.currency_symbols.\' . config(\'accountflow.currency\', \'PKR\'), config(\'accountflow.currency\', \'PKR\') . \' \') }}{{ number_format($row->balance, 2) }}</span>'],
+                ['key' => 'active', 'label' => 'Status', 'raw' => '{!! $row->active == true ? "<span class=\"badge badge-soft-success\">Active</span>" : "<span class=\"badge badge-soft-secondary\">Inactive</span>" !!}'],
+            ],
+            'actions' => [
+                'raw' => "<a href='{{ route('accountflow::accounts.edit', \$row->id) }}' class='btn btn-sm btn-ghost'>Edit</a>"
+            ]
+        ])
+
+        @unless($standalone)
+            </div>
+        @endunless
+    </div>
 </div>

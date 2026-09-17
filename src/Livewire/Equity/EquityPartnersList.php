@@ -69,8 +69,9 @@ class EquityPartnersList extends Component
         $totalCount = EquityPartner::count();
         $currency = $this->resolveCurrency();
         $currencySymbol = $this->resolveCurrencySymbol($currency);
+        $canManage = $this->canAccountFlow(Ability::ManageEquity);
 
-        $view = view($viewpath, compact('partners', 'totalEquity', 'activeCount', 'totalCount', 'currency', 'currencySymbol'));
+        $view = view($viewpath, compact('partners', 'totalEquity', 'activeCount', 'totalCount', 'currency', 'currencySymbol', 'canManage'));
 
         if (! $this->standalone) {
             return $view->extends($layout)->section('content')->title($title);

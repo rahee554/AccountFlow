@@ -142,8 +142,9 @@ class CreatePlannedPayment extends Component
     {
         $viewpath = config('accountflow.view_path');
         $layout = config('accountflow.layout');
+        $title = 'Create Planned Payment | '.config('accountflow.business_name');
 
-        return view($viewpath.'livewire.planned-payments.create-planned-payment')->extends($layout)->section('content');
+        return view($viewpath.'livewire.planned-payments.create-planned-payment')->extends($layout)->section('content')->title($title);
     }
 
     protected function rules()

@@ -32,6 +32,9 @@ class CreateTransfer extends Component
 
     public $accounts = []; // Available accounts
 
+    /** When true renders only the form (no layout/header). */
+    public bool $standalone = false;
+
     protected $rules = [
         'amount' => 'required|numeric|min:0.01',
         'from_account' => 'required|integer|different:to_account|exists:accounts,id',
@@ -148,7 +151,14 @@ class CreateTransfer extends Component
     {
         $viewpath = config('accountflow.view_path');
         $layout = config('accountflow.layout');
+        $title = ($this->isEdit ? 'Edit' : 'Add').' Transfer | '.config('accountflow.business_name');
 
-        return view($viewpath.'livewire.transfers.create-transfer')->extends($layout)->section('content');
+        $view = view($viewpath.'livewire.transfers.create-transfer');
+
+        if (! $this->standalone) {
+            return $view->extends($layout)->section('content')->title($title);
+        }
+
+        return $view;
     }
 }

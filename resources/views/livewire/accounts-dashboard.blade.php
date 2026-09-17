@@ -51,405 +51,289 @@
 @endphp
 
 <div>
-    @include(config('accountflow.view_path') . 'blades.dashboard-header')
-
-    <div class="app-content flex-column-fluid py-6">
-        <div class="app-container container-xxl">
-
-            {{-- Period Selector --}}
-            <div class="card card-flush mb-6">
-                <div class="card-body py-4 px-6">
-                    <div class="d-flex flex-wrap gap-3 align-items-center justify-content-between">
-                        <div class="d-flex flex-wrap gap-2">
-                            @foreach ($periods as $key => $label)
-                                <button type="button" wire:click.prevent="changePeriod('{{ $key }}')"
-                                    class="btn btn-sm {{ ($selectedPeriod ?? 'this_month') === $key ? 'btn-primary' : 'btn-light' }}">
-                                    {{ $label }}
-                                </button>
-                            @endforeach
-                        </div>
-                        <div class="d-flex gap-2 align-items-center">
-                            <input type="date" wire:model="customStartDate" class="form-control form-control-sm"
-                                style="width:140px">
-                            <span class="text-muted small">–</span>
-                            <input type="date" wire:model="customEndDate" class="form-control form-control-sm"
-                                style="width:140px">
-                            <button type="button" wire:click="applyDateRange"
-                                class="btn btn-sm btn-primary">Apply</button>
-                        </div>
-                    </div>
-                    <div class="mt-3 d-flex align-items-center gap-3">
-                        <span class="badge badge-light-primary fw-semibold">
-                            {{ $periods[$selectedPeriod ?? 'this_month'] ?? 'Custom Range' }}
-                        </span>
-                        <span class="text-muted fs-7">
-                            Net:
-                            <strong class="{{ $netPosition >= 0 ? 'text-success' : 'text-danger' }}">
-                                {{ $currencySymbol }}{{ number_format($netPosition, 2) }}
-                            </strong>
-                        </span>
-                    </div>
-                </div>
+    <div class="page-header">
+        <div class="page-header-body">
+            <nav class="page-breadcrumb" aria-label="Breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                </ol>
+            </nav>
+            <div class="page-header-title"><h1>Accounts Dashboard</h1></div>
+            <p class="page-header-subtitle">{{ $periods[$selectedPeriod ?? 'this_month'] ?? 'Custom range' }} — updated {{ Carbon::parse($metrics['last_updated'])->diffForHumans() }}</p>
+        </div>
+        <div class="page-header-actions">
+            <div class="nav nav-segmented mbl-none" role="tablist" aria-label="Period">
+                @foreach ($periods as $key => $label)
+                    <button type="button" class="nav-link @if (($selectedPeriod ?? 'this_month') === $key) active @endif"
+                        wire:click.prevent="changePeriod('{{ $key }}')">{{ $label }}</button>
+                @endforeach
             </div>
+        </div>
+    </div>
 
-            {{-- KPI Row --}}
-            <div class="row g-5 mb-6">
-
-                {{-- Total Balance --}}
-                <div class="col-xl-3 col-md-6">
-                    <div class="card card-flush h-100 border-top border-4 border-primary">
-                        <div class="card-body p-6">
-                            <div class="d-flex align-items-center justify-content-between mb-5">
-                                <div class="symbol symbol-40px">
-                                    <div class="symbol-label bg-light-primary">
-                                        <i class="fas fa-wallet text-primary fs-4"></i>
-                                    </div>
-                                </div>
-                                <span class="badge badge-light-primary fs-8">All Accounts</span>
-                            </div>
-                            <div class="text-muted fw-semibold fs-7 mb-1">Total Balance</div>
-                            <div class="fw-bolder text-gray-900 fs-2hx lh-1">
-                                <span
-                                    class="fs-5 fw-semibold me-1">{{ $currencySymbol }}</span>{{ number_format($metrics['total_balance'], 0) }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Period Income --}}
-                <div class="col-xl-3 col-md-6">
-                    <div class="card card-flush h-100 border-top border-4 border-success">
-                        <div class="card-body p-6">
-                            <div class="d-flex align-items-center justify-content-between mb-5">
-                                <div class="symbol symbol-40px">
-                                    <div class="symbol-label bg-light-success">
-                                        <i class="fas fa-arrow-trend-up text-success fs-4"></i>
-                                    </div>
-                                </div>
-                                @if ($incomeChange !== null)
-                                    <span
-                                        class="badge {{ $incomeChange >= 0 ? 'badge-light-success' : 'badge-light-danger' }} fs-8">
-                                        <i
-                                            class="fas fa-arrow-{{ $incomeChange >= 0 ? 'up' : 'down' }} me-1"></i>{{ number_format(abs($incomeChange), 1) }}%
-                                    </span>
-                                @endif
-                            </div>
-                            <div class="text-muted fw-semibold fs-7 mb-1">Income</div>
-                            <div class="fw-bolder text-gray-900 fs-2hx lh-1">
-                                <span
-                                    class="fs-5 fw-semibold me-1">{{ $currencySymbol }}</span>{{ number_format($metrics['period_income'], 0) }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Period Expenses --}}
-                <div class="col-xl-3 col-md-6">
-                    <div class="card card-flush h-100 border-top border-4 border-danger">
-                        <div class="card-body p-6">
-                            <div class="d-flex align-items-center justify-content-between mb-5">
-                                <div class="symbol symbol-40px">
-                                    <div class="symbol-label bg-light-danger">
-                                        <i class="fas fa-arrow-trend-down text-danger fs-4"></i>
-                                    </div>
-                                </div>
-                                @if ($expenseChange !== null)
-                                    <span
-                                        class="badge {{ $expenseChange <= 0 ? 'badge-light-success' : 'badge-light-danger' }} fs-8">
-                                        <i
-                                            class="fas fa-arrow-{{ $expenseChange >= 0 ? 'up' : 'down' }} me-1"></i>{{ number_format(abs($expenseChange), 1) }}%
-                                    </span>
-                                @endif
-                            </div>
-                            <div class="text-muted fw-semibold fs-7 mb-1">Expenses</div>
-                            <div class="fw-bolder text-gray-900 fs-2hx lh-1">
-                                <span
-                                    class="fs-5 fw-semibold me-1">{{ $currencySymbol }}</span>{{ number_format($metrics['period_expenses'], 0) }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Net Position --}}
-                <div class="col-xl-3 col-md-6">
-                    <div
-                        class="card card-flush h-100 border-top border-4 {{ $netPosition >= 0 ? 'border-info' : 'border-warning' }}">
-                        <div class="card-body p-6">
-                            <div class="d-flex align-items-center justify-content-between mb-5">
-                                <div class="symbol symbol-40px">
-                                    <div class="symbol-label bg-light-info">
-                                        <i class="fas fa-scale-balanced text-info fs-4"></i>
-                                    </div>
-                                </div>
-                                <span
-                                    class="badge {{ $netPosition >= 0 ? 'badge-light-success' : 'badge-light-warning' }} fs-8">
-                                    {{ $netPosition >= 0 ? 'Surplus' : 'Deficit' }}
-                                </span>
-                            </div>
-                            <div class="text-muted fw-semibold fs-7 mb-1">Net Position</div>
-                            <div
-                                class="fw-bolder {{ $netPosition >= 0 ? 'text-success' : 'text-danger' }} fs-2hx lh-1">
-                                @if ($netPosition < 0)
-                                    <span class="fs-5 me-1">-</span>
-                                @endif
-                                <span
-                                    class="fs-5 fw-semibold me-1">{{ $currencySymbol }}</span>{{ number_format(abs($netPosition), 0) }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    {{-- Custom date range + net summary --}}
+    <div class="card mb-4">
+        <div class="card-body d-flex flex-wrap gap-3 align-items-center justify-content-between">
+            <div class="d-flex gap-2 align-items-center">
+                <input type="date" wire:model="customStartDate" class="form-control form-control-sm" style="width:150px">
+                <span class="text-body-secondary">–</span>
+                <input type="date" wire:model="customEndDate" class="form-control form-control-sm" style="width:150px">
+                <button type="button" wire:click="applyDateRange" class="btn btn-sm btn-primary">Apply</button>
             </div>
-
-            {{-- Charts Row --}}
-            <div class="row g-5 mb-6">
-
-                {{-- Financial Trends --}}
-                <div class="col-xl-8">
-                    <div class="card card-flush h-100">
-                        <div class="card-header pt-5">
-                            <h3 class="card-title align-items-start flex-column">
-                                <span class="card-label fw-bold text-dark">Financial Trends</span>
-                                <span class="text-muted fw-semibold fs-7 mt-1">6-month income vs expenses</span>
-                            </h3>
-                        </div>
-                        <div class="card-body pt-4 pb-4">
-                            <div id="af_trends_chart" class="h-250px"></div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Account Balances --}}
-                <div class="col-xl-4">
-                    <div class="card card-flush h-100">
-                        <div class="card-header pt-5">
-                            <h3 class="card-title align-items-start flex-column">
-                                <span class="card-label fw-bold text-dark">Account Balances</span>
-                                <span class="text-muted fw-semibold fs-7 mt-1">Distribution by account</span>
-                            </h3>
-                            <div class="card-toolbar">
-                                <a href="{{ route('accountflow::accounts') }}" class="btn btn-sm btn-icon btn-light">
-                                    <i class="fas fa-arrow-up-right-from-square fs-7"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="card-body pt-2 pb-4">
-                            <div id="af_accounts_chart" class="h-160px mb-4"></div>
-                            @php $acColors = ['primary','success','warning','danger','info']; @endphp
-                            @forelse($accounts as $ai => $acct)
-                                @php
-                                    $lc = $acColors[$ai % count($acColors)];
-                                    $pct =
-                                        $totalAccBal > 0
-                                            ? round(100 * ((float) $acct['balance'] / $totalAccBal), 1)
-                                            : 0;
-                                @endphp
-                                <div class="d-flex align-items-center {{ $ai > 0 ? 'mt-3' : '' }}">
-                                    <div
-                                        class="bullet w-8px h-8px rounded-2 bg-{{ $lc }} me-3 flex-shrink-0">
-                                    </div>
-                                    <div class="flex-grow-1 d-flex justify-content-between align-items-center">
-                                        <span class="fw-semibold fs-7 text-gray-800">{{ $acct['name'] }}</span>
-                                        <span class="text-muted fs-8">
-                                            {{ $currencySymbol }}{{ number_format($acct['balance'], 0) }}
-                                            <span class="text-gray-400 ms-1">({{ $pct }}%)</span>
-                                        </span>
-                                    </div>
-                                </div>
-                            @empty
-                                <p class="text-muted fs-7">No accounts found.</p>
-                            @endforelse
-                        </div>
-                    </div>
-                </div>
+            <div class="text-size-sm text-body-secondary">
+                Net this period:
+                <strong class="{{ $netPosition >= 0 ? 'text-success' : 'text-danger' }}">
+                    {{ $currencySymbol }}{{ number_format($netPosition, 2) }}
+                </strong>
             </div>
+        </div>
+    </div>
 
-            {{-- Data Row --}}
-            <div class="row g-5 mb-6">
-
-                {{-- Recent Transactions --}}
-                <div class="col-xl-8">
-                    <div class="card card-flush h-100">
-                        <div class="card-header pt-5">
-                            <h3 class="card-title align-items-start flex-column">
-                                <span class="card-label fw-bold text-dark">Recent Transactions</span>
-                                <span class="text-muted fw-semibold fs-7 mt-1">Latest activities</span>
-                            </h3>
-                            <div class="card-toolbar">
-                                <a href="{{ route('accountflow::transactions') }}"
-                                    class="btn btn-sm btn-light-primary">
-                                    View All
-                                </a>
-                            </div>
-                        </div>
-                        <div class="card-body pt-2">
-                            <div class="table-responsive">
-                                <table class="table table-row-dashed align-middle gs-0 gy-3 my-0">
-                                    <thead>
-                                        <tr class="fs-8 fw-semibold text-muted text-uppercase border-bottom-0">
-                                            <th>Transaction</th>
-                                            <th>Category</th>
-                                            <th class="text-end">Amount</th>
-                                            <th class="text-end">Date</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($recentTransactions as $tx)
-                                            @php
-                                                $txArr = is_array($tx) ? $tx : (array) $tx;
-                                                $txType = $txArr['type'] ?? '';
-                                                $isExpense = in_array($txType, ['expense', '2', 2]);
-                                                $amtClass = $isExpense ? 'text-danger' : 'text-success';
-                                                $sign = $isExpense ? '−' : '+';
-                                                $txCat = is_array($txArr['category'] ?? null)
-                                                    ? $txArr['category']['name'] ?? '—'
-                                                    : (is_object($txArr['category'] ?? null)
-                                                        ? $txArr['category']->name ?? '—'
-                                                        : '—');
-                                                $txDesc = Str::limit($txArr['description'] ?? $txCat, 45);
-                                                $txAmount = $txArr['amount'] ?? 0;
-                                                $txDate = $txArr['date'] ?? ($txArr['created_at'] ?? now());
-                                            @endphp
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="symbol symbol-30px me-3 flex-shrink-0">
-                                                            <div
-                                                                class="symbol-label bg-light-{{ $isExpense ? 'danger' : 'success' }}">
-                                                                <i
-                                                                    class="fas {{ $isExpense ? 'fa-minus' : 'fa-plus' }} text-{{ $isExpense ? 'danger' : 'success' }} fs-8"></i>
-                                                            </div>
-                                                        </div>
-                                                        <span
-                                                            class="fw-semibold text-gray-800 fs-7">{{ $txDesc }}</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-light fs-8">{{ $txCat }}</span>
-                                                </td>
-                                                <td class="text-end">
-                                                    <span class="{{ $amtClass }} fw-bold fs-7">
-                                                        {{ $sign }}{{ $currencySymbol }}{{ number_format($txAmount, 2) }}
-                                                    </span>
-                                                </td>
-                                                <td class="text-end text-muted fs-8">
-                                                    {{ Carbon::parse($txDate)->format('d M Y') }}
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="4" class="text-center py-8 text-muted">
-                                                    No transactions for this period.
-                                                </td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+    {{-- KPI row --}}
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <div class="card stat-tile h-100"><div class="card-body">
+                <div class="stat">
+                    <div class="stat-head">
+                        <div class="stat-label">Total Balance</div>
+                        <span class="icon-box icon-box-primary"><i data-lucide="wallet"></i></span>
                     </div>
+                    <div class="stat-value">{{ $currencySymbol }}{{ number_format($metrics['total_balance'], 0) }}</div>
+                    <div class="stat-meta"><span>All accounts</span></div>
                 </div>
+            </div></div>
+        </div>
 
-                {{-- Top Expense Categories --}}
-                <div class="col-xl-4">
-                    <div class="card card-flush h-100">
-                        <div class="card-header pt-5">
-                            <h3 class="card-title align-items-start flex-column">
-                                <span class="card-label fw-bold text-dark">Top Categories</span>
-                                <span class="text-muted fw-semibold fs-7 mt-1">By expense amount</span>
-                            </h3>
-                        </div>
-                        <div class="card-body pt-2">
-                            @php $catColors = ['primary','success','warning','danger','info']; @endphp
-                            @forelse($topCategories as $ci => $cat)
-                                @php
-                                    $cc = $catColors[$ci % count($catColors)];
-                                    $pct = $cat['pct'] ?? 0;
-                                @endphp
-                                <div class="{{ $ci > 0 ? 'mt-5' : '' }}">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span
-                                            class="fw-semibold text-gray-800 fs-7">{{ $cat['name'] ?? 'Category' }}</span>
-                                        <span class="fw-bold text-gray-700 fs-7">
-                                            {{ $currencySymbol }}{{ number_format($cat['expense'] ?? 0, 0) }}
-                                        </span>
-                                    </div>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="progress flex-grow-1 h-6px bg-light-{{ $cc }}">
-                                            <div class="progress-bar bg-{{ $cc }}"
-                                                style="width: {{ $pct }}%"></div>
-                                        </div>
-                                        <span class="text-muted fs-8 w-30px text-end">{{ $pct }}%</span>
-                                    </div>
-                                </div>
-                            @empty
-                                <div class="text-center py-8">
-                                    <i class="fas fa-tags text-muted fs-2x mb-3 d-block"></i>
-                                    <span class="text-muted fs-7">No expense data for this period</span>
-                                </div>
-                            @endforelse
-                        </div>
-                        @if (!empty($topCategories))
-                            <div class="card-footer pt-0 pb-5 px-6 border-0">
-                                <a href="{{ route('accountflow::transactions') }}"
-                                    class="btn btn-sm btn-light w-100">
-                                    View All Transactions
-                                </a>
-                            </div>
+        <div class="col-6 col-xl-3">
+            <div class="card stat-tile h-100"><div class="card-body">
+                <div class="stat">
+                    <div class="stat-head">
+                        <div class="stat-label">Income</div>
+                        <span class="icon-box icon-box-success"><i data-lucide="trending-up"></i></span>
+                    </div>
+                    <div class="stat-value">{{ $currencySymbol }}{{ number_format($metrics['period_income'], 0) }}</div>
+                    <div class="stat-meta">
+                        @if ($incomeChange !== null)
+                            <span class="stat-delta {{ $incomeChange >= 0 ? 'stat-delta-positive' : 'stat-delta-negative' }}">
+                                <i data-lucide="{{ $incomeChange >= 0 ? 'trending-up' : 'trending-down' }}"></i>{{ number_format(abs($incomeChange), 1) }}%
+                            </span>
+                            <span>vs last period</span>
+                        @else
+                            <span>This period</span>
                         @endif
                     </div>
                 </div>
-            </div>
+            </div></div>
+        </div>
 
-            {{-- Quick Links --}}
-            <div class="row g-5">
-                <div class="col-12">
-                    <div class="card card-flush">
-                        <div class="card-body py-4 px-6">
-                            <div class="d-flex flex-wrap gap-3 align-items-center">
-                                <span class="fw-semibold text-muted fs-7 me-2">Quick Links:</span>
-                                @featureEnabled('budgets')
-                                <a href="{{ route('accountflow::budgets') }}" class="btn btn-sm btn-light-warning">
-                                    <i class="fas fa-piggy-bank me-1"></i>Budgets
-                                </a>
-                                @endFeatureEnabled
-                                @featureEnabled('planned_payments')
-                                <a href="{{ route('accountflow::planned-payments') }}"
-                                    class="btn btn-sm btn-light-info">
-                                    <i class="fas fa-calendar-check me-1"></i>Planned Payments
-                                </a>
-                                @endFeatureEnabled
-                                @featureEnabled('profit_loss')
-                                <a href="{{ route('accountflow::report.profitLoss') }}"
-                                    class="btn btn-sm btn-light-success">
-                                    <i class="fas fa-chart-line me-1"></i>P&amp;L Report
-                                </a>
-                                @endFeatureEnabled
-                                @featureEnabled('trial_balance')
-                                <a href="{{ route('accountflow::report.trial-balance') }}"
-                                    class="btn btn-sm btn-light-primary">
-                                    <i class="fas fa-balance-scale me-1"></i>Trial Balance
-                                </a>
-                                @endFeatureEnabled
-                                @featureEnabled('cashbook')
-                                <a href="{{ route('accountflow::report.cashbook') }}" class="btn btn-sm btn-light">
-                                    <i class="fas fa-book me-1"></i>Cashbook
-                                </a>
-                                @endFeatureEnabled
-                                <a href="{{ route('accountflow::report.balance-sheet') }}" class="btn btn-sm btn-light-dark">
-                                    <i class="fas fa-file-invoice me-1"></i>Balance Sheet
-                                </a>
-                                @featureEnabled('equity')
-                                <a href="{{ route('accountflow::equity.partners') }}"
-                                    class="btn btn-sm btn-light-primary">
-                                    <i class="fas fa-users me-1"></i>Equity Partners
-                                </a>
-                                @endFeatureEnabled
+        <div class="col-6 col-xl-3">
+            <div class="card stat-tile h-100"><div class="card-body">
+                <div class="stat">
+                    <div class="stat-head">
+                        <div class="stat-label">Expenses</div>
+                        <span class="icon-box icon-box-danger"><i data-lucide="trending-down"></i></span>
+                    </div>
+                    <div class="stat-value">{{ $currencySymbol }}{{ number_format($metrics['period_expenses'], 0) }}</div>
+                    <div class="stat-meta">
+                        @if ($expenseChange !== null)
+                            <span class="stat-delta {{ $expenseChange <= 0 ? 'stat-delta-positive' : 'stat-delta-negative' }}">
+                                <i data-lucide="{{ $expenseChange >= 0 ? 'trending-up' : 'trending-down' }}"></i>{{ number_format(abs($expenseChange), 1) }}%
+                            </span>
+                            <span>vs last period</span>
+                        @else
+                            <span>This period</span>
+                        @endif
+                    </div>
+                </div>
+            </div></div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="card stat-tile h-100"><div class="card-body">
+                <div class="stat">
+                    <div class="stat-head">
+                        <div class="stat-label">Net Position</div>
+                        <span class="icon-box {{ $netPosition >= 0 ? 'icon-box-info' : 'icon-box-warning' }}"><i data-lucide="scale"></i></span>
+                    </div>
+                    <div class="stat-value {{ $netPosition >= 0 ? '' : 'text-danger' }}">
+                        {{ $netPosition < 0 ? '-' : '' }}{{ $currencySymbol }}{{ number_format(abs($netPosition), 0) }}
+                    </div>
+                    <div class="stat-meta"><span class="badge {{ $netPosition >= 0 ? 'badge-soft-success' : 'badge-soft-warning' }}">{{ $netPosition >= 0 ? 'Surplus' : 'Deficit' }}</span></div>
+                </div>
+            </div></div>
+        </div>
+    </div>
+
+    {{-- Charts row --}}
+    <div class="row g-3 mb-4">
+        <div class="col-xl-8">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div><h2 class="card-title">Financial Trends</h2><p class="card-subtitle">6-month income vs expenses</p></div>
+                </div>
+                <div class="card-body">
+                    <div id="af_trends_chart" style="height:250px"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div><h2 class="card-title">Account Balances</h2><p class="card-subtitle">Distribution by account</p></div>
+                    <div class="card-actions">
+                        <a href="{{ route('accountflow::accounts') }}" class="btn btn-ghost btn-sm" wire:navigate>
+                            <i data-lucide="external-link"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="af_accounts_chart" style="height:160px" class="mb-3"></div>
+                    @php $acColors = ['primary', 'success', 'warning', 'danger', 'info']; @endphp
+                    <div class="list-divided">
+                        @forelse($accounts as $ai => $acct)
+                            @php
+                                $lc = $acColors[$ai % count($acColors)];
+                                $pct = $totalAccBal > 0 ? round(100 * ((float) $acct['balance'] / $totalAccBal), 1) : 0;
+                            @endphp
+                            <div class="d-flex align-items-center gap-2 py-1">
+                                <span class="badge-dot badge-dot-{{ $lc }}"></span>
+                                <span class="flex-grow-1 text-size-sm">{{ $acct['name'] }}</span>
+                                <span class="text-size-sm text-body-secondary font-mono">{{ $currencySymbol }}{{ number_format($acct['balance'], 0) }} <span class="text-body-tertiary">({{ $pct }}%)</span></span>
                             </div>
-                        </div>
+                        @empty
+                            <p class="text-body-secondary text-size-sm mb-0">No accounts found.</p>
+                        @endforelse
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
+    {{-- Data row --}}
+    <div class="row g-3 mb-4">
+        <div class="col-xl-8">
+            <div class="card h-100">
+                <div class="card-header card-header-divided">
+                    <div><h2 class="card-title">Recent Transactions</h2></div>
+                    <div class="card-actions">
+                        <a href="{{ route('accountflow::transactions') }}" class="btn btn-ghost btn-sm" wire:navigate>
+                            View all<i data-lucide="chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-flush table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Transaction</th>
+                                    <th scope="col">Category</th>
+                                    <th scope="col" class="cell-numeric">Amount</th>
+                                    <th scope="col" class="cell-numeric">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($recentTransactions as $tx)
+                                    @php
+                                        $txArr = is_array($tx) ? $tx : (array) $tx;
+                                        $txType = $txArr['type'] ?? '';
+                                        $isExpense = in_array($txType, ['expense', '2', 2]);
+                                        $sign = $isExpense ? '−' : '+';
+                                        $txCat = is_array($txArr['category'] ?? null)
+                                            ? $txArr['category']['name'] ?? '—'
+                                            : (is_object($txArr['category'] ?? null)
+                                                ? $txArr['category']->name ?? '—'
+                                                : '—');
+                                        $txDesc = Str::limit($txArr['description'] ?? $txCat, 45);
+                                        $txAmount = $txArr['amount'] ?? 0;
+                                        $txDate = $txArr['date'] ?? ($txArr['created_at'] ?? now());
+                                    @endphp
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="icon-box icon-box-sm {{ $isExpense ? 'icon-box-danger' : 'icon-box-success' }}">
+                                                    <i data-lucide="{{ $isExpense ? 'minus' : 'plus' }}"></i>
+                                                </span>
+                                                <span class="text-size-sm">{{ $txDesc }}</span>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge badge-soft-secondary">{{ $txCat }}</span></td>
+                                        <td class="cell-numeric">
+                                            <span class="font-mono {{ $isExpense ? 'text-danger' : 'text-success' }}">
+                                                {{ $sign }}{{ $currencySymbol }}{{ number_format($txAmount, 2) }}
+                                            </span>
+                                        </td>
+                                        <td class="cell-numeric text-body-secondary text-nowrap">{{ Carbon::parse($txDate)->format('d M Y') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-body-secondary">No transactions for this period.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div><h2 class="card-title">Top Categories</h2><p class="card-subtitle">By expense amount</p></div>
+                </div>
+                <div class="card-body">
+                    @forelse($topCategories as $ci => $cat)
+                        @php $pct = $cat['pct'] ?? 0; @endphp
+                        <div class="progress-labelled {{ $ci > 0 ? 'mt-3' : '' }}">
+                            <div class="progress-meta">
+                                <span class="progress-label">{{ $cat['name'] ?? 'Category' }}</span>
+                                <span class="progress-value">{{ $currencySymbol }}{{ number_format($cat['expense'] ?? 0, 0) }}</span>
+                            </div>
+                            <div class="progress progress-sm">
+                                <div class="progress-bar" style="width: {{ $pct }}%"></div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-4">
+                            <i data-lucide="tag" class="text-body-secondary mb-2"></i>
+                            <p class="text-body-secondary text-size-sm mb-0">No expense data for this period.</p>
+                        </div>
+                    @endforelse
+                </div>
+                @if (!empty($topCategories))
+                    <div class="card-footer">
+                        <a href="{{ route('accountflow::transactions') }}" class="btn btn-ghost btn-sm w-100" wire:navigate>View all transactions</a>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- Quick links --}}
+    <div class="card">
+        <div class="card-body d-flex flex-wrap gap-2 align-items-center">
+            <span class="text-body-secondary text-size-sm me-2">Quick links:</span>
+            @featureEnabled('budgets')
+                <a href="{{ route('accountflow::budgets') }}" class="btn btn-sm btn-soft-warning" wire:navigate><i data-lucide="chart-pie"></i>Budgets</a>
+            @endFeatureEnabled
+            @featureEnabled('planned_payments')
+                <a href="{{ route('accountflow::planned-payments') }}" class="btn btn-sm btn-soft-info" wire:navigate><i data-lucide="calendar-clock"></i>Planned Payments</a>
+            @endFeatureEnabled
+            @featureEnabled('profit_loss')
+                <a href="{{ route('accountflow::report.profitLoss') }}" class="btn btn-sm btn-soft-success" wire:navigate><i data-lucide="trending-up"></i>P&amp;L Report</a>
+            @endFeatureEnabled
+            @featureEnabled('trial_balance')
+                <a href="{{ route('accountflow::report.trial-balance') }}" class="btn btn-sm btn-soft-primary" wire:navigate><i data-lucide="columns-3"></i>Trial Balance</a>
+            @endFeatureEnabled
+            @featureEnabled('cashbook')
+                <a href="{{ route('accountflow::report.cashbook') }}" class="btn btn-sm btn-soft-secondary" wire:navigate><i data-lucide="book-open"></i>Cashbook</a>
+            @endFeatureEnabled
+            <a href="{{ route('accountflow::report.balance-sheet') }}" class="btn btn-sm btn-soft-secondary" wire:navigate><i data-lucide="file-text"></i>Balance Sheet</a>
+            @featureEnabled('equity')
+                <a href="{{ route('accountflow::equity.partners') }}" class="btn btn-sm btn-soft-primary" wire:navigate><i data-lucide="users"></i>Equity Partners</a>
+            @endFeatureEnabled
         </div>
     </div>
 
@@ -467,145 +351,108 @@
                     charts = [];
                 }
 
+                /**
+                 * Colours, fonts and grid/tooltip chrome all come from
+                 * window.AccountFlowCharts (charts-theme.js, a plain-script port of
+                 * ui-flow-admin's own charts/theme.js token bridge) rather than
+                 * hardcoded hex — so these charts use the SAME --uf-* custom
+                 * properties as the rest of the shell and follow a live dark-mode
+                 * or accent change instead of staying stuck on their first-paint
+                 * colours.
+                 */
+                function buildTrendsOptions() {
+                    const t = window.AccountFlowCharts.tokens();
+                    const base = window.AccountFlowCharts.baseOptions();
+
+                    return {
+                        ...base,
+                        chart: {
+                            ...base.chart,
+                            type: 'area',
+                            height: 250,
+                        },
+                        series: [
+                            { name: 'Income', data: @json($trends['income']) },
+                            { name: 'Expenses', data: @json($trends['expenses']) },
+                        ],
+                        colors: [t.success, t.danger],
+                        xaxis: {
+                            ...base.xaxis,
+                            categories: @json($trends['labels']),
+                        },
+                        yaxis: {
+                            ...base.yaxis,
+                            labels: { ...base.yaxis.labels, formatter: fmt },
+                        },
+                        stroke: { ...base.stroke, curve: 'smooth', width: 2 },
+                        fill: {
+                            type: 'gradient',
+                            gradient: { opacityFrom: 0.3, opacityTo: 0.01 },
+                        },
+                        tooltip: { ...base.tooltip, shared: true, intersect: false, y: { formatter: fmt } },
+                        legend: { ...base.legend, position: 'top' },
+                        markers: { size: 4, strokeWidth: 2 },
+                    };
+                }
+
+                function buildAccountsOptions() {
+                    const t = window.AccountFlowCharts.tokens();
+                    const base = window.AccountFlowCharts.baseOptions();
+
+                    return {
+                        ...base,
+                        chart: { ...base.chart, type: 'donut', height: 160 },
+                        series: @json($accountValues),
+                        labels: @json($accountLabels),
+                        colors: window.AccountFlowCharts.palette(),
+                        stroke: { width: 2, colors: [t.surface] },
+                        plotOptions: {
+                            pie: {
+                                donut: {
+                                    size: '60%',
+                                    labels: {
+                                        show: true,
+                                        total: {
+                                            show: true,
+                                            label: 'Total',
+                                            color: t.text,
+                                            formatter: w => fmt(w.globals.seriesTotals.reduce((a, b) => a + b, 0)),
+                                        },
+                                        value: { color: t.text },
+                                    },
+                                },
+                            },
+                        },
+                        legend: { show: false },
+                        tooltip: { ...base.tooltip, y: { formatter: fmt } },
+                    };
+                }
+
                 function init() {
                     destroyAll();
 
-                    if (typeof ApexCharts === 'undefined') {
+                    if (typeof ApexCharts === 'undefined' || !window.AccountFlowCharts) {
                         setTimeout(init, 300);
                         return;
                     }
 
-                    // Financial Trends
                     const trendsEl = document.getElementById('af_trends_chart');
                     if (trendsEl) {
-                        const c = new ApexCharts(trendsEl, {
-                            chart: {
-                                type: 'area',
-                                height: 250,
-                                toolbar: {
-                                    show: false
-                                },
-                                zoom: {
-                                    enabled: false
-                                }
-                            },
-                            series: [{
-                                    name: 'Income',
-                                    data: @json($trends['income'])
-                                },
-                                {
-                                    name: 'Expenses',
-                                    data: @json($trends['expenses'])
-                                },
-                            ],
-                            xaxis: {
-                                categories: @json($trends['labels']),
-                                labels: {
-                                    style: {
-                                        colors: '#a1a5b7',
-                                        fontSize: '12px'
-                                    }
-                                },
-                                axisBorder: {
-                                    show: false
-                                },
-                                axisTicks: {
-                                    show: false
-                                },
-                            },
-                            yaxis: {
-                                labels: {
-                                    style: {
-                                        colors: '#a1a5b7',
-                                        fontSize: '12px'
-                                    },
-                                    formatter: fmt
-                                }
-                            },
-                            colors: ['#22c55e', '#ef4444'],
-                            stroke: {
-                                curve: 'smooth',
-                                width: 2
-                            },
-                            fill: {
-                                type: 'gradient',
-                                gradient: {
-                                    opacityFrom: 0.3,
-                                    opacityTo: 0.01
-                                }
-                            },
-                            grid: {
-                                borderColor: '#f3f4f6',
-                                strokeDashArray: 4
-                            },
-                            tooltip: {
-                                shared: true,
-                                intersect: false,
-                                y: {
-                                    formatter: fmt
-                                }
-                            },
-                            legend: {
-                                position: 'top',
-                                labels: {
-                                    colors: '#6b7280'
-                                }
-                            },
-                            markers: {
-                                size: 4,
-                                strokeColors: '#fff',
-                                strokeWidth: 2
-                            },
-                            dataLabels: {
-                                enabled: false
-                            },
-                        });
+                        const c = new ApexCharts(trendsEl, buildTrendsOptions());
                         c.render();
+                        window.AccountFlowCharts.registerChart(c, buildTrendsOptions);
                         charts.push(c);
                     }
 
-                    // Account distribution donut
                     const acctEl = document.getElementById('af_accounts_chart');
                     if (acctEl && @json(count($accountValues)) > 0) {
-                        const c = new ApexCharts(acctEl, {
-                            chart: {
-                                type: 'donut',
-                                height: 160
-                            },
-                            series: @json($accountValues),
-                            labels: @json($accountLabels),
-                            colors: ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#06b6d4'],
-                            plotOptions: {
-                                pie: {
-                                    donut: {
-                                        size: '60%',
-                                        labels: {
-                                            show: true,
-                                            total: {
-                                                show: true,
-                                                label: 'Total',
-                                                formatter: w => fmt(w.globals.seriesTotals.reduce((a, b) => a + b,
-                                                    0)),
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                            dataLabels: {
-                                enabled: false
-                            },
-                            legend: {
-                                show: false
-                            },
-                            tooltip: {
-                                y: {
-                                    formatter: fmt
-                                }
-                            },
-                        });
+                        const c = new ApexCharts(acctEl, buildAccountsOptions());
                         c.render();
+                        window.AccountFlowCharts.registerChart(c, buildAccountsOptions);
                         charts.push(c);
                     }
+
+                    if (window.ArtflowAdmin) window.ArtflowAdmin.renderIcons();
                 }
 
                 document.readyState === 'loading' ?

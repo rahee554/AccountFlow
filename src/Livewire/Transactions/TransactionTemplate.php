@@ -20,6 +20,14 @@ class TransactionTemplate extends Component
         $viewpath = config('accountflow.view_path');
         $layout = config('accountflow.layout');
 
-        return view($viewpath.'livewire.transactions.transaction-template')->extends($layout)->section('content');
+        // The "Add Transaction Template" action writes data, so it's only
+        // offered to users who can actually manage templates (mirrors
+        // Transactions::render()'s $canManage gating).
+        $canManage = $this->canAccountFlow(Ability::ManageTemplates);
+
+        return view($viewpath.'livewire.transactions.transaction-template', [
+            'canManage' => $canManage,
+        ])->extends($layout)->section('content')
+            ->title('Transaction Templates | '.config('accountflow.business_name'));
     }
 }

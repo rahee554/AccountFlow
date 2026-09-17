@@ -96,6 +96,7 @@ class CreateTransactionTemplate extends Component
 
         return view($viewpath.'livewire.transactions.create-transaction-template', [
             'categories' => $this->getCategoriesProperty(),
-        ])->extends($layout)->section('content');
+        ])->extends($layout)->section('content')
+            ->title('Create Transaction Template | '.config('accountflow.business_name'));
     }
 }

@@ -55,8 +55,9 @@ class LoansPartnersList extends Component
 
         $partners = $query->orderBy('name')->paginate(15);
         $totalCount = LoanUser::count();
+        $canManage = $this->canAccountFlow(Ability::ManageLoans);
 
-        return view($viewpath, compact('partners', 'totalCount'))
+        return view($viewpath, compact('partners', 'totalCount', 'canManage'))
             ->extends($layout)
             ->section('content')
             ->title($title);

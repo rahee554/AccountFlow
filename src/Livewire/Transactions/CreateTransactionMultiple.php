@@ -123,6 +123,7 @@ class CreateTransactionMultiple extends Component
             'income_categories' => $income_categories,
             'expense_categories' => $expense_categories,
             'categories' => (int) $this->type === TransactionType::Income->value ? $income_categories : $expense_categories,
-        ])->extends($layout)->section('content');
+        ])->extends($layout)->section('content')
+            ->title('Add Multiple Transactions | '.config('accountflow.business_name'));
     }
 }

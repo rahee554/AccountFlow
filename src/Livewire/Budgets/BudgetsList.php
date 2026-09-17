@@ -77,7 +77,9 @@ class BudgetsList extends Component
             'yearly' => $allBudgets->where('period', 'yearly')->sum('amount'),
         ];
 
-        $view = view($viewpath, compact('budgets', 'stats', 'currency'));
+        $canManage = $this->canAccountFlow(Ability::ManageBudgets);
+
+        $view = view($viewpath, compact('budgets', 'stats', 'currency', 'canManage'));
 
         if (! $this->standalone) {
             return $view->extends($layout)->section('content')->title($title);

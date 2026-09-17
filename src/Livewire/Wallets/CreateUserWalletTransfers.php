@@ -37,6 +37,9 @@ class CreateUserWalletTransfers extends Component
 
     public $date;
 
+    /** When true renders only the form (no layout/header). */
+    public bool $standalone = false;
+
     protected $messages = [
         'from_user.different' => 'Pick two different people.',
         'amount.min' => 'The amount must be more than zero.',
@@ -85,9 +88,19 @@ class CreateUserWalletTransfers extends Component
 
     public function render(): View
     {
-        return view(config('accountflow.view_path').'livewire.wallets.create-user-wallet-transfers', [
+        $userModel = config('auth.providers.users.model', 'App\Models\User');
+        $title = 'Wallet Transfer | '.config('accountflow.business_name');
+
+        $view = view(config('accountflow.view_path').'livewire.wallets.create-user-wallet-transfers', [
             'accounts' => Account::query()->active()->orderBy('name')->get(),
-        ])->extends(config('accountflow.layout'))->section('content');
+            'users' => $userModel::query()->orderBy('name')->get(['id', 'name']),
+        ]);
+
+        if (! $this->standalone) {
+            return $view->extends(config('accountflow.layout'))->section('content')->title($title);
+        }
+
+        return $view;
     }
 
     protected function rules(): array

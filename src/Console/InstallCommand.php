@@ -2,7 +2,10 @@
 
 namespace ArtflowStudio\AccountFlow\Console;
 
+use ArtflowStudio\AccountFlow\Models\Category;
+use ArtflowStudio\AccountFlow\Models\PaymentMethod;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Schema;
 
 class InstallCommand extends Command
 {
@@ -37,11 +40,23 @@ class InstallCommand extends Command
             );
         }
 
+        $seeded = false;
+
         if ($this->option('seed')) {
             $this->components->task(
                 'Seeding defaults',
                 fn (): bool => $this->callSilently('accountflow:seed') === self::SUCCESS,
             );
+            $seeded = true;
+        } elseif ($this->missingCategoriesOrPaymentMethods()) {
+            $this->newLine();
+            if ($this->confirm('No categories or payment methods found yet — without them, transactions cannot be created. Seed AccountFlow defaults now?', true)) {
+                $this->components->task(
+                    'Seeding defaults',
+                    fn (): bool => $this->callSilently('accountflow:seed', ['--force' => true]) === self::SUCCESS,
+                );
+                $seeded = true;
+            }
         }
 
         $this->newLine();
@@ -56,7 +71,7 @@ class InstallCommand extends Command
             $step++;
         }
 
-        if (! $this->option('seed')) {
+        if (! $seeded) {
             $this->line("  <fg=cyan>{$step}.</> Run <comment>php artisan accountflow:seed</comment> to create default accounts and categories");
             $step++;
         }
@@ -88,5 +103,14 @@ class InstallCommand extends Command
     private function configIsPublished(): bool
     {
         return file_exists(config_path('accountflow.php'));
+    }
+
+    private function missingCategoriesOrPaymentMethods(): bool
+    {
+        if (! Schema::hasTable('accounts') || ! Schema::hasTable('ac_categories') || ! Schema::hasTable('ac_payment_methods')) {
+            return false;
+        }
+
+        return Category::count() === 0 || PaymentMethod::count() === 0;
     }
 }

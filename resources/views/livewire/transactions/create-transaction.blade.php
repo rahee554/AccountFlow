@@ -1,14 +1,29 @@
 <div>
-    @include(config('accountflow.view_path') . 'blades.dashboard-header')
+    @unless($standalone)
+        <div class="page-header">
+            <div class="page-header-body">
+                <nav class="page-breadcrumb" aria-label="Breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ route('accountflow::transactions') }}" wire:navigate>Transactions</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ $isEdit ? 'Edit' : 'Add' }}</li>
+                    </ol>
+                </nav>
+                <div class="page-header-title"><h1>{{ $isEdit ? 'Edit Transaction' : 'Add Transaction' }}</h1></div>
+            </div>
+            <div class="page-header-actions">
+                <a href="{{ route('accountflow::transactions') }}" class="btn btn-soft-secondary" wire:navigate>
+                    <i data-lucide="arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    @endunless
 
-    <!-- Success/Error Messages -->
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
-
     @if (session('error'))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             {{ session('error') }}
@@ -16,26 +31,18 @@
         </div>
     @endif
 
-    <div class="card shadow-sm">
-        <div class="card-header {{ $isEdit ? 'bg-warning text-dark' : 'bg-primary text-white' }}">
-            <h4 class="mb-0">
-                <i class="fas fa-{{ $isEdit ? 'edit' : 'plus-circle' }} me-2"></i>
-                {{ $isEdit ? 'Edit Transaction' : 'Create New Transaction' }}
-            </h4>
-        </div>
-
-        <div class="card-body">
-            <form wire:submit.prevent="storeTransaction">
-                <div class="row justify-content-center">
-                    <div class="col-12 col-md-8 col-lg-6">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <form wire:submit.prevent="storeTransaction">
                         <div class="row g-3">
-                            <!-- Payment Method -->
                             <div class="col-12 col-sm-6">
-                                <label for="payment_method" class="form-label text-uppercase fw-bold text-dark fs-sm">
+                                <label for="payment_method" class="form-label">
                                     Payment Method <span class="text-danger">*</span>
                                 </label>
                                 <select wire:model.change="payment_method"
-                                    class="form-select form-select-sm @error('payment_method') is-invalid @enderror">
+                                    class="form-select @error('payment_method') is-invalid @enderror">
                                     <option value="">Select Payment Method</option>
                                     @foreach ($payment_methods as $method)
                                         <option value="{{ $method->id }}">{{ $method->name }}</option>
@@ -46,30 +53,31 @@
                                 @enderror
                             </div>
 
-                            <!-- Account Selection -->
                             <div class="col-12 col-sm-6">
-                                <label for="account_id" class="form-label text-uppercase fw-bold text-dark fs-sm">
-                                    Select Account <span class="text-danger">*</span>
+                                <label for="account_id" class="form-label">
+                                    Account <span class="text-danger">*</span>
                                 </label>
                                 @if($payment_method)
-                                    <!-- Read-only display when payment method is selected -->
-                                    <select class="form-select form-select-sm" disabled>
-                                        @foreach ($accounts as $account)
-                                            @if($account->id == $account_id)
-                                                <option value="{{ $account->id }}" selected>{{ $account->name }}</option>
-                                            @endif
-                                        @endforeach
+                                    {{--
+                                        Looked up directly rather than found inside $accounts:
+                                        $accounts only lists active accounts (correct for manual
+                                        picking), but the payment method's linked account can be
+                                        one that's since been deactivated — it must still display
+                                        here since it's already the value being saved.
+                                    --}}
+                                    @php $selectedAccount = \ArtflowStudio\AccountFlow\Models\Account::find($account_id); @endphp
+                                    <select class="form-select" disabled>
+                                        @if($selectedAccount)
+                                            <option value="{{ $selectedAccount->id }}" selected>{{ $selectedAccount->name }}</option>
+                                        @endif
                                     </select>
-                                    <!-- Hidden input to persist the value -->
                                     <input type="hidden" wire:model="account_id" value="{{ $account_id }}">
-                                    <div class="form-text text-info">
-                                        <i class="fas fa-lock me-1"></i>
-                                        Account auto-selected from payment method
+                                    <div class="form-text">
+                                        <i data-lucide="lock"></i> Auto-selected from payment method
                                     </div>
                                 @else
-                                    <!-- Enabled select when no payment method is selected -->
                                     <select wire:model="account_id"
-                                        class="form-select form-select-sm @error('account_id') is-invalid @enderror">
+                                        class="form-select @error('account_id') is-invalid @enderror">
                                         <option value="">Select Account</option>
                                         @foreach ($accounts as $account)
                                             <option value="{{ $account->id }}">{{ $account->name }}</option>
@@ -80,172 +88,127 @@
                                     @enderror
                                 @endif
 
-                                <!-- Account Balance Display -->
                                 @if($account_id && $this->accountBalance !== null)
-                                    <div class="mt-1 small text-muted">
-                                        <i class="fas fa-wallet me-1"></i>
-                                        Current Balance: 
-                                        <strong class="text-{{ $this->accountBalance >= 0 ? 'success' : 'danger' }}">
-                                            PKR {{ number_format($this->accountBalance, 2) }}
-                                        </strong>
+                                    <div class="form-text {{ $this->accountBalance >= 0 ? 'text-success' : 'text-danger' }}">
+                                        <i data-lucide="wallet"></i>
+                                        Current balance: {{ config('accountflow.currency_symbols.' . config('accountflow.currency', 'PKR'), config('accountflow.currency', 'PKR') . ' ') }}{{ number_format($this->accountBalance, 2) }}
                                     </div>
                                 @endif
                             </div>
 
-                            <!-- Transaction Type -->
                             <div class="col-12 col-sm-6">
-                                <label class="form-label text-uppercase fw-bold text-dark fs-sm">
-                                    Transaction Type <span class="text-danger">*</span>
+                                <label class="form-label">
+                                    Type <span class="text-danger">*</span>
                                 </label>
-                                <select wire:model.change="type"
-                                    class="form-select form-select-sm">
-                                    <option value="1" {{ $type == 1 ? 'selected' : '' }}>Income</option>
-                                    <option value="2" {{ $type == 2 ? 'selected' : '' }}>Expense</option>
-                                </select>
+                                <div class="nav nav-segmented w-100">
+                                    <button type="button" class="nav-link flex-fill @if((int) $type === 1) active @endif" wire:click="$set('type', 1)">Income</button>
+                                    <button type="button" class="nav-link flex-fill @if((int) $type === 2) active @endif" wire:click="$set('type', 2)">Expense</button>
+                                </div>
                                 @if($isEdit)
                                     <div class="form-text text-warning">
-                                        <i class="fas fa-exclamation-triangle me-1"></i>
-                                        Changing type will reset category selection
+                                        <i data-lucide="triangle-alert"></i> Changing type resets the category
                                     </div>
                                 @endif
                             </div>
 
-                            <!-- Category -->
                             <div class="col-12 col-sm-6">
-                                <label class="form-label text-uppercase fw-bold text-dark fs-sm">
+                                <label class="form-label">
                                     Category <span class="text-danger">*</span>
                                 </label>
                                 <select wire:model="category_id"
-                                    class="form-select form-select-sm @error('category_id') is-invalid @enderror">
+                                    class="form-select @error('category_id') is-invalid @enderror">
                                     <option value="">Select Category</option>
-                                    @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    @foreach ($categories->groupBy(fn ($category) => $category->parent?->name ?? 'Other') as $group => $groupCategories)
+                                        <optgroup label="{{ $group }}">
+                                            @foreach ($groupCategories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                            @endforeach
+                                        </optgroup>
                                     @endforeach
                                 </select>
                                 @error('category_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <div class="form-text">
-                                    Only <span
-                                        class="badge bg-{{ $type == 1 ? 'success' : 'danger' }}">{{ $type == 1 ? 'Income' : 'Expense' }}</span>
-                                    categories are shown
-                                </div>
                             </div>
 
-                            <!-- Date -->
                             <div class="col-12 col-sm-6">
-                                <label for="date" class="form-label text-uppercase fw-bold text-dark fs-sm">
+                                <label for="date" class="form-label">
                                     Date <span class="text-danger">*</span>
                                 </label>
                                 <input type="date" wire:model="date"
-                                    class="form-control form-control-sm @error('date') is-invalid @enderror">
+                                    class="form-control @error('date') is-invalid @enderror">
                                 @error('date')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <!-- Amount -->
                             <div class="col-12 col-sm-6">
-                                <label for="amount" class="form-label text-uppercase fw-bold text-dark fs-sm">
+                                <label for="amount" class="form-label">
                                     Amount <span class="text-danger">*</span>
                                 </label>
-                                <div class="input-group input-group-sm">
-                                    <span class="input-group-text">PKR</span>
+                                <div class="input-group">
+                                    <span class="input-group-text">{{ config('accountflow.currency', 'PKR') }}</span>
                                     <input type="number" wire:model="amount"
                                         class="form-control @error('amount') is-invalid @enderror"
-                                        placeholder="Enter Amount" step="0.01" min="0.01">
+                                        placeholder="0.00" step="0.01" min="0.01">
                                     @error('amount')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
 
-                            <!-- Description -->
                             <div class="col-12">
-                                <label class="form-label text-uppercase fw-bold text-dark fs-sm">Description</label>
+                                <label class="form-label">Description</label>
                                 <textarea wire:model="description"
-                                    class="form-control form-control-sm @error('description') is-invalid @enderror"
-                                    rows="3" placeholder="Details / Description"></textarea>
+                                    class="form-control @error('description') is-invalid @enderror"
+                                    rows="3" placeholder="Details / description"></textarea>
                                 @error('description')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <!-- Buttons -->
-                            <div class="col-12 mt-4">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        Fields marked with <span class="text-danger">*</span> are required
-                                    </small>
-                                    <div class="d-flex gap-2">
-                                        <a href="{{route('accountflow::transactions')}}"
-                                            class="btn btn-secondary btn-sm px-4" wire:navigate>
-                                            <i class="fas fa-arrow-left me-1"></i>
-                                            {{ $isEdit ? 'Back to List' : 'Cancel' }}
-                                        </a>
-                                        <button type="submit"
-                                            class="btn btn-{{ $isEdit ? 'warning' : 'primary' }} btn-sm px-4"
-                                            wire:loading.attr="disabled">
-                                            <span wire:loading.remove>
-                                                <i class="fas fa-save me-1"></i>
-                                                {{ $isEdit ? 'Update Transaction' : 'Save Transaction' }}
-                                            </span>
-                                            <span wire:loading>
-                                                <i class="fas fa-spinner fa-spin me-1"></i>
-                                                {{ $isEdit ? 'Updating...' : 'Saving...' }}
-                                            </span>
-                                        </button>
-                                    </div>
-                                </div>
+                            <div class="col-12 d-flex justify-content-end gap-2 pt-2">
+                                <a href="{{ route('accountflow::transactions') }}" class="btn btn-soft-secondary" wire:navigate>
+                                    {{ $isEdit ? 'Back to List' : 'Cancel' }}
+                                </a>
+                                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
+                                    <span wire:loading.remove>{{ $isEdit ? 'Update Transaction' : 'Save Transaction' }}</span>
+                                    <span wire:loading>{{ $isEdit ? 'Updating…' : 'Saving…' }}</span>
+                                </button>
                             </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Transaction Preview -->
-    @if($amount && $category_id)
-        <div class="card mt-4">
-            <div class="card-header bg-light">
-                <h6 class="mb-0">
-                    <i class="fas fa-eye me-2"></i>{{ $isEdit ? 'Updated Transaction Preview' : 'Transaction Preview' }}
-                </h6>
             </div>
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="me-3">
-                        <div class="icon-preview bg-{{ $type == 1 ? 'success' : 'danger' }} text-white p-3 rounded-circle"
-                            style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-{{ $type == 1 ? 'arrow-up' : 'arrow-down' }} fa-lg"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <h5 class="mb-1">PKR {{ number_format($amount, 2) }}</h5>
-                        <div class="d-flex gap-2 mb-2">
-                            <span class="badge bg-{{ $type == 1 ? 'success' : 'danger' }}">
-                                {{ $type == 1 ? 'Income' : 'Expense' }}
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header"><h2 class="card-title">Preview</h2></div>
+                <div class="card-body">
+                    @if($amount && $category_id)
+                        @php $categoryName = $categories->firstWhere('id', $category_id)->name ?? 'Unknown'; @endphp
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <span class="icon-box icon-box-{{ (int) $type === 1 ? 'success' : 'danger' }}">
+                                <i data-lucide="{{ (int) $type === 1 ? 'trending-up' : 'trending-down' }}"></i>
                             </span>
-                            @if($category_id)
-                                @php
-                                    $categoryName = $categories->firstWhere('id', $category_id)->name ?? 'Unknown';
-                                @endphp
-                                <span class="badge bg-secondary">{{ $categoryName }}</span>
-                            @endif
-                            @if($date)
-                                <span class="badge bg-info">{{ \Carbon\Carbon::parse($date)->format('d M Y') }}</span>
-                            @endif
+                            <div>
+                                <div class="fs-5 fw-semibold">{{ config('accountflow.currency_symbols.' . config('accountflow.currency', 'PKR'), config('accountflow.currency', 'PKR') . ' ') }}{{ number_format($amount, 2) }}</div>
+                                <div class="text-body-secondary text-size-sm">{{ $date ? \Carbon\Carbon::parse($date)->format('d M Y') : '' }}</div>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <span class="badge badge-soft-{{ (int) $type === 1 ? 'success' : 'danger' }}">{{ (int) $type === 1 ? 'Income' : 'Expense' }}</span>
+                            <span class="badge badge-soft-secondary">{{ $categoryName }}</span>
                         </div>
                         @if($description)
-                            <div class="small text-muted">
-                                <strong>Description:</strong> {{ Str::limit($description, 100) }}
-                            </div>
+                            <p class="text-body-secondary text-size-sm mb-0">{{ Str::limit($description, 140) }}</p>
                         @endif
-                    </div>
+                    @else
+                        <p class="text-body-secondary text-size-sm mb-0">Fill in the amount and category to see a preview here.</p>
+                    @endif
                 </div>
             </div>
         </div>
-    @endif
+    </div>
 </div>

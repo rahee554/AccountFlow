@@ -78,8 +78,9 @@ class LoansList extends Component
             'borrowed' => Loan::where('loan_type', 2)->sum('amount'),
             'active' => Loan::where('status', 1)->count(),
         ];
+        $canManage = $this->canAccountFlow(Ability::ManageLoans);
 
-        $view = view($viewpath, compact('loans', 'stats', 'currency'));
+        $view = view($viewpath, compact('loans', 'stats', 'currency', 'canManage'));
 
         if (! $this->standalone) {
             return $view->extends($layout)->section('content')->title($title);

@@ -45,13 +45,16 @@ class CreateTransaction extends Component
 
     public $isEdit = false; // Track if we're in edit mode
 
+    /** When true renders only the form (no layout/header) — for embedding. */
+    public bool $standalone = false;
+
     public function mount($id = null)
     {
         $this->authorizeAccountFlow(Ability::ManageTransactions);
         $this->payment_methods = PaymentMethod::get(['id', 'name', 'account_id']);
         $this->accounts = Account::where('active', true)->get();
-        $this->income_categories = Category::whereNotNull('parent_id')->where('type', 1)->get();
-        $this->expense_categories = Category::whereNotNull('parent_id')->where('type', 2)->get();
+        $this->income_categories = Category::with('parent')->whereNotNull('parent_id')->where('type', 1)->get();
+        $this->expense_categories = Category::with('parent')->whereNotNull('parent_id')->where('type', 2)->get();
 
         if ($id) {
             // Accepts a plain id, and still resolves legacy base64 links.
@@ -77,6 +80,19 @@ class CreateTransaction extends Component
             }
         } else {
             $this->date = now()->format('Y-m-d');
+
+            if ($this->payment_methods->isEmpty()) {
+                session()->flash('warning', 'Add a payment method before creating a transaction.');
+
+                return redirect()->route('accountflow::payment-methods.create');
+            }
+
+            if ($this->income_categories->isEmpty() && $this->expense_categories->isEmpty()) {
+                session()->flash('warning', 'Add a category before creating a transaction.');
+
+                return redirect()->route('accountflow::categories.create');
+            }
+
             // Set default payment method from settings if available
             $defaultPaymentMethodId = Setting::defaultPaymentMethodId();
             if ($defaultPaymentMethodId && PaymentMethod::find($defaultPaymentMethodId)) {
@@ -176,6 +192,13 @@ class CreateTransaction extends Component
             // The dispatch used to sit *after* the return, so it never ran.
             $this->dispatch('refreshTable');
 
+            if ($this->standalone) {
+                $this->reset('amount', 'payment_method', 'account_id', 'category_id', 'description', 'isEdit', 'transactionId');
+                $this->date = now()->format('Y-m-d');
+
+                return null;
+            }
+
             return $this->redirectRoute('accountflow::transactions', navigate: true);
         } catch (Exception $e) {
             session()->flash('error', 'Error '.($this->isEdit ? 'updating' : 'creating').' transaction: '.$e->getMessage());
@@ -187,12 +210,19 @@ class CreateTransaction extends Component
         $viewpath = config('accountflow.view_path');
         $layout = config('accountflow.layout');
 
-        return view(
+        $view = view(
             $viewpath.'livewire.transactions.create-transaction',
             [
                 'categories' => $this->getCategoriesProperty(),
             ],
-        )->extends($layout)->section('content');
+        );
+
+        if (! $this->standalone) {
+            return $view->extends($layout)->section('content')
+                ->title(($this->isEdit ? 'Edit' : 'Add').' Transaction | '.config('accountflow.business_name'));
+        }
+
+        return $view;
     }
 
     protected function updateAccountFromPaymentMethod(): void

@@ -13,6 +13,7 @@
 | [08 — Upgrading from 0.2.x](08-upgrading.md) | What moved, what broke, what to change |
 | [09 — The accounting model](09-accounting-model.md) | Cash book by design — what that gives you and what it does not |
 | [10 — Upgrade runbook](10-upgrade-runbook.md) | **Upgrading a live install with real data** |
+| [11 — Data API](11-data-api.md) | Accounts, categories, payment methods, transfers, budgets — querying and writing for your own UI |
 
 - [README](../README.md) — the short version
 - [CHANGELOG](../CHANGELOG.md) — what changed and why

@@ -23,7 +23,10 @@ class AssetTransactions extends Component
         $viewpath = config('accountflow.view_path').'livewire.assets.asset-transactions';
         $layout = config('accountflow.layout');
         $title = 'Asset Transactions | '.config('accountflow.business_name');
-        $view = view($viewpath);
+
+        $view = view($viewpath, [
+            'canManage' => $this->canAccountFlow(Ability::ManageAssets),
+        ]);
 
         if (! $this->standalone) {
             return $view->extends($layout)->section('content')->title($title);
